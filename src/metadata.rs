@@ -1,6 +1,6 @@
 use crate::*;
 
-#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub struct CertificationExtraMetadata {
     /// Human-readable name of the certification issuing authority within the

@@ -1,16 +1,15 @@
 use crate::*;
 use crate::contract::*;
+use crate::utils::*;
 
 #[near_bindgen]
 impl CertificationContract {
-    pub fn nft_mint(&mut self, token_id: TokenId, receiver_account_id: Option<AccountId>, token_metadata: TokenMetadata, certification_metadata: CertificationExtraMetadata) {
+    pub fn nft_mint(&mut self, token_id: TokenId, receiver_account_id: Option<AccountId>, token_metadata: TokenMetadata, certification_metadata: CertificationExtraMetadata) -> Token {
         // Force owner
         self.assert_owner();
         // Force verification
-        assert_one_yocto();
+        assert_nonzero_deposit();
 
-        // The copies field is irrelevant for unique certifications
-        require!(token_metadata.copies == None, "Certifications are single-issue only");
         // We are using the extra field for standard, type-safe custom metadata (not user-defined)
         require!(token_metadata.extra == None, "Specify extra metadata in certification_metadata parameter");
 
@@ -25,6 +24,6 @@ impl CertificationContract {
             self.transferability.insert(&token_id);
         }
 
-        self.tokens.internal_mint(token_id, to_account_id, Some(combined_metadata));
+        self.tokens.internal_mint(token_id, to_account_id, Some(combined_metadata))
     }
 }
