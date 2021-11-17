@@ -1,10 +1,17 @@
 use crate::*;
 use crate::contract::*;
 
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct CertificationContractInitOptions {
+    pub transferable: bool,
+    pub decertifiable: bool,
+}
+
 #[near_bindgen]
 impl CertificationContract {
     #[init]
-    pub fn new(owner_id: AccountId, metadata: NFTContractMetadata) -> Self {
+    pub fn new(owner_id: AccountId, metadata: NFTContractMetadata, options: CertificationContractInitOptions) -> Self {
         // Only allow the contract to be initialized once
         require!(!env::state_exists(), "Already initialized");
 
@@ -20,6 +27,8 @@ impl CertificationContract {
                 Some(StorageKey::Approval),
             ),
             metadata: LazyOption::new(StorageKey::Metadata, Some(&metadata)),
+            transferable: options.transferable,
+            decertifiable: options.decertifiable,
         }
     }
 }

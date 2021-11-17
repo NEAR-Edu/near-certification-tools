@@ -3,6 +3,7 @@ use crate::event::{CertificationEventLogData, CreateEventLog};
 
 impl CertificationContract {
     pub fn decertify(&mut self, token_id: TokenId, memo: Option<String>) {
+        self.assert_decertifiable();
         // Force owner only
         self.assert_owner();
         // Force verification

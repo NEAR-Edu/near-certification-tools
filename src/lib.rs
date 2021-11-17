@@ -5,7 +5,6 @@ use near_contract_standards::{
         core::{NonFungibleTokenCore, NonFungibleTokenResolver},
         metadata::{NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata},
         NonFungibleToken,
-        refund_deposit,
         Token,
         TokenId,
     }
@@ -47,7 +46,7 @@ mod tests {
     use near_sdk::test_utils::{accounts, VMContextBuilder};
     use near_sdk::testing_env;
 
-    use crate::contract::CertificationContract;
+    use crate::contract::{CertificationContract, CertificationContractInitOptions};
 
     use super::*;
 
@@ -96,8 +95,8 @@ mod tests {
         CertificationExtraMetadata {
             authority_id: Some("john_instructor.near".parse().unwrap()),
             authority_name: Some("John Instructor".into()),
-            program: None, //Some("TR101".into()),
-            program_name: None,// Some("White hat hacking with transferable certification".into()),
+            program: Some("TR101".into()),
+            program_name: Some("White hat hacking with transferable certification".into()),
             program_start_date: None,
             program_end_date: None,
             original_recipient_id: Some("original_recipient.near".parse().unwrap()),
@@ -111,8 +110,8 @@ mod tests {
         CertificationExtraMetadata {
             authority_id: Some("john_instructor.near".parse().unwrap()),
             authority_name: Some("John Instructor".to_string()),
-            program: None, //Some("NTR102".to_string()),
-            program_name: None, //Some("White hat hacking with nontransferable certification".to_string()),
+            program: Some("NTR102".to_string()),
+            program_name: Some("White hat hacking with nontransferable certification".to_string()),
             program_start_date: None,
             program_end_date: None,
             original_recipient_id: Some("original_recipient.near".parse().unwrap()),
@@ -167,7 +166,13 @@ mod tests {
     fn new() {
         let mut context = get_context(accounts(1));
         testing_env!(context.build());
-        let contract = CertificationContract::new(accounts(1).into(), sample_metadata_contract());
+        let contract = CertificationContract::new(
+            accounts(1).into(),
+            sample_metadata_contract(),
+            CertificationContractInitOptions {
+                transferable: false,
+                decertifiable: false,
+            });
         testing_env!(context.is_view(true).build());
         assert_eq!(contract.nft_token("1".to_string()), None);
     }
@@ -184,11 +189,18 @@ mod tests {
     fn mint_transferable() {
         let mut context = get_context(accounts(0));
         testing_env!(context.build());
-        let mut contract = CertificationContract::new(accounts(0).into(), sample_metadata_contract());
+        let mut contract = CertificationContract::new(
+            accounts(0).into(),
+            sample_metadata_contract(),
+            CertificationContractInitOptions {
+                transferable: true,
+                decertifiable: false,
+            },
+        );
 
         testing_env!(context
             .storage_usage(env::storage_usage())
-            .attached_deposit(1)
+            .attached_deposit(MINT_MAX_COST)
             .predecessor_account_id(accounts(0))
             .build());
 
@@ -221,11 +233,18 @@ mod tests {
     fn mint_nontransferable() {
         let mut context = get_context(accounts(0));
         testing_env!(context.build());
-        let mut contract = CertificationContract::new(accounts(0).into(), sample_metadata_contract());
+        let mut contract = CertificationContract::new(
+            accounts(0).into(),
+            sample_metadata_contract(),
+            CertificationContractInitOptions {
+                transferable: false,
+                decertifiable: false,
+            },
+        );
 
         testing_env!(context
             .storage_usage(env::storage_usage())
-            .attached_deposit(1)
+            .attached_deposit(MINT_MAX_COST)
             .predecessor_account_id(accounts(0))
             .build());
 
