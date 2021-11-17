@@ -1,31 +1,36 @@
-use near_contract_standards::non_fungible_token::approval::NonFungibleTokenApproval;
-
 use crate::*;
-use crate::StorageKey::TokenMetadata;
+use crate::event::{CertificationEventLogData, CreateEventLog};
 
 impl CertificationContract {
-    pub fn decertify(&mut self, token_id: &TokenId) {
-        let initial_storage_usage = env::storage_usage();
+    pub fn decertify(&mut self, token_id: TokenId, memo: Option<String>) {
         // Force owner only
         self.assert_owner();
         // Force verification
         assert_one_yocto();
 
-        let metadata = self.tokens.token_metadata_by_id
-            .unwrap()
-            .get(token_id)
+        let lookup = self.tokens.token_metadata_by_id.as_mut().unwrap();
+
+        let metadata = lookup
+            .get(&token_id)
             .expect("Token does not exist");
 
-        let certification_metadata: CertificationExtraMetadata = serde_json::from_str(&metadata.extra.unwrap()).unwrap();
+        let certification_metadata = serde_json::from_str::<CertificationExtraMetadata>(&metadata.extra.unwrap()).unwrap();
 
-        self.tokens.token_metadata_by_id.unwrap().insert(token_id, &TokenMetadata {
-            extra: Some(CertificationExtraMetadata {
-                active: false,
-                ..certification_metadata
-            }.to_json()),
-            ..metadata
-        });
+        let recipient_id = certification_metadata.original_recipient_id.clone();
 
-        refund_deposit(env::storage_usage() - initial_storage_usage);
+        lookup
+            .insert(&token_id, &TokenMetadata {
+                extra: Some(CertificationExtraMetadata {
+                    active: false,
+                    ..certification_metadata
+                }.to_json()),
+                ..metadata
+            });
+
+        self.create_event_log(CertificationEventLogData::Decertify {
+            token_id,
+            recipient_id,
+            memo,
+        }).emit();
     }
 }

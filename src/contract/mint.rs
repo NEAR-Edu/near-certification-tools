@@ -1,11 +1,19 @@
 use crate::*;
 use crate::contract::*;
+use crate::event::*;
 use crate::utils::*;
 
 #[near_bindgen]
 impl CertificationContract {
     #[payable]
-    pub fn nft_mint(&mut self, token_id: TokenId, receiver_account_id: Option<AccountId>, token_metadata: TokenMetadata, certification_metadata: CertificationExtraMetadata) -> Token {
+    pub fn nft_mint(
+        &mut self,
+        token_id: TokenId,
+        receiver_account_id: Option<AccountId>,
+        token_metadata: TokenMetadata,
+        certification_metadata: CertificationExtraMetadata,
+        memo: Option<String>,
+    ) -> Token {
         // Force owner
         self.assert_owner();
         // Force verification
@@ -22,6 +30,12 @@ impl CertificationContract {
             extra: Some(certification_metadata.to_json()),
             ..token_metadata
         };
+
+        self.create_event_log(CertificationEventLogData::Issue {
+            token_id: token_id.clone(),
+            recipient_id: certification_metadata.original_recipient_id.unwrap_or_else(|| to_account_id.clone()),
+            memo,
+        }).emit();
 
         // internal_mint manages storage cost refunding
         self.tokens.internal_mint(token_id, to_account_id, Some(combined_metadata))

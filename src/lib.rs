@@ -16,9 +16,10 @@ use near_sdk::{
     Balance,
     borsh::{self, BorshDeserialize, BorshSerialize},
     BorshStorageKey,
-    collections::{LazyOption, UnorderedSet},
-    env::{self, panic_str},
+    collections::LazyOption,
+    env,
     json_types::*,
+    log,
     near_bindgen,
     PanicOnDefault,
     Promise,
@@ -38,7 +39,7 @@ mod metadata;
 mod storage_key;
 mod contract;
 mod utils;
-mod events;
+mod event;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
@@ -93,29 +94,31 @@ mod tests {
 
     fn sample_metadata_certification_transferable() -> CertificationExtraMetadata {
         CertificationExtraMetadata {
-            authority_account_id: Some("john_instructor.near".parse().unwrap()),
+            authority_id: Some("john_instructor.near".parse().unwrap()),
             authority_name: Some("John Instructor".into()),
-            program_id: None, //Some("TR101".into()),
+            program: None, //Some("TR101".into()),
             program_name: None,// Some("White hat hacking with transferable certification".into()),
             program_start_date: None,
             program_end_date: None,
-            original_recipient_account_id: Some("original_recipient.near".parse().unwrap()),
+            original_recipient_id: Some("original_recipient.near".parse().unwrap()),
             original_recipient_name: Some("Original Recipient".into()),
             active: true,
+            memo: None,
         }
     }
 
     fn sample_metadata_certification_nontransferable() -> CertificationExtraMetadata {
         CertificationExtraMetadata {
-            authority_account_id: Some("john_instructor.near".parse().unwrap()),
+            authority_id: Some("john_instructor.near".parse().unwrap()),
             authority_name: Some("John Instructor".to_string()),
-            program_id: None, //Some("NTR102".to_string()),
+            program: None, //Some("NTR102".to_string()),
             program_name: None, //Some("White hat hacking with nontransferable certification".to_string()),
             program_start_date: None,
             program_end_date: None,
-            original_recipient_account_id: Some("original_recipient.near".parse().unwrap()),
+            original_recipient_id: Some("original_recipient.near".parse().unwrap()),
             original_recipient_name: Some("Original Recipient".to_string()),
             active: false,
+            memo: None,
         }
     }
 
@@ -197,6 +200,7 @@ mod tests {
             accounts(0).into(),
             sample_metadata_token(),
             sample_metadata_certification_transferable(),
+            None,
         );
         assert_eq!(token.token_id, token_id);
         assert_eq!(token.owner_id, accounts(0));
@@ -208,7 +212,7 @@ mod tests {
             },
         );
         assert_eq!(token.approved_account_ids.unwrap(), HashMap::new());
-        assert_eq!(contract.transferability.contains(&token_id), true, "Token is transferable");
+        // TODO: Check transferability
 
         print_monitor(initial_storage);
     }
@@ -233,6 +237,7 @@ mod tests {
             accounts(0).into(),
             sample_metadata_token(),
             sample_metadata_certification_nontransferable(),
+            None,
         );
         assert_eq!(token.token_id, token_id);
         assert_eq!(token.owner_id, accounts(0));
@@ -244,7 +249,7 @@ mod tests {
             },
         );
         assert_eq!(token.approved_account_ids.unwrap(), HashMap::new());
-        assert_eq!(contract.transferability.contains(&token_id), false, "Token is not transferable");
+        // TODO: Check transferability
 
         print_monitor(initial_storage);
     }
