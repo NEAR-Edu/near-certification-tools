@@ -5,6 +5,7 @@ use near_contract_standards::{
         core::{NonFungibleTokenCore, NonFungibleTokenResolver},
         metadata::{NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata},
         NonFungibleToken,
+        refund_deposit,
         Token,
         TokenId,
     }
@@ -16,7 +17,7 @@ use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
     BorshStorageKey,
     collections::{LazyOption, UnorderedSet},
-    env,
+    env::{self, panic_str},
     json_types::*,
     near_bindgen,
     PanicOnDefault,
@@ -37,6 +38,7 @@ mod metadata;
 mod storage_key;
 mod contract;
 mod utils;
+mod events;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
@@ -54,6 +56,7 @@ mod tests {
         let mut builder = VMContextBuilder::new();
         builder
             .current_account_id(accounts(0))
+            .account_balance(14500000000000000000000000)
             .signer_account_id(predecessor_account_id.clone())
             .predecessor_account_id(predecessor_account_id);
         builder
@@ -98,7 +101,7 @@ mod tests {
             program_end_date: None,
             original_recipient_account_id: Some("original_recipient.near".parse().unwrap()),
             original_recipient_name: Some("Original Recipient".into()),
-            transferable: true,
+            active: true,
         }
     }
 
@@ -112,7 +115,7 @@ mod tests {
             program_end_date: None,
             original_recipient_account_id: Some("original_recipient.near".parse().unwrap()),
             original_recipient_name: Some("Original Recipient".to_string()),
-            transferable: false,
+            active: false,
         }
     }
 
@@ -182,7 +185,7 @@ mod tests {
 
         testing_env!(context
             .storage_usage(env::storage_usage())
-            .attached_deposit(MINT_MAX_COST)
+            .attached_deposit(1)
             .predecessor_account_id(accounts(0))
             .build());
 
@@ -218,7 +221,7 @@ mod tests {
 
         testing_env!(context
             .storage_usage(env::storage_usage())
-            .attached_deposit(MINT_MAX_COST)
+            .attached_deposit(1)
             .predecessor_account_id(accounts(0))
             .build());
 

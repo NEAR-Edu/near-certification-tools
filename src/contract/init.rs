@@ -20,7 +20,6 @@ impl CertificationContract {
                 Some(StorageKey::Approval),
             ),
             metadata: LazyOption::new(StorageKey::Metadata, Some(&metadata)),
-            transferability: UnorderedSet::new(StorageKey::Transferability),
         }
     }
 }

@@ -48,9 +48,8 @@ pub struct CertificationExtraMetadata {
     /// NEAR account ID of the original recipient of this certification.
     pub original_recipient_account_id: Option<AccountId>,
 
-    /// Panics `nft_transfer` and `nft_transfer_call` calls on this token when
-    /// `false`.
-    pub transferable: bool,
+    /// Certification is active. Decertification sets this value to false.
+    pub active: bool,
 }
 
 impl CertificationExtraMetadata {
@@ -73,7 +72,7 @@ mod tests {
             program_end_date: None,
             original_recipient_account_id: Some("original_recipient.near".parse().unwrap()),
             original_recipient_name: Some("Original Recipient".to_string()),
-            transferable: true,
+            active: true,
         }
     }
 
@@ -90,6 +89,6 @@ mod tests {
         assert!(deserialized.program_end_date.as_ref().is_none());
         assert_eq!(deserialized.original_recipient_account_id.as_ref().unwrap().to_string(), "original_recipient.near");
         assert_eq!(deserialized.original_recipient_name.as_ref().unwrap().to_string(), "Original Recipient");
-        assert_eq!(deserialized.transferable, true);
+        assert_eq!(deserialized.active, true);
     }
 }

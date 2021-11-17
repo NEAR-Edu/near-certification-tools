@@ -11,6 +11,11 @@ target = "wasm32-unknown-unknown"
 near-sdk = "4.0.0-pre.4"
 near-contract-standards = "4.0.0-pre.4"
 
+[features]
+default = ["decertifiable"]
+transferable = []
+decertifiable = []
+
 [lib]
 crate-type = ["cdylib"]
 

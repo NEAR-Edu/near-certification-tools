@@ -13,8 +13,11 @@ impl NonFungibleTokenCore for CertificationContract {
         approval_id: Option<u64>,
         memo: Option<String>,
     ) {
-        self.assert_transferable(&token_id);
-        self.tokens.nft_transfer(receiver_id, token_id, approval_id, memo)
+        #[cfg(feature = "transferable")]
+            self.tokens.nft_transfer(receiver_id, token_id, approval_id, memo);
+
+        #[cfg(not(feature = "transferable"))]
+        std::panic!("Certifications are non-transferable");
     }
 
     #[payable]
@@ -26,8 +29,11 @@ impl NonFungibleTokenCore for CertificationContract {
         memo: Option<String>,
         msg: String,
     ) -> PromiseOrValue<bool> {
-        self.assert_transferable(&token_id);
-        self.tokens.nft_transfer_call(receiver_id, token_id, approval_id, memo, msg)
+        #[cfg(feature = "transferable")]
+            self.tokens.nft_transfer_call(receiver_id, token_id, approval_id, memo, msg);
+
+        #[cfg(not(feature = "transferable"))]
+        std::panic!("Certifications are non-transferable");
     }
 
     fn nft_token(&self, token_id: TokenId) -> Option<Token> {

@@ -4,6 +4,7 @@ use crate::utils::*;
 
 #[near_bindgen]
 impl CertificationContract {
+    #[payable]
     pub fn nft_mint(&mut self, token_id: TokenId, receiver_account_id: Option<AccountId>, token_metadata: TokenMetadata, certification_metadata: CertificationExtraMetadata) -> Token {
         // Force owner
         self.assert_owner();
@@ -17,13 +18,12 @@ impl CertificationContract {
             Some(r) => r,
             None => self.tokens.owner_id.clone(),
         };
-        let combined_metadata = TokenMetadata { extra: Some(certification_metadata.to_json()), ..token_metadata };
-        // combined_metadata.extra = Some(certification_metadata.to_json());
+        let combined_metadata = TokenMetadata {
+            extra: Some(certification_metadata.to_json()),
+            ..token_metadata
+        };
 
-        if certification_metadata.transferable {
-            self.transferability.insert(&token_id);
-        }
-
+        // internal_mint manages storage cost refunding
         self.tokens.internal_mint(token_id, to_account_id, Some(combined_metadata))
     }
 }
