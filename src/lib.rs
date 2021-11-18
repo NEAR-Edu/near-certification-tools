@@ -12,7 +12,6 @@ use near_contract_standards::{
 use near_sdk::{
     AccountId,
     assert_one_yocto,
-    Balance,
     borsh::{self, BorshDeserialize, BorshSerialize},
     BorshStorageKey,
     collections::LazyOption,
@@ -26,7 +25,6 @@ use near_sdk::{
     require,
     serde::{Deserialize, Serialize},
     serde_json,
-    StorageUsage,
 };
 
 use storage_key::StorageKey;
@@ -42,10 +40,18 @@ mod event;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
-    use near_contract_standards::non_fungible_token::approval::NonFungibleTokenApproval;
-    use near_contract_standards::non_fungible_token::metadata::NFT_METADATA_SPEC;
-    use near_sdk::test_utils::{accounts, VMContextBuilder};
-    use near_sdk::testing_env;
+    use near_contract_standards::{
+        non_fungible_token::{
+            approval::NonFungibleTokenApproval,
+            metadata::NFT_METADATA_SPEC,
+        }
+    };
+    use near_sdk::{
+        Balance,
+        StorageUsage,
+        test_utils::{accounts, VMContextBuilder},
+        testing_env,
+    };
 
     use crate::contract::{CertificationContract, CertificationContractInitOptions};
 

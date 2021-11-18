@@ -18,6 +18,10 @@ pub struct CertificationContract {
 
 #[near_bindgen]
 impl CertificationContract {
+    pub fn owner_id(&self) -> AccountId {
+        self.tokens.owner_id.clone()
+    }
+
     pub(crate) fn assert_owner(&self) {
         require!(env::predecessor_account_id() == self.tokens.owner_id, "Unauthorized");
     }

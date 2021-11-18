@@ -1,0 +1,16 @@
+{
+  "owner_id": "hatchet.testnet",
+  "metadata": {
+    "name": "CERT_TOKEN_NAME",
+    "symbol": "SYMBOL",
+    "spec": "nft-1.0.0",
+    "reference": null,
+    "reference_hash": null,
+    "base_uri": null,
+    "icon": null
+  },
+  "options": {
+    "transferable": true,
+    "decertifiable": true
+  }
+}
