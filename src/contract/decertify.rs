@@ -1,5 +1,5 @@
 use crate::*;
-use crate::event::{CertificationEventLogData, CreateEventLog};
+use crate::event::*;
 
 impl CertificationContract {
     pub fn cert_is_valid(&self, token_id: TokenId) -> bool {

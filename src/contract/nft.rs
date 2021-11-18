@@ -63,9 +63,3 @@ impl NonFungibleTokenMetadataProvider for CertificationContract {
 
 near_contract_standards::impl_non_fungible_token_approval!(CertificationContract, tokens);
 near_contract_standards::impl_non_fungible_token_enumeration!(CertificationContract, tokens);
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn transferable_token_can_transfer() {}
-}
