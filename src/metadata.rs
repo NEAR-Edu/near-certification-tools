@@ -48,8 +48,9 @@ pub struct CertificationExtraMetadata {
     /// For example: "John Doe", "The Goblin Slayer", "Steve"
     pub original_recipient_name: Option<String>,
 
-    /// Certification is active. Decertification sets this value to false.
-    pub active: bool,
+    /// Certification is valid. Freshly issued certifications have
+    /// `valid == true`; decertification sets this value to `false`.
+    pub valid: bool,
 
     /// Optional additional data
     pub memo: Option<String>,
@@ -75,7 +76,7 @@ mod tests {
             program_end_date: None,
             original_recipient_id: Some("original_recipient.near".parse().unwrap()),
             original_recipient_name: Some("Original Recipient".to_string()),
-            active: true,
+            valid: true,
             memo: None,
         }
     }
@@ -93,7 +94,7 @@ mod tests {
         assert!(deserialized.program_end_date.as_ref().is_none());
         assert_eq!(deserialized.original_recipient_id.as_ref().unwrap().to_string(), "original_recipient.near");
         assert_eq!(deserialized.original_recipient_name.as_ref().unwrap().to_string(), "Original Recipient");
-        assert_eq!(deserialized.active, true);
+        assert_eq!(deserialized.valid, true);
         assert!(deserialized.memo.as_ref().is_none());
     }
 }

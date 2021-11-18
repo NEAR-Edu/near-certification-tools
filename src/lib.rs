@@ -101,7 +101,7 @@ mod tests {
             program_end_date: None,
             original_recipient_id: Some("original_recipient.near".parse().unwrap()),
             original_recipient_name: Some("Original Recipient".into()),
-            active: true,
+            valid: true,
             memo: None,
         }
     }
@@ -116,7 +116,7 @@ mod tests {
             program_end_date: None,
             original_recipient_id: Some("original_recipient.near".parse().unwrap()),
             original_recipient_name: Some("Original Recipient".to_string()),
-            active: false,
+            valid: true,
             memo: None,
         }
     }
@@ -186,17 +186,49 @@ mod tests {
     }
 
     #[test]
-    fn mint_transferable() {
-        let mut context = get_context(accounts(0));
+    fn init_transferable_decertifiable() {
+        let mut context = get_context(accounts(1));
+
+        for i in 0..4usize {
+            let transferable = (i & 0b1) != 0;
+            let decertifiable = (i & 0b10) != 0;
+
+            testing_env!(context.is_view(false).build());
+            let contract = CertificationContract::new(
+                accounts(1).into(),
+                sample_metadata_contract(),
+                CertificationContractInitOptions {
+                    transferable,
+                    decertifiable,
+                });
+
+            testing_env!(context.is_view(true).build());
+            assert_eq!(contract.cert_allows_nft_transfer(), transferable);
+            assert_eq!(contract.cert_allows_decertification(), decertifiable);
+        }
+    }
+
+    fn init_contract(owner_id: AccountId, contract_metadata: NFTContractMetadata, init_options: CertificationContractInitOptions) -> (VMContextBuilder, CertificationContract) {
+        let context = get_context(owner_id.clone());
         testing_env!(context.build());
-        let mut contract = CertificationContract::new(
-            accounts(0).into(),
+        let contract = CertificationContract::new(
+            owner_id,
+            contract_metadata,
+            init_options,
+        );
+
+        (context, contract)
+    }
+
+    #[test]
+    fn mint_transferable() {
+        let (mut context, mut contract) = init_contract(
+            accounts(0),
             sample_metadata_contract(),
             CertificationContractInitOptions {
                 transferable: true,
                 decertifiable: false,
-            },
-        );
+            });
 
         testing_env!(context
             .storage_usage(env::storage_usage())
@@ -224,23 +256,41 @@ mod tests {
             },
         );
         assert_eq!(token.approved_account_ids.unwrap(), HashMap::new());
-        // TODO: Check transferability
+        assert_eq!(contract.cert_is_valid(token_id.clone()), true);
 
+        println!("Token mint:");
         print_monitor(initial_storage);
+
+        testing_env!(context
+            .attached_deposit(1)
+            .build()
+        );
+
+        contract.nft_transfer(accounts(1), token_id.clone(), None, None);
+
+        let transferred_token = contract.nft_token(token_id.clone()).expect("Token exists after transfer");
+
+        assert_eq!(transferred_token.token_id, token_id);
+        assert_eq!(transferred_token.owner_id, accounts(1));
+        assert_eq!(
+            transferred_token.metadata.unwrap(),
+            TokenMetadata {
+                extra: Some(sample_metadata_certification_transferable().to_json()),
+                ..sample_metadata_token()
+            },
+        );
     }
 
     #[test]
+    #[should_panic(expected = "Certifications cannot be transferred")]
     fn mint_nontransferable() {
-        let mut context = get_context(accounts(0));
-        testing_env!(context.build());
-        let mut contract = CertificationContract::new(
-            accounts(0).into(),
+        let (mut context, mut contract) = init_contract(
+            accounts(0),
             sample_metadata_contract(),
             CertificationContractInitOptions {
                 transferable: false,
                 decertifiable: false,
-            },
-        );
+            });
 
         testing_env!(context
             .storage_usage(env::storage_usage())
@@ -268,9 +318,132 @@ mod tests {
             },
         );
         assert_eq!(token.approved_account_ids.unwrap(), HashMap::new());
-        // TODO: Check transferability
+        assert_eq!(contract.cert_is_valid(token_id.clone()), true);
 
         print_monitor(initial_storage);
+
+        // Test transferability
+        testing_env!(context
+            .attached_deposit(1)
+            .build()
+        );
+
+        contract.nft_transfer(accounts(1), token_id.clone(), None, None);
+    }
+
+    #[test]
+    fn mint_decertifiable() {
+        let (mut context, mut contract) = init_contract(
+            accounts(0),
+            sample_metadata_contract(),
+            CertificationContractInitOptions {
+                transferable: false,
+                decertifiable: true,
+            });
+
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(MINT_MAX_COST)
+            .predecessor_account_id(accounts(0))
+            .build());
+
+        let initial_storage = start_monitor();
+
+        let token_id = "0".to_string();
+        let token = contract.nft_mint(
+            token_id.clone(),
+            accounts(0).into(),
+            sample_metadata_token(),
+            sample_metadata_certification_nontransferable(),
+            None,
+        );
+        assert_eq!(token.token_id, token_id);
+        assert_eq!(token.owner_id, accounts(0));
+        assert_eq!(
+            token.metadata.unwrap(),
+            TokenMetadata {
+                extra: Some(sample_metadata_certification_nontransferable().to_json()),
+                ..sample_metadata_token()
+            },
+        );
+        assert_eq!(token.approved_account_ids.unwrap(), HashMap::new());
+        assert_eq!(contract.cert_is_valid(token_id.clone()), true);
+
+        print_monitor(initial_storage);
+
+        // Test transferability
+        testing_env!(context
+            .attached_deposit(1)
+            .build()
+        );
+
+        contract.cert_decertify(token_id.clone(), None);
+
+        let decertified_token = contract.nft_token(token_id.clone()).expect("Token exists after decertification");
+
+        assert_eq!(contract.cert_is_valid(token_id.clone()), false);
+        assert_eq!(decertified_token.token_id, token_id);
+        assert_eq!(decertified_token.owner_id, accounts(0));
+        assert_eq!(
+            decertified_token.metadata.unwrap(),
+            TokenMetadata {
+                extra: Some(CertificationExtraMetadata {
+                    valid: false,
+                    ..sample_metadata_certification_nontransferable()
+                }.to_json()),
+                ..sample_metadata_token()
+            },
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "Certifications cannot be decertified")]
+    fn mint_nondecertifiable() {
+        let (mut context, mut contract) = init_contract(
+            accounts(0),
+            sample_metadata_contract(),
+            CertificationContractInitOptions {
+                transferable: false,
+                decertifiable: false,
+            });
+
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(MINT_MAX_COST)
+            .predecessor_account_id(accounts(0))
+            .build());
+
+        let initial_storage = start_monitor();
+
+        let token_id = "0".to_string();
+        let token = contract.nft_mint(
+            token_id.clone(),
+            accounts(0).into(),
+            sample_metadata_token(),
+            sample_metadata_certification_nontransferable(),
+            None,
+        );
+        assert_eq!(token.token_id, token_id);
+        assert_eq!(token.owner_id, accounts(0));
+        assert_eq!(
+            token.metadata.unwrap(),
+            TokenMetadata {
+                extra: Some(sample_metadata_certification_nontransferable().to_json()),
+                ..sample_metadata_token()
+            },
+        );
+        assert_eq!(token.approved_account_ids.unwrap(), HashMap::new());
+        assert_eq!(contract.cert_is_valid(token_id.clone()), true);
+
+        print_monitor(initial_storage);
+
+        // Test transferability
+        testing_env!(context
+            .attached_deposit(1)
+            .build()
+        );
+
+        contract.cert_decertify(token_id.clone(), None);
     }
 }
 

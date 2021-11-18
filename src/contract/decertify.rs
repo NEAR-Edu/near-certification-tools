@@ -2,7 +2,21 @@ use crate::*;
 use crate::event::{CertificationEventLogData, CreateEventLog};
 
 impl CertificationContract {
-    pub fn decertify(&mut self, token_id: TokenId, memo: Option<String>) {
+    pub fn cert_is_valid(&self, token_id: TokenId) -> bool {
+        serde_json::from_str::<CertificationExtraMetadata>(
+            &self.tokens.token_metadata_by_id
+                .as_ref()
+                .unwrap()
+                .get(&token_id)
+                .unwrap()
+                .extra
+                .unwrap()
+        )
+            .unwrap()
+            .valid
+    }
+
+    pub fn cert_decertify(&mut self, token_id: TokenId, memo: Option<String>) {
         self.assert_decertifiable();
         // Force owner only
         self.assert_owner();
@@ -22,7 +36,7 @@ impl CertificationContract {
         lookup
             .insert(&token_id, &TokenMetadata {
                 extra: Some(CertificationExtraMetadata {
-                    active: false,
+                    valid: false,
                     ..certification_metadata
                 }.to_json()),
                 ..metadata

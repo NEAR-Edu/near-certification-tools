@@ -30,11 +30,11 @@ impl CertificationContract {
         require!(self.decertifiable, "Certifications cannot be decertified");
     }
 
-    pub fn is_transferable(&self) -> bool {
+    pub fn cert_allows_nft_transfer(&self) -> bool {
         self.transferable
     }
 
-    pub fn is_decertifiable(&self) -> bool {
+    pub fn cert_allows_decertification(&self) -> bool {
         self.decertifiable
     }
 }
