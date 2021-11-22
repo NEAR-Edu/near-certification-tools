@@ -210,8 +210,8 @@ mod tests {
                 });
 
             testing_env!(context.is_view(true).build());
-            assert_eq!(contract.cert_allows_nft_transfer(), can_transfer);
-            assert_eq!(contract.cert_allows_invalidation(), can_invalidate);
+            assert_eq!(contract.cert_can_transfer(), can_transfer);
+            assert_eq!(contract.cert_can_invalidate(), can_invalidate);
         }
     }
 

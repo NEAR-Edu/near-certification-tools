@@ -34,11 +34,11 @@ impl CertificationContract {
         require!(self.can_invalidate, "Certifications cannot be invalidated");
     }
 
-    pub fn cert_allows_nft_transfer(&self) -> bool {
+    pub fn cert_can_transfer(&self) -> bool {
         self.can_transfer
     }
 
-    pub fn cert_allows_invalidation(&self) -> bool {
+    pub fn cert_can_invalidate(&self) -> bool {
         self.can_invalidate
     }
 }
