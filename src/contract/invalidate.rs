@@ -16,8 +16,8 @@ impl CertificationContract {
             .valid
     }
 
-    pub fn cert_decertify(&mut self, token_id: TokenId, memo: Option<String>) {
-        self.assert_decertifiable();
+    pub fn cert_invalidate(&mut self, token_id: TokenId, memo: Option<String>) {
+        self.assert_can_invalidate();
         // Force owner only
         self.assert_owner();
         // Force verification
@@ -42,7 +42,7 @@ impl CertificationContract {
                 ..metadata
             });
 
-        self.create_event_log(CertificationEventLogData::Decertify {
+        self.create_event_log(CertificationEventLogData::Invalidate {
             token_id,
             recipient_id,
             memo,

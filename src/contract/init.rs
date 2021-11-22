@@ -4,8 +4,8 @@ use crate::contract::*;
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct CertificationContractInitOptions {
-    pub transferable: bool,
-    pub decertifiable: bool,
+    pub can_transfer: bool,
+    pub can_invalidate: bool,
 }
 
 #[near_bindgen]
@@ -27,8 +27,8 @@ impl CertificationContract {
                 Some(StorageKey::Approval),
             ),
             metadata: LazyOption::new(StorageKey::Metadata, Some(&metadata)),
-            transferable: options.transferable,
-            decertifiable: options.decertifiable,
+            can_transfer: options.can_transfer,
+            can_invalidate: options.can_invalidate,
         }
     }
 }

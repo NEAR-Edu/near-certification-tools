@@ -177,8 +177,8 @@ mod tests {
             accounts(1).into(),
             sample_metadata_contract(),
             CertificationContractInitOptions {
-                transferable: false,
-                decertifiable: false,
+                can_transfer: false,
+                can_invalidate: false,
             });
         testing_env!(context.is_view(true).build());
         assert_eq!(contract.nft_token("1".to_string()), None);
@@ -193,25 +193,25 @@ mod tests {
     }
 
     #[test]
-    fn init_transferable_decertifiable() {
+    fn init_transfer_invalidate() {
         let mut context = get_context(accounts(1));
 
         for i in 0..4usize {
-            let transferable = (i & 0b1) != 0;
-            let decertifiable = (i & 0b10) != 0;
+            let can_transfer = (i & 0b1) != 0;
+            let can_invalidate = (i & 0b10) != 0;
 
             testing_env!(context.is_view(false).build());
             let contract = CertificationContract::new(
                 accounts(1).into(),
                 sample_metadata_contract(),
                 CertificationContractInitOptions {
-                    transferable,
-                    decertifiable,
+                    can_transfer,
+                    can_invalidate,
                 });
 
             testing_env!(context.is_view(true).build());
-            assert_eq!(contract.cert_allows_nft_transfer(), transferable);
-            assert_eq!(contract.cert_allows_decertification(), decertifiable);
+            assert_eq!(contract.cert_allows_nft_transfer(), can_transfer);
+            assert_eq!(contract.cert_allows_invalidation(), can_invalidate);
         }
     }
 
@@ -228,13 +228,13 @@ mod tests {
     }
 
     #[test]
-    fn mint_transferable() {
+    fn mint_can_transfer_true() {
         let (mut context, mut contract) = init_contract(
             accounts(0),
             sample_metadata_contract(),
             CertificationContractInitOptions {
-                transferable: true,
-                decertifiable: false,
+                can_transfer: true,
+                can_invalidate: false,
             });
 
         testing_env!(context
@@ -290,13 +290,13 @@ mod tests {
 
     #[test]
     #[should_panic(expected = "Certifications cannot be transferred")]
-    fn mint_nontransferable() {
+    fn mint_can_transfer_false() {
         let (mut context, mut contract) = init_contract(
             accounts(0),
             sample_metadata_contract(),
             CertificationContractInitOptions {
-                transferable: false,
-                decertifiable: false,
+                can_transfer: false,
+                can_invalidate: false,
             });
 
         testing_env!(context
@@ -339,13 +339,13 @@ mod tests {
     }
 
     #[test]
-    fn mint_decertifiable() {
+    fn mint_can_invalidate_true() {
         let (mut context, mut contract) = init_contract(
             accounts(0),
             sample_metadata_contract(),
             CertificationContractInitOptions {
-                transferable: false,
-                decertifiable: true,
+                can_transfer: false,
+                can_invalidate: true,
             });
 
         testing_env!(context
@@ -384,15 +384,15 @@ mod tests {
             .build()
         );
 
-        contract.cert_decertify(token_id.clone(), None);
+        contract.cert_invalidate(token_id.clone(), None);
 
-        let decertified_token = contract.nft_token(token_id.clone()).expect("Token exists after decertification");
+        let invalidated_token = contract.nft_token(token_id.clone()).expect("Token exists after invalidation");
 
         assert_eq!(contract.cert_is_valid(token_id.clone()), false);
-        assert_eq!(decertified_token.token_id, token_id);
-        assert_eq!(decertified_token.owner_id, accounts(0));
+        assert_eq!(invalidated_token.token_id, token_id);
+        assert_eq!(invalidated_token.owner_id, accounts(0));
         assert_eq!(
-            decertified_token.metadata.unwrap(),
+            invalidated_token.metadata.unwrap(),
             TokenMetadata {
                 extra: Some(CertificationExtraMetadata {
                     valid: false,
@@ -404,14 +404,14 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "Certifications cannot be decertified")]
-    fn mint_nondecertifiable() {
+    #[should_panic(expected = "Certifications cannot be invalidated")]
+    fn mint_can_invalidate_false() {
         let (mut context, mut contract) = init_contract(
             accounts(0),
             sample_metadata_contract(),
             CertificationContractInitOptions {
-                transferable: false,
-                decertifiable: false,
+                can_transfer: false,
+                can_invalidate: false,
             });
 
         testing_env!(context
@@ -450,7 +450,7 @@ mod tests {
             .build()
         );
 
-        contract.cert_decertify(token_id.clone(), None);
+        contract.cert_invalidate(token_id.clone(), None);
     }
 
     #[test]
@@ -459,8 +459,8 @@ mod tests {
             accounts(0),
             sample_metadata_contract(),
             CertificationContractInitOptions {
-                transferable: false,
-                decertifiable: false,
+                can_transfer: false,
+                can_invalidate: false,
             });
 
         testing_env!(context
@@ -500,8 +500,8 @@ mod tests {
             accounts(0),
             sample_metadata_contract(),
             CertificationContractInitOptions {
-                transferable: false,
-                decertifiable: false,
+                can_transfer: false,
+                can_invalidate: false,
             });
 
         testing_env!(context
@@ -548,8 +548,8 @@ mod tests {
             accounts(0),
             sample_metadata_contract(),
             CertificationContractInitOptions {
-                transferable: false,
-                decertifiable: false,
+                can_transfer: false,
+                can_invalidate: false,
             });
 
         testing_env!(context

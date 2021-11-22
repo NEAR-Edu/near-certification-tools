@@ -45,21 +45,21 @@ Returns the account ID of the contract owner.
 
 Returns `true` if the contract allows NFT certifications to be transferred after issue, and `false` otherwise. Note that if NFT transfers are disallows, this causes the contract to be (technically) non-compliant with the NEP171 standard.
 
-### `cert_allows_decertification`
+### `cert_allows_invalidation`
 
-Returns `true` if the contract owner is allowed to decertify (invalidate) existing certifications by setting the `valid` property to `false`. Note that decertification does not delete an NFT or change its ownership.
+Returns `true` if the contract owner is allowed to invalidate  existing certifications by setting the `valid` property to `false`. Note that invalidation does not delete an NFT or change its ownership.
 
 ### `cert_is_valid`
 
-Returns `true` if a particular token's `valid` property is `true`, and `false` otherwise. Decertified tokens will have this property set to `false`.
+Returns `true` if a particular token's `valid` property is `true`, and `false` otherwise. Invalidated tokens will have this property set to `false`.
 
-### `cert_decertify`
+### `cert_invalidate`
 
-Owner-only. Sets the `valid` property to `false` for a particular token. Panics if the contract does not allow decertification.
+Owner-only. Sets the `valid` property to `false` for a particular token. Panics if the contract does not allow invalidation.
 
 ### `nft_mint`
 
-Non-standard but well-known NFT minting function.
+Owner-only; non-standard but well-known NFT minting function.
 
 ## Metadata
 

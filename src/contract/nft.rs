@@ -13,7 +13,7 @@ impl NonFungibleTokenCore for CertificationContract {
         approval_id: Option<u64>,
         memo: Option<String>,
     ) {
-        self.assert_transferable();
+        self.assert_can_transfer();
         self.tokens.nft_transfer(receiver_id, token_id, approval_id, memo);
     }
 
@@ -26,7 +26,7 @@ impl NonFungibleTokenCore for CertificationContract {
         memo: Option<String>,
         msg: String,
     ) -> PromiseOrValue<bool> {
-        self.assert_transferable();
+        self.assert_can_transfer();
         self.tokens.nft_transfer_call(receiver_id, token_id, approval_id, memo, msg)
     }
 

@@ -34,7 +34,7 @@ pub(crate) enum CertificationEventLogData {
         token_id: TokenId,
         memo: Option<String>,
     },
-    Decertify {
+    Invalidate {
         recipient_id: Option<AccountId>,
         token_id: TokenId,
         memo: Option<String>,
@@ -45,7 +45,7 @@ impl CertificationEventLogData {
     fn name(&self) -> &str {
         match self {
             CertificationEventLogData::Issue { .. } => "cert_issue",
-            CertificationEventLogData::Decertify { .. } => "cert_decertify",
+            CertificationEventLogData::Invalidate { .. } => "cert_invalidate",
         }
     }
 }

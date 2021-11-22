@@ -10,7 +10,7 @@
     "icon": null
   },
   "options": {
-    "transferable": true,
-    "decertifiable": true
+    "can_transfer": true,
+    "can_invalidate": true
   }
 }

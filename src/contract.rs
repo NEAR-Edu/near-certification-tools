@@ -5,15 +5,15 @@ use crate::*;
 mod nft;
 mod mint;
 mod init;
-mod decertify;
+mod invalidate;
 
 #[near_bindgen]
 #[derive(PanicOnDefault, BorshDeserialize, BorshSerialize)]
 pub struct CertificationContract {
     pub(crate) tokens: NonFungibleToken,
     pub(crate) metadata: LazyOption<NFTContractMetadata>,
-    pub(crate) transferable: bool,
-    pub(crate) decertifiable: bool,
+    pub(crate) can_transfer: bool,
+    pub(crate) can_invalidate: bool,
 }
 
 #[near_bindgen]
@@ -26,19 +26,19 @@ impl CertificationContract {
         require!(env::predecessor_account_id() == self.tokens.owner_id, "Unauthorized");
     }
 
-    pub(crate) fn assert_transferable(&self) {
-        require!(self.transferable, "Certifications cannot be transferred");
+    pub(crate) fn assert_can_transfer(&self) {
+        require!(self.can_transfer, "Certifications cannot be transferred");
     }
 
-    pub(crate) fn assert_decertifiable(&self) {
-        require!(self.decertifiable, "Certifications cannot be decertified");
+    pub(crate) fn assert_can_invalidate(&self) {
+        require!(self.can_invalidate, "Certifications cannot be invalidated");
     }
 
     pub fn cert_allows_nft_transfer(&self) -> bool {
-        self.transferable
+        self.can_transfer
     }
 
-    pub fn cert_allows_decertification(&self) -> bool {
-        self.decertifiable
+    pub fn cert_allows_invalidation(&self) -> bool {
+        self.can_invalidate
     }
 }

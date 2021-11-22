@@ -49,7 +49,7 @@ pub struct CertificationExtraMetadata {
     pub original_recipient_name: Option<String>,
 
     /// Certification is valid. Freshly issued certifications have
-    /// `valid == true`; decertification sets this value to `false`.
+    /// `valid == true`; invalidation sets this value to `false`.
     pub valid: bool,
 
     /// Optional additional data
