@@ -1,0 +1,15 @@
+{
+  "name": "near-certification-view-contract",
+  "version": "0.0.1",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "build:debug": "asc --config asconfig.json --target debug",
+    "build:release": "asc --config asconfig.json --target release",
+    "dev-deploy": "near dev-deploy --wasmFile ./build/debug/contract.wasm",
+    "deploy": "near deploy --wasmFile ./build/release/contract.wasm",
+    "test": "asp --nologo"
+  },
+  "dependencies": {
+    "near-sdk-as": "3.1.0"
+  }
+}

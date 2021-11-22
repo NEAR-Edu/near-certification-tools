@@ -1,0 +1,10 @@
+{
+  "extends": "assemblyscript/std/assembly.json",
+  "compilerOptions": {
+    "strict": true,
+    "strictBindCallApply": false
+  },
+  "include": [
+    "./**/*.ts"
+  ]
+}
