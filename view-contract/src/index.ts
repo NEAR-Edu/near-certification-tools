@@ -1,34 +1,71 @@
-/*
- * This is an example of an AssemblyScript smart contract with two simple,
- * symmetric functions:
- *
- * 1. setGreeting: accepts a greeting, such as "howdy", and records it for the
- *    user (account_id) who sent the request
- * 2. getGreeting: accepts an account_id and returns the greeting saved for it,
- *    defaulting to "Hello"
- *
- * Learn more about writing NEAR smart contracts with AssemblyScript:
- * https://docs.near.org/docs/develop/contracts/as/intro
- *
- */
+import { Context, logging, storage } from 'near-sdk-as';
+import { ContractPromise, PersistentMap } from 'near-sdk-core';
+import { CertificationMetadata, Token } from './metadata';
+import { NftTokenArgs } from './NftTokenArgs';
+import * as StorageKey from './StorageKey';
+import { assertOwner } from './utils';
+import { JSON } from 'assemblyscript-json';
 
-import { Context, logging, storage } from 'near-sdk-as'
+const formatTemplateMap = new PersistentMap<string, string>(
+  StorageKey.FORMAT_TEMPLATE_MAP,
+);
 
-const DEFAULT_MESSAGE = 'Hello'
+export function init(ownerId: string, contractAddress: string): void {
+  // Assert not initialized
+  assert(
+    storage.get<string>(StorageKey.INITIALIZATION) == null,
+    'Already initialized',
+  );
 
-// Exported functions will be part of the public interface for your smart contract.
-// Feel free to extract behavior to non-exported functions!
-export function getGreeting(accountId: string): string | null {
-  // This uses raw `storage.get`, a low-level way to interact with on-chain
-  // storage for simple contracts.
-  // If you have something more complex, check out persistent collections:
-  // https://docs.near.org/docs/concepts/data-storage#assemblyscript-collection-types
-  return storage.get<string>(accountId, DEFAULT_MESSAGE)
+  storage.set<string>(StorageKey.INITIALIZATION, 'initialized');
+
+  storage.set<string>(StorageKey.OWNER_ID, ownerId);
+  storage.set<string>(StorageKey.CONTRACT_ADDRESS, contractAddress);
 }
 
-export function setGreeting(message: string): void {
-  const accountId = Context.sender
-  // Use logging.log to record logs permanently to the blockchain!
-  logging.log(`Saving greeting "${message}" for account "${accountId}"`)
-  storage.set(accountId, message)
+export function setContractAddress(contractAddress: string): void {
+  assertOwner();
+  oneYocto();
+
+  storage.set<string>(StorageKey.CONTRACT_ADDRESS, contractAddress);
+}
+
+export function setFormatTemplate(format: string, template: string): void {
+  assertOwner();
+  oneYocto();
+
+  formatTemplateMap.set(format, template);
+}
+
+@nearBindgen
+class _viewThenCallbackArgs {
+  constructor(public format: string) {}
+}
+
+export function view(tokenId: string, format: string): void {
+  ContractPromise.create(
+    storage.get<string>(StorageKey.CONTRACT_ADDRESS)!,
+    'nft_token',
+    new NftTokenArgs(tokenId),
+    20000000000000,
+  ).then(
+    Context.contractName,
+    '_viewThen',
+    new _viewThenCallbackArgs(format),
+    20000000000000,
+  ).returnAsResult();
+}
+
+export function _viewThen(format: string): string {
+  const results = ContractPromise.getResults();
+  assert(results.length == 1, 'Callback only');
+
+  const result = results[0];
+
+  assert(result.succeeded, 'Promise failed');
+
+  const token = decode<Token>(result.buffer);
+  logging.log(token);
+  const certification = JSON.parse(token.metadata.extra) as JSON.Obj;
+  return certification.getString('authority_id')!.valueOf();
 }

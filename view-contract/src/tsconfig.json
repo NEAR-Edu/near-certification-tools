@@ -2,7 +2,8 @@
   "extends": "assemblyscript/std/assembly.json",
   "compilerOptions": {
     "strict": true,
-    "strictBindCallApply": false
+    "strictBindCallApply": false,
+    "strictNullChecks": false
   },
   "include": [
     "./**/*.ts"
