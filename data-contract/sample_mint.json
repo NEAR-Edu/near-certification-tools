@@ -1,0 +1,31 @@
+{
+  "token_id": "1",
+  "receiver_account_id": "hatchet.testnet",
+  "token_metadata": {
+    "title": "Certified White Hat Hacker",
+    "description": "This certifies that the recipient has fulfilled Organization, Inc.'s requirements as a white hat hacker.",
+    "media": null,
+    "media_hash": null,
+    "copies": 1,
+    "issued_at": null,
+    "expires_at": null,
+    "starts_at": null,
+    "updated_at": null,
+    "extra": null,
+    "reference": null,
+    "reference_hash": null
+  },
+  "certification_metadata": {
+    "authority_id": "john_instructor.near",
+    "authority_name": "John Instructor",
+    "program": "TR101",
+    "program_name": "White hat hacking with transferable certification",
+    "program_start_date": null,
+    "program_end_date": null,
+    "original_recipient_id": "original_recipient.near",
+    "original_recipient_name": "Original Recipient",
+    "valid": true,
+    "memo": null
+  },
+  "memo": "memo here"
+}
