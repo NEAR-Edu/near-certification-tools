@@ -1,16 +1,15 @@
-import { Context, logging, storage } from 'near-sdk-as';
-import { ContractPromise, PersistentMap } from 'near-sdk-core';
-import { CertificationMetadata, Token } from './metadata';
-import { NftTokenArgs } from './NftTokenArgs';
+import { JSON } from 'assemblyscript-json';
+import 'near-sdk-bindgen';
+import { PersistentMap, storage } from 'near-sdk-core';
+import { Token } from './metadata';
 import * as StorageKey from './StorageKey';
 import { assertOwner } from './utils';
-import { JSON } from 'assemblyscript-json';
 
 const formatTemplateMap = new PersistentMap<string, string>(
   StorageKey.FORMAT_TEMPLATE_MAP,
 );
 
-export function init(ownerId: string, contractAddress: string): void {
+export function init(ownerId: string): void {
   // Assert not initialized
   assert(
     storage.get<string>(StorageKey.INITIALIZATION) == null,
@@ -20,14 +19,6 @@ export function init(ownerId: string, contractAddress: string): void {
   storage.set<string>(StorageKey.INITIALIZATION, 'initialized');
 
   storage.set<string>(StorageKey.OWNER_ID, ownerId);
-  storage.set<string>(StorageKey.CONTRACT_ADDRESS, contractAddress);
-}
-
-export function setContractAddress(contractAddress: string): void {
-  assertOwner();
-  oneYocto();
-
-  storage.set<string>(StorageKey.CONTRACT_ADDRESS, contractAddress);
 }
 
 export function setFormatTemplate(format: string, template: string): void {
@@ -37,35 +28,64 @@ export function setFormatTemplate(format: string, template: string): void {
   formatTemplateMap.set(format, template);
 }
 
-@nearBindgen
-class _viewThenCallbackArgs {
-  constructor(public format: string) {}
+function getTemplate(format: string): string {
+  return formatTemplateMap.getSome(format);
 }
 
-export function view(tokenId: string, format: string): void {
-  ContractPromise.create(
-    storage.get<string>(StorageKey.CONTRACT_ADDRESS)!,
-    'nft_token',
-    new NftTokenArgs(tokenId),
-    20000000000000,
-  ).then(
-    Context.contractName,
-    '_viewThen',
-    new _viewThenCallbackArgs(format),
-    20000000000000,
-  ).returnAsResult();
+function jsonValString(obj: JSON.Obj, key: string): string {
+  const x = obj.getValue(key);
+  if (x == null) {
+    return '';
+  } else {
+    return x.toString();
+  }
 }
 
-export function _viewThen(format: string): string {
-  const results = ContractPromise.getResults();
-  assert(results.length == 1, 'Callback only');
+function renderTemplate(token: Token, template: string): string {
+  let rendered = template;
 
-  const result = results[0];
+  // NEP-171 token data replacements
+  // Closures not implemented in AS so can't do .forEach
+  // Index signature types are... unfriendly as well, so we're just hardcoding everything
+  // Ugly, I know
+  {
+    rendered = rendered.replaceAll('{token.id}', token.id);
+    rendered = rendered.replaceAll('{token.owner_id}', token.owner_id);
+  }
 
-  assert(result.succeeded, 'Promise failed');
+  // NEP-177 token metadata replacements
+  {
+    rendered = rendered.replaceAll('{token.title}', token.metadata.title);
+    rendered = rendered.replaceAll('{token.description}', token.metadata.description);
+    rendered = rendered.replaceAll('{token.media}', token.metadata.media);
+    rendered = rendered.replaceAll('{token.media_hash}', token.metadata.media_hash);
+    rendered = rendered.replaceAll('{token.copies}', token.metadata.copies.toString());
+    rendered = rendered.replaceAll('{token.issued_at}', token.metadata.issued_at);
+    rendered = rendered.replaceAll('{token.expires_at}', token.metadata.expires_at);
+    rendered = rendered.replaceAll('{token.starts_at}', token.metadata.starts_at);
+    rendered = rendered.replaceAll('{token.updated_at}', token.metadata.updated_at);
+    rendered = rendered.replaceAll('{token.reference}', token.metadata.reference);
+    rendered = rendered.replaceAll('{token.reference_hash}', token.metadata.reference_hash);
+  }
 
-  const token = decode<Token>(result.buffer);
-  logging.log(token);
-  const certification = JSON.parse(token.metadata.extra) as JSON.Obj;
-  return certification.getString('authority_id')!.valueOf();
+  // Certification metadata replacements
+  {
+    const certification = JSON.parse(token.metadata.extra) as JSON.Obj;
+    rendered = rendered.replaceAll('{cert.authority_name}', jsonValString(certification, 'authority_name'));
+    rendered = rendered.replaceAll('{cert.authority_id}', jsonValString(certification, 'authority_id'));
+    rendered = rendered.replaceAll('{cert.program}', jsonValString(certification, 'program'));
+    rendered = rendered.replaceAll('{cert.program_name}', jsonValString(certification, 'program_name'));
+    rendered = rendered.replaceAll('{cert.program_start_date}', jsonValString(certification, 'program_start_date'));
+    rendered = rendered.replaceAll('{cert.program_end_date}', jsonValString(certification, 'program_end_date'));
+    rendered = rendered.replaceAll('{cert.original_recipient_id}', jsonValString(certification, 'original_recipient_id'));
+    rendered = rendered.replaceAll('{cert.original_recipient_name}', jsonValString(certification, 'original_recipient_name'));
+    rendered = rendered.replaceAll('{cert.valid}', jsonValString(certification, 'valid'));
+    rendered = rendered.replaceAll('{cert.memo}', jsonValString(certification, 'memo'));
+  }
+
+  return rendered;
+}
+
+export function view(token: Token, format: string): string {
+  return renderTemplate(token, getTemplate(format));
 }

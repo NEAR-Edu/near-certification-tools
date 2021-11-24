@@ -10,6 +10,6 @@
     "test": "asp --nologo"
   },
   "dependencies": {
-    "near-sdk-as": "3.1.0"
+    "near-sdk-as": "^3.2.3"
   }
 }
