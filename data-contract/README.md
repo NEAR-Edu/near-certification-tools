@@ -1,7 +1,6 @@
-# NEAR Certification Tools
+# NEAR Certification Tools - Data Contract
 
-This project is a collection of smart contracts and a web interface to view and manage NEP171-compatible NFT
-certification tokens.
+This Rust contract provides the foundational data model for certifications, issuing standards-compliant NFTs.
 
 # Build
 
