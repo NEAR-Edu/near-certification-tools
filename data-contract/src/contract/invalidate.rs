@@ -1,6 +1,8 @@
 use crate::*;
+use crate::contract::*;
 use crate::event::*;
 
+#[near_bindgen]
 impl CertificationContract {
     pub fn cert_is_valid(&self, token_id: TokenId) -> bool {
         serde_json::from_str::<CertificationExtraMetadata>(
