@@ -10,6 +10,8 @@
     "test": "asp --nologo"
   },
   "dependencies": {
-    "near-sdk-as": "^3.2.3"
+    "assemblyscript-json": "^1.1.0",
+    "near-sdk-as": "^3.2.3",
+    "near-sdk-core": "^3.2.1"
   }
 }
