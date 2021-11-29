@@ -4,6 +4,12 @@ This AssemblyScript contract provides a public interface for generating custom r
 
 # Build
 
+Install dependencies:
+
+```txt
+$ npm install
+```
+
 ## Debug
 
 ```txt
