@@ -18,6 +18,7 @@ impl CertificationContract {
             .valid
     }
 
+    #[payable]
     pub fn cert_invalidate(&mut self, token_id: TokenId, memo: Option<String>) {
         self.assert_can_invalidate();
         // Force owner only
