@@ -2,6 +2,12 @@
 
 This Rust contract provides the foundational data model for certifications, issuing standards-compliant NFTs.
 
+# Design Rationale
+
+A notable difference between the implementation of this contract and many other NFT projects is that all of the metadata
+is stored on-chain. This is for the purpose of reducing overhead to client implementation, and also because storage on
+NEAR is so darn cheap.
+
 # Build
 
 ```text

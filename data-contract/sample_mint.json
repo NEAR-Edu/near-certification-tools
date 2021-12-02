@@ -20,6 +20,7 @@
     "authority_name": "John Instructor",
     "program": "TR101",
     "program_name": "White hat hacking with transferable certification",
+    "program_link": "https://near.university",
     "program_start_date": null,
     "program_end_date": null,
     "original_recipient_id": "original_recipient.near",

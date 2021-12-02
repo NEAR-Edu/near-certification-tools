@@ -28,6 +28,13 @@ pub struct CertificationExtraMetadata {
     /// For example: "Computer Science Fundamentals"
     pub program_name: Option<String>,
 
+    /// Optionally off-chain external reference to the certification-granting
+    /// program.
+    ///
+    /// For example: "https://example.com/courses/cs101.html",
+    ///     "ipfs://QmawceGscqN4o8Y8Fv26UUmB454kn2bnkXV5tEQYc4jBd6"
+    pub program_link: Option<String>,
+
     /// Program start date timestamp, i.e. number of non-leap-nanoseconds since
     /// January 1, 1970 0:00:00 UTC.
     ///
@@ -72,6 +79,7 @@ mod tests {
             authority_name: Some("Test Authority".to_string()),
             program: Some("PRG101".to_string()),
             program_name: Some("Program Name".to_string()),
+            program_link: Some("https://near.university".into()),
             program_start_date: None,
             program_end_date: None,
             original_recipient_id: Some("original_recipient.near".parse().unwrap()),
