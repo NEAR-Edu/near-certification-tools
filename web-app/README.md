@@ -14,13 +14,13 @@ There is also an API endpoint ([/api/mint-cert](/web-app/pages/api/mint-cert.ts)
 
 Airtable and Integromat are connected via a polling function in Integromat. Once every day or so, Integromat can poll Airtable to retrieve all certified developers, only grabbing the most recently added ones (since the last poll). In the Integromat flow, we have all the data from the submissions table that we need to issue a cert (including name, mainnet address, course, etc).
 
-The Integromat flow then calls the HTTP "app" (Integromat calls each flow step an "app") and uses it to call out to this API endpoint, passing a payload of NCD data that mints a new NFT.
+The Integromat flow then calls the [HTTP "app"](https://www.integromat.com/en/help/app/http) (Integromat calls each flow step an "app") and uses it to call out to this API endpoint, passing a payload of NCD data that mints a new NFT.
 
 The next step in the Integromat flow is to email the recipient of the NCD with a link directly to their wallet where they can see the NFT (and also a link to this frontend).
 
 ### Viewing the dynamically-generated png image
 
-See [/web-app/pages/api/cert/[imageFileName].ts](/web-app/pages/api/cert/[imageFileName].ts)
+Visitors can view the image at /api/cert/abcd.svg or /api/cert/abcd.png. See [/web-app/pages/api/cert/[imageFileName].ts](/web-app/pages/api/cert/[imageFileName].ts)
 
 ## Getting Started
 
