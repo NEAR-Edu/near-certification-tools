@@ -19,10 +19,11 @@ const dot = '.';
 function parseFileName(imageFileNameString: string) {
   const extension = imageFileNameString.split(dot).pop(); // https://stackoverflow.com/a/1203361/470749
   const contentType = extension === svg ? 'image/svg+xml' : 'image/png';
-  const canvasType = extension === svg ? 'svg' : undefined;
+  const bufferType: 'image/png' | undefined = extension === svg ? undefined : 'image/png';
+  const canvasType: 'pdf' | 'svg' | undefined = extension === svg ? 'svg' : undefined;
   const lastIndex = imageFileNameString.lastIndexOf(`${dot}${extension}`); // https://stackoverflow.com/a/9323226/470749
   const hash = imageFileNameString.substring(0, lastIndex);
-  return { extension, contentType, canvasType, hash };
+  return { extension, bufferType, contentType, canvasType, hash };
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Buffer>) {
@@ -30,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const { imageFileName } = req.query;
 
   const imageFileNameString = typeof imageFileName === 'string' ? imageFileName : imageFileName[0];
-  const { extension, contentType, canvasType, hash } = parseFileName(imageFileNameString);
+  const { bufferType, contentType, canvasType, hash } = parseFileName(imageFileNameString);
 
   // TODO: Using this hash, fetch other text (mainnet address, date, program name, and competencies from NFT metadata) that will be added to the certificate image.
 
@@ -57,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     context.fillText(hash, width / 2, height / 2);
 
     // Convert the Canvas to a buffer
-    const buffer = extension === svg ? canvas.toBuffer() : canvas.toBuffer(contentType);
+    const buffer = bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();
 
     // Set and send the response as a PNG
     res.setHeader('Content-Type', contentType);
