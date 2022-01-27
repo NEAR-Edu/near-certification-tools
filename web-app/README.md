@@ -38,4 +38,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## TODO
 
-Add Google Analytics
+1. fix mint-cert.ts
+1. update background.svg
+1. update generateImage with design
+1. create the index page to list out the logged-in visitor's certificates
+1. Add Google Analytics

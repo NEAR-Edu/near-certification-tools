@@ -14,28 +14,24 @@ const certificateBackgroundImage = './public/background.svg';
 const fontFamily = 'signpainter';
 const svg = 'svg';
 const dot = '.';
+const imagePng = 'image/png';
 
 // TODO registerFont(fontFile, { family: fontFamily });
 
+type CanvasTypeDef = 'pdf' | 'svg' | undefined;
+type BufferTypeDef = 'image/png' | undefined;
+
 function parseFileName(imageFileNameString: string) {
   const extension = imageFileNameString.split(dot).pop(); // https://stackoverflow.com/a/1203361/470749
-  const contentType = extension === svg ? 'image/svg+xml' : 'image/png';
-  const bufferType: 'image/png' | undefined = extension === svg ? undefined : 'image/png';
-  const canvasType: 'pdf' | 'svg' | undefined = extension === svg ? 'svg' : undefined;
+  const contentType = extension === svg ? 'image/svg+xml' : imagePng;
+  const bufferType: BufferTypeDef = extension === svg ? undefined : imagePng;
+  const canvasType: CanvasTypeDef = extension === svg ? svg : undefined;
   const lastIndex = imageFileNameString.lastIndexOf(`${dot}${extension}`); // https://stackoverflow.com/a/9323226/470749
   const hash = imageFileNameString.substring(0, lastIndex);
   return { extension, bufferType, contentType, canvasType, hash };
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Buffer>) {
-  // Grab payload from query.
-  const { imageFileName } = req.query;
-
-  const imageFileNameString = getSimpleStringFromParam(imageFileName);
-  const { bufferType, contentType, canvasType, hash } = parseFileName(imageFileNameString);
-
-  // TODO: Using this hash, fetch other text (mainnet address, date, program name, and competencies from NFT metadata) that will be added to the certificate image.
-
+async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDef, hash: string) {
   // TODO: Change the design and content of this image.
 
   // Define the canvas
@@ -51,19 +47,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   context.font = `40px '${fontFamily}' bold`;
 
   // Load and draw the background image first
-  await loadImage(certificateBackgroundImage).then((image) => {
-    // Draw the background
-    context.drawImage(image, 0, 0, width, height);
+  const image = await loadImage(certificateBackgroundImage);
 
-    // Draw the text
-    context.fillText(hash, width / 2, height / 2);
+  // Draw the background
+  context.drawImage(image, 0, 0, width, height);
 
-    // Convert the Canvas to a buffer
-    const buffer = bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();
+  // Draw the text
+  context.fillText(hash, width / 2, height / 2);
 
-    // Set and send the response as a PNG
-    res.setHeader('Content-Type', contentType);
-    // TODO: cache
-    res.send(buffer);
-  });
+  // Convert the Canvas to a buffer
+  const buffer = bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();
+  return buffer;
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse<Buffer>) {
+  // Grab payload from query.
+  const { imageFileName } = req.query;
+
+  const imageFileNameString = getSimpleStringFromParam(imageFileName);
+  const { bufferType, contentType, canvasType, hash } = parseFileName(imageFileNameString);
+
+  // TODO: Using this hash, fetch other text (mainnet address, date, program name, and competencies from NFT metadata) that will be added to the certificate image, and
+  // provide each piece of text to generateImage.
+  const imageBuffer = await generateImage(canvasType, bufferType, hash);
+  res.setHeader('Content-Type', contentType);
+  // TODO: cache
+  res.send(imageBuffer);
 }
