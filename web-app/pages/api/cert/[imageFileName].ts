@@ -6,6 +6,7 @@ import {
   createCanvas,
   loadImage,
 } from 'canvas';
+import { getSimpleStringFromParam } from '../../../helpers/strings';
 
 // TODO: Update this section:
 const certificateBackgroundImage = './public/background.svg';
@@ -30,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   // Grab payload from query.
   const { imageFileName } = req.query;
 
-  const imageFileNameString = typeof imageFileName === 'string' ? imageFileName : imageFileName[0];
+  const imageFileNameString = getSimpleStringFromParam(imageFileName);
   const { bufferType, contentType, canvasType, hash } = parseFileName(imageFileNameString);
 
   // TODO: Using this hash, fetch other text (mainnet address, date, program name, and competencies from NFT metadata) that will be added to the certificate image.

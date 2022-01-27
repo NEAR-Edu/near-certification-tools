@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "canvas": "^2.9.0",
+    "near-api-js": "^0.44.2",
     "next": "11.1.2",
     "react": "17.0.2",
     "react-dom": "17.0.2"
