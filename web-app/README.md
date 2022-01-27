@@ -33,4 +33,9 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## See also
 
+- Keep in mind that through commit 2022-01-26 18:25:22 -0500 b44d3a9 there was a folder called "view-contract", where the original idea was to have the dynamic SVG/PNG image generation happen on the NEAR blockchain rather than on a centralized server. But we abandoned that approach due to high gas costs of cross-contract calls.
 - This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+## TODO
+
+Add Google Analytics

@@ -8,10 +8,19 @@ A notable difference between the implementation of this contract and many other 
 is stored on-chain. This is for the purpose of reducing overhead to client implementation, and also because storage on
 NEAR is so darn cheap.
 
+# Install Rust and Cargo
+https://doc.rust-lang.org/cargo/getting-started/installation.html#install-rust-and-cargo
+```bash
+curl https://sh.rustup.rs -sSf | sh
+```
+You might want to close and reopen your IDE (e.g. VSC) and install any Rust-related extensions too.
+
 # Build
 
-```text
+```bash
 $ ./build.sh
+# If you get the error discussed at https://stackoverflow.com/a/70883283/470749, try first running:
+rustup target add wasm32-unknown-unknown
 ```
 
 # Deploy
@@ -20,7 +29,7 @@ Modify `init_args.json` file to fit your needs, particularly `owner_id`.
 
 ## Testnet
 
-```text
+```bash
 $ ./dev_deploy.sh
 ```
 
@@ -28,13 +37,13 @@ Any arguments are forwarded to `near dev-deploy` command.
 
 For example, to deploy to a new dev address (ignoring a previously generated address in `neardev/`):
 
-```text
+```bash
 $ ./dev_deploy.sh --force
 ```
 
 ## Mainnet
 
-```text
+```bash
 $ ./deploy.sh ACCOUNT_ID
 ```
 
