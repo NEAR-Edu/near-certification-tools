@@ -29,7 +29,7 @@ yarn
 yarn dev
 ```
 
-The app is at [http://localhost:3000/api/cert/abcdefg.svg](http://localhost:3000/api/cert/abcdefg.svg) and [http://localhost:3000/api/mint-cert](http://localhost:3000/api/mint-cert).
+The app is at [http://localhost:3000/api/cert/017717dc-1e06-48d0-af2f-eb03b3dc5f9c.svg](http://localhost:3000/api/cert/017717dc-1e06-48d0-af2f-eb03b3dc5f9c.svg) and [http://localhost:3000/api/mint-cert](http://localhost:3000/api/mint-cert).
 
 ## See also
 

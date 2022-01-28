@@ -23,14 +23,14 @@ const apiKeyHeaderName = 'X-Api-key';
 type CertificateRequiredFields = {
   title: string;
   description: string;
-  authority_id: string;
+  authority_id: AccountId;
   authority_name: string;
   program: string;
   program_name: string;
   program_link: string;
   program_start_date: string;
   program_end_date: string;
-  original_recipient_id: string;
+  original_recipient_id: AccountId;
   original_recipient_name: string;
   memo: string;
 };
@@ -91,12 +91,12 @@ function buildMetadata(certificateRequiredFields: CertificateRequiredFields) {
   return { tokenMetadata, certificationMetadata };
 }
 
-async function mintCertificate(receiverAccountId: AccountId, tokenId: string, certificateRequiredFields: CertificateRequiredFields) {
+async function mintCertificate(tokenId: string, certificateRequiredFields: CertificateRequiredFields) {
   const account = await getNearAccount(issuingAuthorityAccountId, privateKey);
   const contract = getNftContract(account);
   const { tokenMetadata, certificationMetadata } = buildMetadata(certificateRequiredFields);
   const payload = {
-    receiver_account_id: receiverAccountId,
+    receiver_account_id: certificateRequiredFields.original_recipient_id,
     token_id: tokenId,
     token_metadata: tokenMetadata,
     certification_metadata: certificationMetadata,
@@ -119,12 +119,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   // Require that this request is authenticated!
   const { headers } = req; // https://stackoverflow.com/a/63529345/470749
   if (headers?.[apiKeyHeaderName] === apiKey) {
-    const { receiverAccountId, details } = req.query;
-    const receiverAccountIdString = getSimpleStringFromParam(receiverAccountId);
+    const { details } = req.query;
     const detailsJson = getSimpleStringFromParam(details);
     const certificateRequiredFields = JSON.parse(detailsJson); // Eventually we will want to add error-handling / validation.
     const tokenId = generateUUIDForTokenId();
-    mintCertificate(receiverAccountIdString, tokenId, certificateRequiredFields)
+    mintCertificate(tokenId, certificateRequiredFields)
       .then((result) => {
         const url = getSvgUrl(req.headers.host || '', tokenId);
         res.status(HTTP_SUCCESS).json({ result, tokenId, url });
