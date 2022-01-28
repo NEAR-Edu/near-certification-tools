@@ -32,6 +32,7 @@ type CertificateRequiredFields = {
   program_end_date: string;
   original_recipient_id: string;
   original_recipient_name: string;
+  memo: string;
 };
 
 type NFT = Contract & {
@@ -70,6 +71,7 @@ function buildMetadata(certificateRequiredFields: CertificateRequiredFields) {
     program_end_date,
     original_recipient_id,
     original_recipient_name,
+    memo,
   }) => ({
     authority_id,
     authority_name,
@@ -81,7 +83,7 @@ function buildMetadata(certificateRequiredFields: CertificateRequiredFields) {
     original_recipient_id,
     original_recipient_name,
     valid: true,
-    memo: null,
+    memo, // This will list out the competencies that have been certified.
   }))(certificateRequiredFields);
   /* eslint-enable camelcase */
 

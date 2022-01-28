@@ -28,8 +28,8 @@ function parseFileName(imageFileNameString: string) {
   const bufferType: BufferTypeDef = extension === svg ? undefined : imagePng;
   const canvasType: CanvasTypeDef = extension === svg ? svg : undefined;
   const lastIndex = imageFileNameString.lastIndexOf(`${dot}${extension}`); // https://stackoverflow.com/a/9323226/470749
-  const hash = imageFileNameString.substring(0, lastIndex);
-  return { extension, bufferType, contentType, canvasType, hash };
+  const tokenId = imageFileNameString.substring(0, lastIndex);
+  return { extension, bufferType, contentType, canvasType, tokenId };
 }
 
 function getBaseContext(canvas: Canvas) {
@@ -55,7 +55,7 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   const height = 653; // height of the image
   const canvas = createCanvas(width, height, canvasType);
 
-  const { hash, date, programName, accountName, competencies } = details;
+  const { tokenId, date, programName, accountName, competencies } = details;
 
   const fillStyle = `#${Math.floor(Math.random() * 16777215).toString(16)}`; // https://css-tricks.com/snippets/javascript/random-hex-color/
   const font = `40px '${fontFamily}' bold`;
@@ -68,7 +68,7 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   context.drawImage(image, 0, 0, width, height);
 
   // Draw the text
-  addText(canvas, hash, font, fillStyle, width * 0.5, height * 0.9);
+  addText(canvas, tokenId, font, fillStyle, width * 0.5, height * 0.9);
   addText(canvas, date, font, fillStyle, width * 0.2, height * 0.8);
   addText(canvas, programName, font, fillStyle, width * 0.05, height * 0.4);
   addText(canvas, accountName, font, fillStyle, width * 0.5, height * 0.3);
@@ -79,15 +79,15 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   return buffer;
 }
 
-async function fetchCertificateDetails(hash: string) {
-  // TODO: Using this hash, fetch other text (mainnet address, date, program name, and competencies from NFT metadata) that will be added to the certificate image, and
+async function fetchCertificateDetails(tokenId: string) {
+  // TODO: Using this tokenId, fetch other text (mainnet address, date, program name, and competencies from NFT metadata) that will be added to the certificate image, and
   return {
-    hash,
+    tokenId,
     date: '2022-01-13',
     programName: 'NEAR Certified Developer',
     accountName: 'ryancwalsh.near',
     competencies:
-      'has successfully completed the NEAR Certified Developer program and demonstrated proficiency in reading and writing smart contracts to build the Open Web with NEAR',
+      'has successfully completed the NEAR Certified Developer program and demonstrated proficiency in reading and writing smart contracts to build the Open Web with NEAR', // comes from 'memo' field within certification_metadata
   };
 }
 
@@ -96,8 +96,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const { imageFileName } = req.query;
 
   const imageFileNameString = getSimpleStringFromParam(imageFileName);
-  const { bufferType, contentType, canvasType, hash } = parseFileName(imageFileNameString);
-  const details = await fetchCertificateDetails(hash);
+  const { bufferType, contentType, canvasType, tokenId } = parseFileName(imageFileNameString);
+  const details = await fetchCertificateDetails(tokenId);
 
   // provide each piece of text to generateImage.
   const imageBuffer = await generateImage(canvasType, bufferType, details);

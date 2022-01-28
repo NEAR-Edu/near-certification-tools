@@ -38,9 +38,9 @@ The app is at [http://localhost:3000/api/cert/abcdefg.svg](http://localhost:3000
 
 ## TODO
 
-1. fix mint-cert.ts
-1. update background.svg
 1. fix fetchCertificateDetails
+1. figure out correct env var values
+1. update background.svg
 1. update generateImage with design
 1. create the index page to list out the logged-in visitor's certificates
 1. Add Google Analytics
