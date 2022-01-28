@@ -2394,6 +2394,11 @@ near-api-js@^0.44.2:
     text-encoding-utf-8 "^1.0.2"
     tweetnacl "^1.0.1"
 
+next-ssl-redirect-middleware@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/next-ssl-redirect-middleware/-/next-ssl-redirect-middleware-0.1.3.tgz#ca81869448dcfe6a5476f01e23558d2f572a12c8"
+  integrity sha512-1U/OjXKMv6Rj0Ie+0e86DLFGAg0dtVS+OhZY/ReqE+6LLlF63p3xpyTUn37iaV+qTNvdqwAcmPz2kQ22u1gRPA==
+
 next@11.1.2:
   version "11.1.2"
   resolved "https://registry.yarnpkg.com/next/-/next-11.1.2.tgz#527475787a9a362f1bc916962b0c0655cc05bc91"
