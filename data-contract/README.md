@@ -93,3 +93,6 @@ Owner-only; non-standard but well-known NFT minting function.
 
 Additional metadata is stored in the `extra` field of the standard-compliant NFT metadata.
 See [`src/metadata.rs`](src/metadata.rs).
+The 'memo' fields (see [data-contract/sample_mint.json](data-contract/sample_mint.json)) can be empty or null because their values currently do not get used.
+
+In token_metadata, 'title', 'description', and 'issued_at' are the only fields we will use.
