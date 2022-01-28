@@ -89,10 +89,9 @@ function buildMetadata(certificateRequiredFields: CertificateRequiredFields) {
   return { tokenMetadata, certificationMetadata };
 }
 
-async function mintCertificate(receiverAccountId: AccountId, certificateRequiredFields: CertificateRequiredFields) {
+async function mintCertificate(receiverAccountId: AccountId, tokenId: string, certificateRequiredFields: CertificateRequiredFields) {
   const account = await getNearAccount(issuingAuthorityAccountId, privateKey);
   const contract = getNftContract(account);
-  const tokenId = generateUUIDForTokenId();
   const { tokenMetadata, certificationMetadata } = buildMetadata(certificateRequiredFields);
   const payload = {
     receiver_account_id: receiverAccountId,
@@ -110,6 +109,10 @@ async function mintCertificate(receiverAccountId: AccountId, certificateRequired
   return result;
 }
 
+function getSvgUrl(baseUrl: string, tokenId: string) {
+  return `${baseUrl}/api/cert/${tokenId}.svg`;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   // Require that this request is authenticated!
   const { headers } = req; // https://stackoverflow.com/a/63529345/470749
@@ -118,9 +121,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const receiverAccountIdString = getSimpleStringFromParam(receiverAccountId);
     const detailsJson = getSimpleStringFromParam(details);
     const certificateRequiredFields = JSON.parse(detailsJson); // Eventually we will want to add error-handling / validation.
-    mintCertificate(receiverAccountIdString, certificateRequiredFields)
+    const tokenId = generateUUIDForTokenId();
+    mintCertificate(receiverAccountIdString, tokenId, certificateRequiredFields)
       .then((result) => {
-        res.status(HTTP_SUCCESS).json({ result });
+        const url = getSvgUrl(req.headers.host || '', tokenId);
+        res.status(HTTP_SUCCESS).json({ result, tokenId, url });
       })
       .catch(() => {
         res.status(HTTP_ERROR).json({ status: 'error', message: 'Issuing the certificate failed.' });
