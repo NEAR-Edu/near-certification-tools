@@ -5,6 +5,7 @@ import { AccountId, getNearAccount } from '../../helpers/near';
 import { getSimpleStringFromParam } from '../../helpers/strings';
 
 const privateKey = process.env.NEAR_PRIVATE_KEY || '';
+const apiKey = process.env.API_KEY || '';
 // public vars:
 const certificateContractName = process.env.NEXT_PUBLIC_CERTIFICATE_CONTRACT_NAME || 'example-contract.testnet';
 const issuingAuthorityAccountId = process.env.NEXT_PUBLIC_ISSUING_AUTHORITY_ACCOUNT_ID || 'example-authority.testnet';
@@ -14,7 +15,9 @@ console.log('public env vars', { certificateContractName, issuingAuthorityAccoun
 
 const HTTP_SUCCESS = 200;
 const HTTP_ERROR = 500;
+const HTTP_UNAUTHORIZED = 401; // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
 const depositAmount = 0;
+const apiKeyHeaderName = 'X-Api-key';
 
 type NFT = Contract & {
   // https://stackoverflow.com/a/41385149/470749
@@ -57,14 +60,19 @@ async function mintCertificate(receiverAccountId: AccountId, certificationMetada
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
-  // TODO: Require that this request is authenticated!
-  const { receiverAccountId, certificationMetadata } = req.query;
-  const receiverAccountIdString = getSimpleStringFromParam(receiverAccountId);
-  mintCertificate(receiverAccountIdString, certificationMetadata)
-    .then((result) => {
-      res.status(HTTP_SUCCESS).json({ result });
-    })
-    .catch(() => {
-      res.status(HTTP_ERROR).json({ status: 'error', message: 'Issuing the certificate failed.' });
-    });
+  // Require that this request is authenticated!
+  const { headers } = req; // https://stackoverflow.com/a/63529345/470749
+  if (headers?.[apiKeyHeaderName] === apiKey) {
+    const { receiverAccountId, certificationMetadata } = req.query;
+    const receiverAccountIdString = getSimpleStringFromParam(receiverAccountId);
+    mintCertificate(receiverAccountIdString, certificationMetadata)
+      .then((result) => {
+        res.status(HTTP_SUCCESS).json({ result });
+      })
+      .catch(() => {
+        res.status(HTTP_ERROR).json({ status: 'error', message: 'Issuing the certificate failed.' });
+      });
+  } else {
+    res.status(HTTP_UNAUTHORIZED).json({ status: 'error', message: 'Unauthorized. Please provide the API key.' });
+  }
 }
