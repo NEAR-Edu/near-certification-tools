@@ -9,7 +9,7 @@ import {
 import { getSimpleStringFromParam } from '../../../helpers/strings';
 
 // TODO: Update this section:
-const certificateBackgroundImage = './public/background.svg';
+const certificateBackgroundImage = './public/background.png';
 // const fontFile = './fonts/Sign-Painter-Regular.ttf';
 const fontFamily = 'signpainter';
 const svg = 'svg';
@@ -31,17 +31,19 @@ function parseFileName(imageFileNameString: string) {
   return { extension, bufferType, contentType, canvasType, hash };
 }
 
-async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDef, hash: string) {
+async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDef, details: any) {
   // TODO: Change the design and content of this image.
 
   // Define the canvas
-  const width = 200; // width of the image
-  const height = 100; // height of the image
+  const width = 1160; // width of the image
+  const height = 653; // height of the image
   const canvas = createCanvas(width, height, canvasType);
   const context = canvas.getContext('2d');
 
+  const { hash, date, programName, accountName, competencies } = details;
+
   // Define the font style
-  context.textAlign = 'center';
+  context.textAlign = 'left';
   context.textBaseline = 'top';
   context.fillStyle = `#${Math.floor(Math.random() * 16777215).toString(16)}`; // https://css-tricks.com/snippets/javascript/random-hex-color/
   context.font = `40px '${fontFamily}' bold`;
@@ -53,11 +55,27 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   context.drawImage(image, 0, 0, width, height);
 
   // Draw the text
-  context.fillText(hash, width / 2, height / 2);
+  context.fillText(hash, width * 0.5, height * 0.9);
+  context.fillText(date, width * 0.2, height * 0.8);
+  context.fillText(programName, width * 0.05, height * 0.4);
+  context.fillText(accountName, width * 0.5, height * 0.3);
+  context.fillText(competencies, width * 0.5, height * 0.4);
 
   // Convert the Canvas to a buffer
   const buffer = bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();
   return buffer;
+}
+
+async function fetchCertificateDetails(hash: string) {
+  // TODO: Using this hash, fetch other text (mainnet address, date, program name, and competencies from NFT metadata) that will be added to the certificate image, and
+  return {
+    hash,
+    date: '2022-01-13',
+    programName: 'NEAR Certified Developer',
+    accountName: 'ryancwalsh.near',
+    competencies:
+      'has successfully completed the NEAR Certified Developer program and demonstrated proficiency in reading and writing smart contracts to build the Open Web with NEAR',
+  };
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Buffer>) {
@@ -66,10 +84,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   const imageFileNameString = getSimpleStringFromParam(imageFileName);
   const { bufferType, contentType, canvasType, hash } = parseFileName(imageFileNameString);
+  const details = await fetchCertificateDetails(hash);
 
-  // TODO: Using this hash, fetch other text (mainnet address, date, program name, and competencies from NFT metadata) that will be added to the certificate image, and
   // provide each piece of text to generateImage.
-  const imageBuffer = await generateImage(canvasType, bufferType, hash);
+  const imageBuffer = await generateImage(canvasType, bufferType, details);
   res.setHeader('Content-Type', contentType);
   // TODO: cache
   res.send(imageBuffer);
