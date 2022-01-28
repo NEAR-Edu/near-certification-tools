@@ -2,6 +2,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import {
+  Canvas,
   // registerFont,
   createCanvas,
   loadImage,
@@ -31,6 +32,21 @@ function parseFileName(imageFileNameString: string) {
   return { extension, bufferType, contentType, canvasType, hash };
 }
 
+function getBaseContext(canvas: Canvas) {
+  const context = canvas.getContext('2d');
+  context.textAlign = 'left';
+  context.textBaseline = 'top';
+  return context;
+}
+
+function addText(canvas: Canvas, text: string, font: string, fillStyle: string, leftPos: number, rightPos: number) {
+  const context = getBaseContext(canvas);
+  // Define the font style
+  context.fillStyle = fillStyle;
+  context.font = font;
+  context.fillText(text, leftPos, rightPos);
+}
+
 async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDef, details: any) {
   // TODO: Change the design and content of this image.
 
@@ -38,28 +54,25 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   const width = 1160; // width of the image
   const height = 653; // height of the image
   const canvas = createCanvas(width, height, canvasType);
-  const context = canvas.getContext('2d');
 
   const { hash, date, programName, accountName, competencies } = details;
 
-  // Define the font style
-  context.textAlign = 'left';
-  context.textBaseline = 'top';
-  context.fillStyle = `#${Math.floor(Math.random() * 16777215).toString(16)}`; // https://css-tricks.com/snippets/javascript/random-hex-color/
-  context.font = `40px '${fontFamily}' bold`;
+  const fillStyle = `#${Math.floor(Math.random() * 16777215).toString(16)}`; // https://css-tricks.com/snippets/javascript/random-hex-color/
+  const font = `40px '${fontFamily}' bold`;
 
   // Load and draw the background image first
   const image = await loadImage(certificateBackgroundImage);
 
   // Draw the background
+  const context = getBaseContext(canvas);
   context.drawImage(image, 0, 0, width, height);
 
   // Draw the text
-  context.fillText(hash, width * 0.5, height * 0.9);
-  context.fillText(date, width * 0.2, height * 0.8);
-  context.fillText(programName, width * 0.05, height * 0.4);
-  context.fillText(accountName, width * 0.5, height * 0.3);
-  context.fillText(competencies, width * 0.5, height * 0.4);
+  addText(canvas, hash, font, fillStyle, width * 0.5, height * 0.9);
+  addText(canvas, date, font, fillStyle, width * 0.2, height * 0.8);
+  addText(canvas, programName, font, fillStyle, width * 0.05, height * 0.4);
+  addText(canvas, accountName, font, fillStyle, width * 0.5, height * 0.3);
+  addText(canvas, competencies, font, fillStyle, width * 0.5, height * 0.4);
 
   // Convert the Canvas to a buffer
   const buffer = bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();
