@@ -18,7 +18,7 @@ You might want to close and reopen your IDE (e.g. VSC) and install any Rust-rela
 # Build
 
 ```bash
-$ ./build.sh
+./build.sh
 # If you get the error discussed at https://stackoverflow.com/a/70883283/470749, try first running:
 rustup target add wasm32-unknown-unknown
 ```
@@ -30,7 +30,10 @@ Modify `init_args.json` file to fit your needs, particularly `owner_id`.
 ## Testnet
 
 ```bash
-$ ./dev_deploy.sh
+NEAR_ENV=testnet near login
+./dev_deploy.sh
+# You can now issue a certificate by running something like `NEAR_ENV=testnet near call <the contract ID> nft_mint '<a JSON payload similar to as shown in sample_mint.json>' --account-id <whichever account you logged in as>.testnet --deposit 0.2 --gas 300000000000000`. Example:
+NEAR_ENV=testnet near call dev-1643292007908-55838431863482 nft_mint '{  "token_id": "303216412112497cb6c193152a27c49c",  "receiver_account_id": "hatchet.testnet",  "token_metadata": {    "title": "Certified White Hat Hacker",    "description": "This certifies that the recipient has fulfilled Organization, Inc.s requirements as a white hat hacker.",    "media": null,    "media_hash": null,    "copies": 1,    "issued_at": "2021-11-28 13:00",    "expires_at": null,    "starts_at": null,    "updated_at": null,    "extra": null,    "reference": null,    "reference_hash": null  },  "certification_metadata": {    "authority_id": "john_instructor.near",    "authority_name": "John Instructor",    "program": "TR101",    "program_name": "White hat hacking with transferable certification",    "program_link": "https://near.university",    "program_start_date": null,    "program_end_date": null,    "original_recipient_id": "original_recipient.near",    "original_recipient_name": "Original Recipient",    "valid": true,    "memo": null  },  "memo": null}' --account-id ryancwalsh.testnet --deposit 0.2 --gas 300000000000000
 ```
 
 Any arguments are forwarded to `near dev-deploy` command.
@@ -38,13 +41,13 @@ Any arguments are forwarded to `near dev-deploy` command.
 For example, to deploy to a new dev address (ignoring a previously generated address in `neardev/`):
 
 ```bash
-$ ./dev_deploy.sh --force
+./dev_deploy.sh --force
 ```
 
 ## Mainnet
 
 ```bash
-$ ./deploy.sh ACCOUNT_ID
+./deploy.sh ACCOUNT_ID
 ```
 
 # Interactions

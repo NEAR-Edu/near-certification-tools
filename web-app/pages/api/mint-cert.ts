@@ -17,6 +17,7 @@ console.log('public env vars', { certificateContractName, issuingAuthorityAccoun
 const HTTP_SUCCESS = 200;
 const HTTP_ERROR = 500;
 const HTTP_UNAUTHORIZED = 401; // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+// Could also use https://github.com/near/units-js#parsing-strings for this:
 const depositAmountYoctoNear = utils.format.parseNearAmount('0.2'); // 0.2Ⓝ is max. There will be a certain deposit required to pay for the storage of the data on chain. Contract will automatically refund any excess.
 const apiKeyHeaderName = 'X-Api-key';
 
@@ -53,7 +54,7 @@ function getNftContract(account: Account) {
 }
 
 function generateUUIDForTokenId(): string {
-  return randomUUID(); // https://stackoverflow.com/a/67624847/470749 https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID
+  return randomUUID().replaceAll('-', ''); // https://stackoverflow.com/a/67624847/470749 https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID
 }
 
 function buildMetadata(certificateRequiredFields: CertificateRequiredFields) {
