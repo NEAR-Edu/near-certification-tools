@@ -29,7 +29,7 @@ yarn
 yarn dev
 ```
 
-The app is at [http://localhost:3000/api/cert/017717dc-1e06-48d0-af2f-eb03b3dc5f9c.svg](http://localhost:3000/api/cert/017717dc-1e06-48d0-af2f-eb03b3dc5f9c.svg) and [http://localhost:3000/api/mint-cert](http://localhost:3000/api/mint-cert).
+The app is at [http://localhost:3000/api/cert/303216412112497cb6c193152a27c49c.svg](http://localhost:3000/api/cert/303216412112497cb6c193152a27c49c.svg) and [http://localhost:3000/api/mint-cert](http://localhost:3000/api/mint-cert).
 
 ## See also
 
@@ -44,3 +44,7 @@ The app is at [http://localhost:3000/api/cert/017717dc-1e06-48d0-af2f-eb03b3dc5f
 1. update generateImage with design
 1. create the index page to list out the logged-in visitor's certificates
 1. Add Google Analytics
+1. Get access to Integromat (and Airtable if necessary), and paste our `API_KEY` (the arbitrary one in our `.env` file) into the appropriate place in Integromat's HTTP app.
+1. Ask Sherif to map his desired subdomain to the specific path at render.com/example
+1. Ensure that HTTP is blocked (because HTTPS is enforced via `web-app/pages/_middleware.ts`). (We wouldn't want `web-app/pages/api/mint-cert.ts` exposed via HTTP because our secret `API_KEY` would be leaked, and anyone could issue any certificate.)
+1. Sherif will deploy the production contract.
