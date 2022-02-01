@@ -38,11 +38,13 @@ The app is at [http://localhost:3000/api/cert/303216412112497cb6c193152a27c49c.s
 
 ## TODO
 
-1. fix fetchCertificateDetails
-1. figure out correct env var values
-1. update background.svg
-1. update generateImage with design
 1. create the index page to list out the logged-in visitor's certificates
+   1. also improve the design of web-app/pages/index.tsx and web-app/pages/certificates/[account].tsx
+1. fix fetchCertificateDetails
+   1. Will we show competencies? Expiration?
+1. figure out correct env var values
+1. receive from Dan a background SVG file for each program's certificate + designs for what the final output should look like once text is inserted
+1. update generateImage with designs for each program's certificate
 1. Add Google Analytics
 1. Get access to Integromat (and Airtable if necessary), and paste our `API_KEY` (the arbitrary one in our `.env` file) into the appropriate place in Integromat's HTTP app.
 1. Ask Sherif to map his desired subdomain to the specific path at render.com/example
