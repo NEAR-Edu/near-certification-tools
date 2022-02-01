@@ -11,6 +11,8 @@ import { getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStore } from '../../../helpers/near';
 
+const HTTP_ERROR_CODE_MISSING = 404;
+
 // TODO: Update this section:
 const ncdCertificateBackgroundSvgImage = './public/certificate-backgrounds/NCD_background.svg'; // Background images must be in SVG format
 // const fontFile = './fonts/Sign-Painter-Regular.ttf';
@@ -96,38 +98,45 @@ async function fetchCertificateDetails(tokenId: string) {
   const account = await getNearAccountWithoutAccountIdOrKeyStore();
   const contract = getNftContract(account);
   const response = await (contract as NFT).nft_token({ token_id: tokenId });
-  const { metadata } = response;
-  const { extra } = metadata;
-  const certificateMetadata = JSON.parse(extra);
-  console.log({ contract, response, certificateMetadata });
-  const accountName = certificateMetadata.original_recipient_id;
-  const programCode = certificateMetadata.program;
-  const competencies = certificateMetadata.memo || metadata.description; // TODO: Do we definitely want to show competencies? Where will they be stored?
-  const expiration = getExpiration(accountName);
-  const date = metadata.issued_at; // TODO: Choose how we want to format the date.
-  const programName = metadata.title;
-  return {
-    tokenId,
-    date,
-    programCode, // This will determine which background image gets used.
-    programName,
-    accountName,
-    competencies,
-    expiration,
-  };
+  if (response) {
+    const { metadata } = response;
+    const { extra } = metadata;
+    const certificateMetadata = JSON.parse(extra);
+    console.log({ contract, response, certificateMetadata });
+    const accountName = certificateMetadata.original_recipient_id;
+    const programCode = certificateMetadata.program;
+    const competencies = certificateMetadata.memo || metadata.description; // TODO: Do we definitely want to show competencies? Where will they be stored?
+    const expiration = getExpiration(accountName);
+    const date = metadata.issued_at; // TODO: Choose how we want to format the date.
+    const programName = metadata.title;
+    return {
+      tokenId,
+      date,
+      programCode, // This will determine which background image gets used.
+      programName,
+      accountName,
+      competencies,
+      expiration,
+    };
+  } else {
+    return null;
+  }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Buffer>) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<Buffer | { error: string }>) {
   // Grab payload from query.
   const { imageFileName } = req.query;
 
   const imageFileNameString = getSimpleStringFromParam(imageFileName);
   const { bufferType, contentType, canvasType, tokenId } = parseFileName(imageFileNameString);
   const details = await fetchCertificateDetails(tokenId);
-
-  // Provide each piece of text to generateImage.
-  const imageBuffer = await generateImage(canvasType, bufferType, details);
-  res.setHeader('Content-Type', contentType);
-  // TODO: cache
-  res.send(imageBuffer);
+  if (details) {
+    // Provide each piece of text to generateImage.
+    const imageBuffer = await generateImage(canvasType, bufferType, details);
+    res.setHeader('Content-Type', contentType);
+    // TODO: cache
+    res.send(imageBuffer);
+  } else {
+    res.status(HTTP_ERROR_CODE_MISSING).json({ error: `No certificate exists with this Token ID (${tokenId}).` });
+  }
 }
