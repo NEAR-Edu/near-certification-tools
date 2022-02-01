@@ -52,6 +52,7 @@ function addText(canvas: Canvas, text: string, font: string, fillStyle: string, 
 }
 
 function getBackgroundSvgImageFromProgramCode(programCode: string) {
+  console.log({ programCode });
   return ncdCertificateBackgroundSvgImage; // TODO: Switch which file is returned based on programCode.
 }
 
@@ -90,8 +91,10 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   return buffer;
 }
 
-async function getExpiration(accountName: string): string {
+async function getExpiration(accountName: string): Promise<string> {
   // TODO: Will we show an expiration? Is it always 'most recent mainnet activity' + 6 months?
+  console.log({ accountName });
+  return '';
 }
 
 async function fetchCertificateDetails(tokenId: string) {
@@ -106,7 +109,7 @@ async function fetchCertificateDetails(tokenId: string) {
     const accountName = certificateMetadata.original_recipient_id;
     const programCode = certificateMetadata.program;
     const competencies = certificateMetadata.memo || metadata.description; // TODO: Do we definitely want to show competencies? Where will they be stored?
-    const expiration = getExpiration(accountName);
+    const expiration = await getExpiration(accountName);
     const date = metadata.issued_at; // TODO: Choose how we want to format the date.
     const programName = metadata.title;
     return {

@@ -1,6 +1,6 @@
 # Overview
 
-This project will be accessible at https://cert.near.university (and hosted via https://render.com).
+This project will be accessible at https://cert.near.university (and hosted via https://dashboard.render.com/web/srv-c7sqr03ru51p1aabjuk0/settings).
 
 ## Frontend
 
@@ -35,6 +35,7 @@ The app is at [http://localhost:3000/api/cert/303216412112497cb6c193152a27c49c.s
 
 - Keep in mind that through commit 2022-01-26 18:25:22 -0500 b44d3a9 there was a folder called "view-contract", where the original idea was to have the dynamic SVG/PNG image generation happen on the NEAR blockchain rather than on a centralized server. But we abandoned that approach due to high gas costs of cross-contract calls.
 - This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+- Solving a TypeScript issue that happens when Render tries to build the project: https://community.render.com/t/deploy-a-github-sub-directory/1156/12
 
 ## TODO
 
