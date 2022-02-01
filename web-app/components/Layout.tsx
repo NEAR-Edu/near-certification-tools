@@ -10,6 +10,13 @@ export default function Layout({ children }: { children: JSX.Element | JSX.Eleme
         <title>NEAR University - Certificate Browser</title>
         <meta name="description" content="View NEAR University certificates of any .near account" />
         <link rel="icon" href="/favicon.ico" />
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/brands.min.css"
+          integrity="sha512-rQgMaFKZKIoTKfYInSVMH1dSM68mmPYshaohG8pK17b+guRbSiMl9dDbd3Sd96voXZeGerRIFFr2ewIiusEUgg=="
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+        />
       </Head>
       <div>
         <a href="/">NEAR University Certificate Browser</a>
