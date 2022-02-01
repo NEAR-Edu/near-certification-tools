@@ -36,17 +36,18 @@ type CertificateRequiredFields = {
   memo: string;
 };
 
-type NFT = Contract & {
+export type NFT = Contract & {
   // https://stackoverflow.com/a/41385149/470749
-  nft_mint: (args: any, gas: any, depositAmount: any) => Promise<any>;
+  nft_mint: (args: any, gas: any, depositAmount: any) => Promise<any>; // TODO Add types
+  nft_token: (args: any) => Promise<any>;
 };
 
-function getNftContract(account: Account) {
+export function getNftContract(account: Account) {
   const contract = new Contract(
     account, // the account object that is connecting
     certificateContractName,
     {
-      viewMethods: [], // view methods do not change state but usually return a value
+      viewMethods: ['nft_token'], // view methods do not change state but usually return a value
       changeMethods: ['nft_mint'], // change methods modify state
     },
   );

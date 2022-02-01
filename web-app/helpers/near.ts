@@ -31,3 +31,16 @@ export async function getNearAccount(accountId: string, privateKey: string) {
   const near = await getNearConnection(keyStore);
   return new Account(near.connection, accountId);
 }
+
+export async function getNearAccountWithoutKeyStore(accountId: string) {
+  const keyStore = new InMemoryKeyStore(); // TODO Why would keyStore be required? Clearly it's allowed to be empty.
+  const near = await getNearConnection(keyStore);
+  return new Account(near.connection, accountId);
+}
+
+export async function getNearAccountWithoutAccountIdOrKeyStore() {
+  const keyStore = new InMemoryKeyStore();
+  const near = await getNearConnection(keyStore);
+  const accountId: AccountId = ''; // TODO Why would account_id be required for a simple `near view` call? Clearly it's allowed to be empty.
+  return new Account(near.connection, accountId);
+}

@@ -7,13 +7,12 @@ import {
   createCanvas,
   loadImage,
 } from 'canvas';
-import { InMemoryKeyStore } from 'near-api-js/lib/key_stores';
-import { CodeResult } from 'near-api-js/lib/providers/provider';
 import { getSimpleStringFromParam } from '../../../helpers/strings';
-import { getNearConnection } from '../../../helpers/near';
+import { getNftContract, NFT } from '../mint-cert';
+import { getNearAccountWithoutAccountIdOrKeyStore } from '../../../helpers/near';
 
 // TODO: Update this section:
-const certificateBackgroundImage = './public/background.png';
+const certificateBackgroundSvgImage = './public/background.svg'; // This needs to be an SVG
 // const fontFile = './fonts/Sign-Painter-Regular.ttf';
 const fontFamily = 'signpainter';
 const svg = 'svg';
@@ -64,7 +63,7 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   const font = `40px '${fontFamily}' bold`;
 
   // Load and draw the background image first
-  const image = await loadImage(certificateBackgroundImage);
+  const image = await loadImage(certificateBackgroundSvgImage);
 
   // Draw the background
   const context = getBaseContext(canvas);
@@ -83,29 +82,20 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
 }
 
 async function fetchCertificateDetails(tokenId: string) {
-  const keyStore = new InMemoryKeyStore();
-  const near = await getNearConnection(keyStore);
-  const response: CodeResult = await near.connection.provider.query({
-    request_type: 'call_function',
-    finality: 'final',
-    account_id: 'dev-1643292007908-55838431863482', // TODO Why would account_id be required for a simple `near view` call? https://discord.com/channels/490367152054992913/542945453533036544/937863529250320424
-    method_name: 'nft_token',
-    args_base64: btoa(`{"token_id":"${tokenId}"}`),
-  });
-  const { result } = response;
-  const responseJson = String.fromCharCode.apply(null, result); // https://stackoverflow.com/a/36046727/470749
-  const responseObj = JSON.parse(responseJson);
-  console.log({ responseObj });
-
+  const account = await getNearAccountWithoutAccountIdOrKeyStore();
+  const contract = getNftContract(account);
+  const response = await (contract as NFT).nft_token({ token_id: tokenId });
+  console.log({ response });
+  const date = response.metadata.issued_at; // TODO: Choose how we want to format the date.
+  const programName = response.metadata.title;
   // TODO: fetch other text (mainnet address, date, program code, program name, and competencies from NFT metadata) from responseObj that will be added to the certificate image
   return {
     tokenId,
-    date: '2022-01-13',
-    programCode: 'NCD', // This will determine what background image gets used.
-    programName: 'NEAR Certified Developer',
-    accountName: 'ryancwalsh.near',
-    competencies:
-      'has successfully completed the NEAR Certified Developer program and demonstrated proficiency in reading and writing smart contracts to build the Open Web with NEAR', // comes from 'memo' field within certification_metadata
+    date,
+    programCode: 'TODO programCode', // TODO This will determine what background image gets used.
+    programName,
+    accountName: 'TODO accountName', // TODO
+    competencies: 'TODO competencies', // TODO. Comes from 'memo' field within certification_metadata
   };
 }
 
