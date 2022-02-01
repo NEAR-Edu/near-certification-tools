@@ -10,7 +10,7 @@ const helperUrl = process.env.NEXT_PUBLIC_NEAR_HELPER_URL || 'https://helper.tes
 
 export type AccountId = string;
 
-export async function getNearConnection(keyStore: KeyStore) {
+export async function getNearConnection(keyStore?: KeyStore) {
   const config: ConnectConfig = {
     headers: {},
     networkId,
