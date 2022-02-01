@@ -12,7 +12,7 @@ import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStore } from '../../../helpers/near';
 
 // TODO: Update this section:
-const certificateBackgroundSvgImage = './public/background.svg'; // This needs to be an SVG
+const ncdCertificateBackgroundSvgImage = './public/certificate-backgrounds/NCD_background.svg'; // Background images must be in SVG format
 // const fontFile = './fonts/Sign-Painter-Regular.ttf';
 const fontFamily = 'signpainter';
 const svg = 'svg';
@@ -49,8 +49,13 @@ function addText(canvas: Canvas, text: string, font: string, fillStyle: string, 
   context.fillText(text, leftPos, rightPos);
 }
 
+function getBackgroundSvgImageFromProgramCode(programCode: string) {
+  return ncdCertificateBackgroundSvgImage; // TODO: Switch which file is returned based on programCode.
+}
+
 async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDef, details: any) {
-  // TODO: Change the design and content of this image.
+  const { programCode } = details;
+  // TODO: Change the design and content of this image based on programCode.
 
   // Define the canvas
   const width = 1160; // width of the image
@@ -59,10 +64,11 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
 
   const { tokenId, date, programName, accountName, competencies } = details;
 
-  const fillStyle = `#${Math.floor(Math.random() * 16777215).toString(16)}`; // https://css-tricks.com/snippets/javascript/random-hex-color/
+  const fillStyle = `#${Math.floor(Math.random() * 16777215).toString(16)}`; // This is just temporary and will be removed once we have final designs for each program's certificate. https://css-tricks.com/snippets/javascript/random-hex-color/
   const font = `40px '${fontFamily}' bold`;
 
   // Load and draw the background image first
+  const certificateBackgroundSvgImage = getBackgroundSvgImageFromProgramCode(programCode);
   const image = await loadImage(certificateBackgroundSvgImage);
 
   // Draw the background
@@ -75,27 +81,39 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   addText(canvas, programName, font, fillStyle, width * 0.05, height * 0.4);
   addText(canvas, accountName, font, fillStyle, width * 0.5, height * 0.3);
   addText(canvas, competencies, font, fillStyle, width * 0.5, height * 0.4);
+  // TODO: Will we show an expiration?
 
   // Convert the Canvas to a buffer
   const buffer = bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();
   return buffer;
 }
 
+async function getExpiration(accountName: string): string {
+  // TODO: Will we show an expiration? Is it always 'most recent mainnet activity' + 6 months?
+}
+
 async function fetchCertificateDetails(tokenId: string) {
   const account = await getNearAccountWithoutAccountIdOrKeyStore();
   const contract = getNftContract(account);
   const response = await (contract as NFT).nft_token({ token_id: tokenId });
-  console.log({ response });
-  const date = response.metadata.issued_at; // TODO: Choose how we want to format the date.
-  const programName = response.metadata.title;
-  // TODO: fetch other text (mainnet address, date, program code, program name, and competencies from NFT metadata) from responseObj that will be added to the certificate image
+  const { metadata } = response;
+  const { extra } = metadata;
+  const certificateMetadata = JSON.parse(extra);
+  console.log({ contract, response, certificateMetadata });
+  const accountName = certificateMetadata.original_recipient_id;
+  const programCode = certificateMetadata.program;
+  const competencies = certificateMetadata.memo || metadata.description; // TODO: Do we definitely want to show competencies? Where will they be stored?
+  const expiration = getExpiration(accountName);
+  const date = metadata.issued_at; // TODO: Choose how we want to format the date.
+  const programName = metadata.title;
   return {
     tokenId,
     date,
-    programCode: 'TODO programCode', // TODO This will determine what background image gets used.
+    programCode, // This will determine which background image gets used.
     programName,
-    accountName: 'TODO accountName', // TODO
-    competencies: 'TODO competencies', // TODO. Comes from 'memo' field within certification_metadata
+    accountName,
+    competencies,
+    expiration,
   };
 }
 
@@ -107,7 +125,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const { bufferType, contentType, canvasType, tokenId } = parseFileName(imageFileNameString);
   const details = await fetchCertificateDetails(tokenId);
 
-  // provide each piece of text to generateImage.
+  // Provide each piece of text to generateImage.
   const imageBuffer = await generateImage(canvasType, bufferType, details);
   res.setHeader('Content-Type', contentType);
   // TODO: cache
