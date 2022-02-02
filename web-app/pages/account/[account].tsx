@@ -5,6 +5,7 @@ import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import styles from '../../styles/Account.module.scss';
+import { getSimpleStringFromParam } from '../../helpers/strings';
 
 export const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -25,35 +26,35 @@ function Tile({ tokenId }: { tokenId: string }): JSX.Element {
   );
 }
 
-function DemoTiles({ num }: { num: number }): JSX.Element {
-  // TODO: Remove
-  const tiles = [];
+async function getCertificates(accountId: string): Promise<string[]> {
+  // TODO Fetch from blockchain instead. See impl_non_fungible_token_enumeration in data-contract/src/contract/nft.rs and https://docs.rs/near-contract-standards/latest/near_contract_standards/macro.impl_non_fungible_token_enumeration.html
+  const num = randomIntBetween(0, 9);
+  const certificates = [];
   for (let i = 1; i <= num; i += 1) {
-    tiles.push(`${i}`);
+    certificates.push(`${i}`);
   }
-  if (tiles.length > 0) {
-    tiles[0] = '303216412112497cb6c193152a27c49c';
+  if (certificates.length > 0) {
+    certificates[0] = '303216412112497cb6c193152a27c49c';
   }
-  return (
-    <>
-      {tiles.map((tokenId) => (
-        <Tile tokenId={tokenId} key={tokenId} />
-      ))}
-    </>
-  );
+  console.log({ accountId, num, certificates });
+  return certificates;
 }
 
 const Account: NextPage = () => {
   const router = useRouter();
   const { account } = router.query; // https://nextjs.org/docs/routing/dynamic-routes
+  const accountId = getSimpleStringFromParam(account);
 
-  const [num, setNum] = useState(0);
+  const [certificates, setCertificates] = useState<string[]>([]);
   useEffect(() => {
     // https://github.com/vercel/next.js/discussions/17443#discussioncomment-87097
-    const rand = randomIntBetween(0, 9);
-    console.log({ rand });
-    setNum(rand);
-  }, []);
+    async function fetchCertsOncePerPageLoad() {
+      const certs: string[] = await getCertificates(accountId);
+      setCertificates(certs);
+    }
+
+    fetchCertsOncePerPageLoad();
+  }, [accountId]);
 
   console.log({ account });
 
@@ -61,7 +62,9 @@ const Account: NextPage = () => {
     <Layout>
       <h1 className={styles.title}>{account}&rsquo;s Certificates</h1>
 
-      <div className={styles.grid}>{num ? <DemoTiles num={num} /> : <span>No certificates yet!</span>}</div>
+      <div className={styles.grid}>
+        {certificates.length > 0 ? certificates.map((tokenId: string) => <Tile tokenId={tokenId} key={tokenId} />) : <span>No certificates yet!</span>}
+      </div>
     </Layout>
   );
 };
