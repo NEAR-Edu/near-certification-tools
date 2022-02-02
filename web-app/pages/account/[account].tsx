@@ -1,4 +1,4 @@
-// This page is visible at /certificates/example.near
+// This page is visible at /account/example.near
 
 import { useState, useEffect } from 'react';
 import type { NextPage } from 'next';

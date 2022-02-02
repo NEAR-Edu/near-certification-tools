@@ -11,7 +11,7 @@ const Home: NextPage = () => {
     event.preventDefault();
     console.log(account);
     const destinationPath = account.endsWith(suffix) ? account : `${account}${suffix}`;
-    window.location.href = `/certificates/${destinationPath}`;
+    window.location.href = `/account/${destinationPath}`;
   }
 
   return (

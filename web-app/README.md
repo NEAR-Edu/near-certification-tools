@@ -39,8 +39,10 @@ The app is at [http://localhost:3000/api/cert/303216412112497cb6c193152a27c49c.s
 
 ## TODO
 
+1. Tiles should link to a new page that has social metadata to make those pages more shareable (rather than linking directly to the image)
+   1. Also consider efficiency; fetch certificate data just once, and then pass that to the image generator. fetchCertificateDetails should not be inside `web-app/pages/api/cert/[imageFileName].ts`
 1. create the index page to list out the logged-in visitor's certificates
-   1. also improve the design of web-app/pages/index.tsx and web-app/pages/certificates/[account].tsx
+   1. also improve the design of web-app/pages/index.tsx and web-app/pages/account/[account].tsx
 1. fix fetchCertificateDetails
    1. Will we show competencies? Expiration?
 1. figure out correct env var values
