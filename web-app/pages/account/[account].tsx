@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import styles from '../../styles/Account.module.scss';
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+export const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 function randomIntBetween(min: number, max: number): number {
   // TODO Remove this function when removing DemoTiles
@@ -14,39 +14,13 @@ function randomIntBetween(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-function buildTwitterUrl(pngUrl: string) {
-  // https://stevenwestmoreland.com/2018/07/creating-social-sharing-links-without-javascript.html
-  const text = 'I got certified on the NEAR blockchain!';
-  const hashtags = ['NEAR', 'blockchain', 'NEARUniversity'];
-  const via = 'NEARedu';
-  const url = encodeURI(`https://twitter.com/intent/tweet?text=${text}&url=${pngUrl}&hashtags=${hashtags.join(',')}&via=${via}`);
-  console.log({ url });
-  return url;
-}
-
-function buildLinkedInUrl(pngUrl: string) {
-  // https://stackoverflow.com/a/61583006/470749
-  const url = encodeURI(`https://www.linkedin.com/sharing/share-offsite/?url=${pngUrl}`);
-  console.log({ url });
-  return url;
-}
-
 function Tile({ tokenId }: { tokenId: string }): JSX.Element {
-  const pngUrl = `${baseUrl}/api/cert/${tokenId}.png`;
+  const svgUrl = `${baseUrl}/api/cert/${tokenId}.svg`;
   return (
     <div className={styles.card} key={tokenId}>
-      <a href={`/api/cert/${tokenId}.svg`}>
-        <img src={pngUrl} alt={`certificate ${tokenId}`} />
+      <a href={`/certificate/${tokenId}`}>
+        <img src={svgUrl} alt={`certificate ${tokenId}`} />
       </a>
-      <div className="text-sm mt-2 ml-2">
-        Share:{' '}
-        <a href={buildTwitterUrl(pngUrl)} target="_blank" rel="noreferrer">
-          <i className="fab fa-twitter-square not-italic text-sky-700 p-1" />
-        </a>
-        <a href={buildLinkedInUrl(pngUrl)} target="_blank" rel="noreferrer">
-          <i className="fab fa-linkedin-in not-italic text-sky-700 p-1" />
-        </a>
-      </div>
     </div>
   );
 }
