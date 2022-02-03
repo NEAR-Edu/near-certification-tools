@@ -43,7 +43,6 @@ The app is at [http://localhost:3000/api/cert/303216412112497cb6c193152a27c49c.s
 
 ## Ryan:
 
-1. `web-app/pages/account/[account].tsx` should list out the actual certificates of that account. https://discord.com/channels/828768337978195969/906115083250307103/938148914362728539 hinted about where to learn how to do it.
 1. Also consider efficiency; fetch certificate data just once, and then pass that to the image generator. fetchCertificateDetails should not be inside `web-app/pages/api/cert/[imageFileName].ts`
 
 1. fix fetchCertificateDetails
