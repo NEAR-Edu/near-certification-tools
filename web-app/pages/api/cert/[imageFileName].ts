@@ -9,7 +9,7 @@ import {
 } from 'canvas';
 import { getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNftContract, NFT } from '../mint-cert';
-import { getNearAccountWithoutAccountIdOrKeyStore } from '../../../helpers/near';
+import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
 
 const HTTP_ERROR_CODE_MISSING = 404;
 
@@ -98,7 +98,7 @@ async function getExpiration(accountName: string): Promise<string> {
 }
 
 async function fetchCertificateDetails(tokenId: string) {
-  const account = await getNearAccountWithoutAccountIdOrKeyStore();
+  const account = await getNearAccountWithoutAccountIdOrKeyStoreForBackend();
   const contract = getNftContract(account);
   const response = await (contract as NFT).nft_token({ token_id: tokenId });
   if (response) {

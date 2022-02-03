@@ -40,6 +40,7 @@ export type NFT = Contract & {
   // https://stackoverflow.com/a/41385149/470749
   nft_mint: (args: any, gas: any, depositAmount: any) => Promise<any>; // TODO Add types
   nft_token: (args: any) => Promise<any>;
+  nft_tokens_for_owner: (args: any) => Promise<any>;
 };
 
 export function getNftContract(account: Account) {

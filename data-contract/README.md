@@ -118,4 +118,10 @@ Then you can view those details of that certificate on the blockchain by running
 ```bash
 NEAR_ENV=testnet near view dev-1643292007908-55838431863482 nft_token '{"token_id": "303216412112497cb6c193152a27c49c"}'
 ```
+
+### View all NFTs (from this contract) owned by an account
+Run something like `NEAR_ENV=testnet near view <the contract ID> nft_tokens_for_owner '{"account_id": "<the account ID>"}'`. See https://nomicon.io/Standards/NonFungibleToken/Enumeration.html#interface . `from_index` defaults to 0 and `limit` defaults to unlimited. Example:
+```bash
+NEAR_ENV=testnet near view dev-1643292007908-55838431863482 nft_tokens_for_owner '{"account_id": "hatchet.testnet"}'
+```
 ----

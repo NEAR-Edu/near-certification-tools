@@ -6,14 +6,10 @@ import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import styles from '../../styles/Account.module.scss';
 import { getSimpleStringFromParam } from '../../helpers/strings';
+import { getNearAccountWithoutAccountIdOrKeyStoreForFrontend } from '../../helpers/near';
+import { getNftContract, NFT } from '../api/mint-cert';
 
 export const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-
-function randomIntBetween(min: number, max: number): number {
-  // TODO Remove this function when removing DemoTiles
-  // min and max included
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
 
 function Tile({ tokenId }: { tokenId: string }): JSX.Element {
   const svgUrl = `${baseUrl}/api/cert/${tokenId}.svg`;
@@ -27,17 +23,12 @@ function Tile({ tokenId }: { tokenId: string }): JSX.Element {
 }
 
 async function getCertificates(accountId: string): Promise<string[]> {
-  // TODO Fetch from blockchain instead. See impl_non_fungible_token_enumeration in data-contract/src/contract/nft.rs and https://docs.rs/near-contract-standards/latest/near_contract_standards/macro.impl_non_fungible_token_enumeration.html
-  const num = randomIntBetween(0, 9);
-  const certificates = [];
-  for (let i = 1; i <= num; i += 1) {
-    certificates.push(`${i}`);
-  }
-  if (certificates.length > 0) {
-    certificates[0] = '303216412112497cb6c193152a27c49c';
-  }
-  console.log({ accountId, num, certificates });
-  return certificates;
+  console.log('getCertificates');
+  const account = await getNearAccountWithoutAccountIdOrKeyStoreForFrontend();
+  const contract = getNftContract(account);
+  const response = await (contract as NFT).nft_tokens_for_owner({ account_id: accountId });
+  console.log({ account, accountId, response });
+  return []; // TODO
 }
 
 const Account: NextPage = () => {
@@ -47,8 +38,10 @@ const Account: NextPage = () => {
 
   const [certificates, setCertificates] = useState<string[]>([]);
   useEffect(() => {
+    // TODO Use getServerSideProps https://nextjs.org/docs/basic-features/typescript#static-generation-and-server-side-rendering
     // https://github.com/vercel/next.js/discussions/17443#discussioncomment-87097
     async function fetchCertsOncePerPageLoad() {
+      console.log('fetchCertsOncePerPageLoad');
       const certs: string[] = await getCertificates(accountId);
       setCertificates(certs);
     }
