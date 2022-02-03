@@ -1,12 +1,10 @@
 // This page is visible at /account/example.near
 
-import { useState, useEffect } from 'react';
-import type { NextPage } from 'next';
-import { useRouter } from 'next/router';
+import type { GetServerSideProps, NextPage } from 'next';
 import Layout from '../../components/Layout';
 import styles from '../../styles/Account.module.scss';
 import { getImageUrl, getSimpleStringFromParam } from '../../helpers/strings';
-import { getNearAccountWithoutAccountIdOrKeyStoreForFrontend } from '../../helpers/near';
+import { AccountId, getNearAccountWithoutAccountIdOrKeyStoreForFrontend } from '../../helpers/near';
 import { getNftContract, NFT } from '../api/mint-cert';
 
 function Tile({ tokenId }: { tokenId: string }): JSX.Element {
@@ -20,42 +18,33 @@ function Tile({ tokenId }: { tokenId: string }): JSX.Element {
   );
 }
 
+type Certificate = any;
+type AccountPageProps = { accountId: AccountId; certificates: Certificate[] };
+
 async function getCertificates(accountId: string): Promise<string[]> {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForFrontend();
   const contract = getNftContract(account);
-  if (accountId) {
-    // TODO: Clean this up so that it isn't being called multiple times (with the first time having an empty accountId).
-    const response = await (contract as NFT).nft_tokens_for_owner({ account_id: accountId });
-    console.log({ account, accountId, response });
-    return response.map((cert: any) => cert.token_id);
-  } else {
-    return [];
-  }
+  const response = await (contract as NFT).nft_tokens_for_owner({ account_id: accountId });
+  console.log({ account, accountId, response });
+  return response.map((cert: Certificate) => cert.token_id);
 }
 
-const Account: NextPage = () => {
-  const router = useRouter();
-  const { account } = router.query; // https://nextjs.org/docs/routing/dynamic-routes
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  // https://nextjs.org/docs/api-reference/data-fetching/get-server-side-props
+  // TODO: Replace `"near-api-js": "ryancwalsh/near-api-js#gracefully-handle-window-and-buffer"` with the official "near-api-js" in `package.json` once https://github.com/near/near-api-js/issues/747 is fixed.
+  const { account } = context.query; // https://nextjs.org/docs/routing/dynamic-routes
   const accountId = getSimpleStringFromParam(account);
+  const certificates = await getCertificates(accountId);
+  console.log({ accountId, certificates });
+  // Pass data to the page via props
+  const props: AccountPageProps = { accountId, certificates };
+  return { props };
+};
 
-  const [certificates, setCertificates] = useState<string[]>([]);
-  useEffect(() => {
-    // TODO Use getServerSideProps https://nextjs.org/docs/basic-features/typescript#static-generation-and-server-side-rendering
-    // https://github.com/vercel/next.js/discussions/17443#discussioncomment-87097
-    async function fetchCertsOncePerPageLoad() {
-      console.log('fetchCertsOncePerPageLoad');
-      const certs: string[] = await getCertificates(accountId);
-      setCertificates(certs);
-    }
-
-    fetchCertsOncePerPageLoad();
-  }, [accountId]);
-
-  console.log({ account });
-
+const Account: NextPage<AccountPageProps> = ({ accountId, certificates }: AccountPageProps) => {
   return (
     <Layout>
-      <h1 className={styles.title}>{account}&rsquo;s Certificates</h1>
+      <h1 className={styles.title}>{accountId}&rsquo;s Certificates</h1>
 
       <div className={styles.grid}>
         {certificates.length > 0 ? certificates.map((tokenId: string) => <Tile tokenId={tokenId} key={tokenId} />) : <span>No certificates yet!</span>}
