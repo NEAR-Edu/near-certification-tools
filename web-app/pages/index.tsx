@@ -2,8 +2,10 @@ import React, { FormEvent, useState } from 'react';
 import type { NextPage } from 'next';
 import Layout from '../components/Layout';
 import styles from '../styles/Home.module.scss';
+import { networkId } from '../helpers/near';
 
-const suffix = '.near';
+const suffix = networkId === 'mainnet' ? '.near' : networkId;
+
 const Home: NextPage = () => {
   const [account, setAccount] = useState('');
 

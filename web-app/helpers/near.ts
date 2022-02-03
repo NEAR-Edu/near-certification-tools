@@ -2,7 +2,7 @@
 import { KeyPair, Account, connect, ConnectConfig } from 'near-api-js'; // https://github.com/near/near-api-js/blob/master/examples/quick-reference.md
 import { BrowserLocalStorageKeyStore, InMemoryKeyStore, KeyStore } from 'near-api-js/lib/key_stores';
 
-const networkId = process.env.NEXT_PUBLIC_NEAR_NETWORK_ID || 'testnet';
+export const networkId = process.env.NEXT_PUBLIC_NEAR_NETWORK_ID || 'testnet';
 const nodeUrl = process.env.NEXT_PUBLIC_NEAR_NODE_URL || 'https://rpc.testnet.near.org';
 const walletUrl = process.env.NEXT_PUBLIC_NEAR_WALLET_URL || 'https://wallet.testnet.near.org';
 const helperUrl = process.env.NEXT_PUBLIC_NEAR_HELPER_URL || 'https://helper.testnet.near.org';
@@ -31,12 +31,6 @@ export async function getNearAccount(accountId: string, privateKey: string) {
   const near = await getNearConnection(keyStore);
   return new Account(near.connection, accountId);
 }
-
-// export async function getNearAccountWithoutKeyStore(accountId: string) {
-//   const keyStore = new InMemoryKeyStore(); // TODO Why would keyStore be required? Clearly it's allowed to be empty.
-//   const near = await getNearConnection(keyStore);
-//   return new Account(near.connection, accountId);
-// }
 
 export async function getNearAccountWithoutAccountIdOrKeyStore(keyStore: KeyStore) {
   const near = await getNearConnection(keyStore);
