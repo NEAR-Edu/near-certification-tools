@@ -5,14 +5,12 @@ import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import styles from '../../styles/Account.module.scss';
-import { getSimpleStringFromParam } from '../../helpers/strings';
+import { getImageUrl, getSimpleStringFromParam } from '../../helpers/strings';
 import { getNearAccountWithoutAccountIdOrKeyStoreForFrontend } from '../../helpers/near';
 import { getNftContract, NFT } from '../api/mint-cert';
 
-export const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-
 function Tile({ tokenId }: { tokenId: string }): JSX.Element {
-  const svgUrl = `${baseUrl}/api/cert/${tokenId}.svg`;
+  const svgUrl = getImageUrl(tokenId);
   return (
     <div className={styles.card} key={tokenId}>
       <a href={`/certificate/${tokenId}`}>
@@ -23,12 +21,16 @@ function Tile({ tokenId }: { tokenId: string }): JSX.Element {
 }
 
 async function getCertificates(accountId: string): Promise<string[]> {
-  console.log('getCertificates');
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForFrontend();
   const contract = getNftContract(account);
-  const response = await (contract as NFT).nft_tokens_for_owner({ account_id: accountId });
-  console.log({ account, accountId, response });
-  return []; // TODO
+  if (accountId) {
+    // TODO: Clean this up so that it isn't being called multiple times (with the first time having an empty accountId).
+    const response = await (contract as NFT).nft_tokens_for_owner({ account_id: accountId });
+    console.log({ account, accountId, response });
+    return response.map((cert: any) => cert.token_id);
+  } else {
+    return [];
+  }
 }
 
 const Account: NextPage = () => {

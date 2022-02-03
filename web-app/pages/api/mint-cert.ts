@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { randomUUID } from 'crypto'; // Added in: node v14.17.0
 import { Account, Contract, utils } from 'near-api-js'; // https://github.com/near/near-api-js/blob/master/examples/quick-reference.md
 import { AccountId, getNearAccount } from '../../helpers/near';
-import { getSimpleStringFromParam } from '../../helpers/strings';
+import { getImagePath, getSimpleStringFromParam } from '../../helpers/strings';
 
 const privateKey = process.env.NEAR_PRIVATE_KEY || '';
 const apiKey = process.env.API_KEY || '';
@@ -44,11 +44,12 @@ export type NFT = Contract & {
 };
 
 export function getNftContract(account: Account) {
+  // TODO: Make `account` optional.
   const contract = new Contract(
     account, // the account object that is connecting
     certificateContractName,
     {
-      viewMethods: ['nft_token'], // view methods do not change state but usually return a value
+      viewMethods: ['nft_token', 'nft_tokens_for_owner'], // view methods do not change state but usually return a value
       changeMethods: ['nft_mint'], // change methods modify state
     },
   );
@@ -115,7 +116,7 @@ async function mintCertificate(tokenId: string, certificateRequiredFields: Certi
 }
 
 function getSvgUrl(baseUrl: string, tokenId: string) {
-  return `${baseUrl}/api/cert/${tokenId}.svg`;
+  return `${baseUrl}${getImagePath(tokenId)}`;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
