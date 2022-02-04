@@ -43,8 +43,6 @@ The app is at [http://localhost:3000/api/cert/303216412112497cb6c193152a27c49c.s
 
 ## Ryan:
 
-1. Also consider efficiency; fetch certificate data just once, and then pass that to the image generator. fetchCertificateDetails should not be inside `web-app/pages/api/cert/[imageFileName].ts`
-
 1. fix fetchCertificateDetails
    1. Will we show competencies? Expiration? How will we dynamically calculate the expiration date? https://discord.com/channels/828768337978195969/906115083250307103/938190056429092924 has hints.
 1. figure out correct var values for the `.env` file
@@ -53,6 +51,10 @@ The app is at [http://localhost:3000/api/cert/303216412112497cb6c193152a27c49c.s
 1. Ensure that HTTP is blocked (because HTTPS is enforced via `web-app/pages/_middleware.ts`). (We wouldn't want `web-app/pages/api/mint-cert.ts` exposed via HTTP because our secret `API_KEY` would be leaked, and anyone could issue any certificate.)
    1. 2022-02-02 13:00 ET http://near-certification-tools.onrender.com/ does seem to successfully redirect to https://near-certification-tools.onrender.com/ but we'll want to test the minting later.
 1. Sherif will deploy the production contract.
+1. Add documentation here about Integromat, etc
+1. Configure https://github.com/NEAR-Edu/near-certification-tools/settings/branch_protection_rules/new
+1. Lower priority improvements:
+   1. Add cert text details to `web-app/pages/certificate/[tokenId].tsx` but consider efficiency; it should fetch certificate data just once, and then pass that to the image generator. fetchCertificateDetails should not be inside `web-app/pages/api/cert/[imageFileName].ts`
 
 ## Ozan and Çağatay to split up:
 
@@ -72,5 +74,6 @@ Especially when working on a team that lives across time zones, it's important t
    - `web-app/pages/certificate/[tokenId].tsx`
 
 1. Learn about Open Graph https://ogp.me/. Edit the `<head>` tag (in a NextJs way) of the `web-app/pages/certificate/[tokenId].tsx` page to include social metadata to make that page generate a preview when people share it on social platforms. E.g. https://www.linkedin.com/post-inspector/ and https://cards-dev.twitter.com/validator will show you what sharing any particular URL will look like. Since we're working on localhost and don't automatically have a publicly-viewable URL, you'll probably need to generate a temporary public URL for your machine using localtunnel https://theboroer.github.io/localtunnel-www/ or something similar (in order to use those sharing-preview tools).
+1. Check that the sharing buttons at http://localhost:3000/certificate/303216412112497cb6c193152a27c49c successfully post to Twitter and LinkedIn. (See note above about localtunnel).
 1. Add Google Analytics tracking to the layout. You'll probably need to work with Sherif (get him to give you whatever tracking ID you need).
 1. Stay aware of what others (e.g. Ryan) are working on. Take opportunities whenever you can to volunteer to move a specific task off my list and onto your list. Any time you can stretch into doing something more difficult is a win for all of us.

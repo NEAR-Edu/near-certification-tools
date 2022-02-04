@@ -4,7 +4,7 @@ import Layout from '../components/Layout';
 import styles from '../styles/Home.module.scss';
 import { networkId } from '../helpers/near';
 
-const suffix = networkId === 'mainnet' ? '.near' : networkId;
+const suffix = networkId === 'mainnet' ? '.near' : `.${networkId}`;
 
 const Home: NextPage = () => {
   const [account, setAccount] = useState('');

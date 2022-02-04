@@ -9,8 +9,8 @@ https://cards-dev.twitter.com/validator
 import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
+import { baseUrl } from '../../helpers/strings';
 import styles from '../../styles/Account.module.scss';
-import { baseUrl } from '../account/[account]';
 
 function buildTwitterUrl(pngUrl: string) {
   // https://stevenwestmoreland.com/2018/07/creating-social-sharing-links-without-javascript.html

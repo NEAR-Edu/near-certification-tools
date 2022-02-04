@@ -132,6 +132,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   const imageFileNameString = getSimpleStringFromParam(imageFileName);
   const { bufferType, contentType, canvasType, tokenId } = parseFileName(imageFileNameString);
+  console.log({ bufferType, contentType, canvasType, tokenId });
   const details = await fetchCertificateDetails(tokenId);
   if (details) {
     // Provide each piece of text to generateImage.
