@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@prisma/client": "^3.9.1",
     "canvas": "^2.9.0",
     "dayjs": "^1.10.7",
     "near-api-js": "ryancwalsh/near-api-js#gracefully-handle-window-and-buffer",
@@ -25,6 +26,7 @@
     "eslint-config-airbnb-typescript-prettier": "^5.0.0",
     "postcss": "^8.4.5",
     "prettier": "^2.5.1",
+    "prisma": "^3.9.1",
     "sass": "^1.43.5",
     "tailwindcss": "^3.0.16",
     "typescript": "^4.5.5"

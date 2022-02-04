@@ -7,6 +7,7 @@ import { getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
 import { height, populateAnalystCert, populateDeveloperCert, width } from '../../../helpers/certificate-designs';
+import prisma from '../../../helpers/prisma';
 
 const HTTP_ERROR_CODE_MISSING = 404;
 const svg = 'svg';
@@ -51,14 +52,33 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   return buffer;
 }
 
-async function getMostRecentActivityDateTime(accountName: string): Promise<string> {
-  console.log({ accountName });
-  return '2022-01-01'; // TODO How will we dynamically calculate the expiration date? https://discord.com/channels/828768337978195969/906115083250307103/938190056429092924 has hints.
+async function getMostRecentActivityDateTime(accountName: string): Promise<Dayjs> {
+  // TODO
+  const result = await prisma.receipts.findFirst({
+    where: {
+      action_receipts: {
+        // https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting#filter-on-relations
+        signer_account_id: {
+          equals: accountName,
+        },
+      },
+    },
+    orderBy: {
+      included_in_block_timestamp: 'desc',
+    },
+  });
+  console.log({ accountName, result });
+  const moment = dayjs(); // TODO remove
+  // const timestamp: number = result?.included_in_block_timestamp;
+  // const moment = timestamp ? dayjs(timestamp) : null;
+  // console.log({ accountName, result, timestamp, moment });
+
+  return moment;
 }
 
 async function getExpiration(accountName: string): Promise<string> {
   const recent = await getMostRecentActivityDateTime(accountName);
-  return formatDate(dayjs(recent).add(expirationMonths, 'months'));
+  return formatDate(recent.add(expirationMonths, 'months'));
 }
 
 async function fetchCertificateDetails(tokenId: string) {

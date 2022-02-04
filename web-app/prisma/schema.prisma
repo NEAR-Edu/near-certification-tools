@@ -1,0 +1,379 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_MAINNET_URL")
+}
+
+model access_keys {
+  public_key                                           String
+  account_id                                           String
+  created_by_receipt_id                                String?
+  deleted_by_receipt_id                                String?
+  permission_kind                                      access_key_permission_kind
+  last_update_block_height                             Decimal                    @db.Decimal(20, 0)
+  receipts_access_keys_created_by_receipt_idToreceipts receipts?                  @relation("access_keys_created_by_receipt_idToreceipts", fields: [created_by_receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "created_by_receipt_fk")
+  receipts_access_keys_deleted_by_receipt_idToreceipts receipts?                  @relation("access_keys_deleted_by_receipt_idToreceipts", fields: [deleted_by_receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "deleted_by_receipt_fk")
+
+  @@id([public_key, account_id], map: "access_keys_pk")
+  @@index([account_id])
+  @@index([last_update_block_height])
+  @@index([public_key])
+}
+
+model account_changes {
+  id                                 BigInt                   @id @default(dbgenerated("nextval('account_changes_new_id_seq'::regclass)"))
+  affected_account_id                String
+  changed_in_block_timestamp         Decimal                  @db.Decimal(20, 0)
+  changed_in_block_hash              String
+  caused_by_transaction_hash         String?
+  caused_by_receipt_id               String?
+  update_reason                      state_change_reason_kind
+  affected_account_nonstaked_balance Decimal                  @db.Decimal(45, 0)
+  affected_account_staked_balance    Decimal                  @db.Decimal(45, 0)
+  affected_account_storage_usage     Decimal                  @db.Decimal(20, 0)
+  index_in_block                     Int
+  accounts                           accounts                 @relation(fields: [affected_account_id], references: [account_id], onDelete: Cascade, onUpdate: NoAction, map: "account_id_fk")
+  receipts                           receipts?                @relation(fields: [caused_by_receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "receipt_id_fk")
+  transactions                       transactions?            @relation(fields: [caused_by_transaction_hash], references: [transaction_hash], onDelete: Cascade, onUpdate: NoAction, map: "transaction_hash_fk")
+  blocks                             blocks                   @relation(fields: [changed_in_block_hash], references: [block_hash], onDelete: Cascade, onUpdate: NoAction, map: "block_hash_fk")
+
+  @@index([affected_account_id])
+  @@index([changed_in_block_hash])
+  @@index([changed_in_block_timestamp])
+  @@index([caused_by_receipt_id], map: "account_changes_changed_in_caused_by_receipt_id_idx")
+  @@index([caused_by_transaction_hash], map: "account_changes_changed_in_caused_by_transaction_hash_idx")
+  @@index([changed_in_block_timestamp, index_in_block], map: "account_changes_sorting_idx")
+}
+
+model accounts {
+  id                                                BigInt            @id @default(dbgenerated("nextval('accounts_id_seq'::regclass)"))
+  account_id                                        String            @unique
+  created_by_receipt_id                             String?
+  deleted_by_receipt_id                             String?
+  last_update_block_height                          Decimal           @db.Decimal(20, 0)
+  receipts_accounts_created_by_receipt_idToreceipts receipts?         @relation("accounts_created_by_receipt_idToreceipts", fields: [created_by_receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "created_receipt_fk")
+  receipts_accounts_deleted_by_receipt_idToreceipts receipts?         @relation("accounts_deleted_by_receipt_idToreceipts", fields: [deleted_by_receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "deleted_receipt_fk")
+  account_changes                                   account_changes[]
+
+  @@index([last_update_block_height])
+}
+
+model action_receipt_actions {
+  receipt_id                          String
+  index_in_action_receipt             Int
+  action_kind                         action_kind
+  args                                Json
+  receipt_predecessor_account_id      String
+  receipt_receiver_account_id         String
+  receipt_included_in_block_timestamp Decimal     @db.Decimal(20, 0)
+  receipts                            receipts    @relation(fields: [receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "action_receipt_fk")
+
+  @@id([receipt_id, index_in_action_receipt], map: "receipt_action_action_pk")
+  @@index([action_kind])
+  @@index([receipt_included_in_block_timestamp])
+  @@index([receipt_predecessor_account_id])
+  @@index([receipt_receiver_account_id])
+  @@index([receipt_receiver_account_id, receipt_included_in_block_timestamp], map: "action_receipt_actions_receiver_and_timestamp_idx")
+}
+
+model action_receipt_input_data {
+  input_data_id       String
+  input_to_receipt_id String
+  receipts            receipts @relation(fields: [input_to_receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "receipt_fk")
+
+  @@id([input_data_id, input_to_receipt_id], map: "action_input_pk")
+  @@index([input_data_id])
+  @@index([input_to_receipt_id])
+}
+
+model action_receipt_output_data {
+  output_data_id         String
+  output_from_receipt_id String
+  receiver_account_id    String
+  receipts               receipts @relation(fields: [output_from_receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "receipt_fk")
+
+  @@id([output_data_id, output_from_receipt_id], map: "action_output_pk")
+  @@index([output_data_id])
+  @@index([output_from_receipt_id])
+  @@index([receiver_account_id])
+}
+
+model action_receipts {
+  receipt_id        String   @id(map: "receipt_actions_pkey")
+  signer_account_id String
+  signer_public_key String
+  gas_price         Decimal  @db.Decimal(45, 0)
+  receipts          receipts @relation(fields: [receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "receipt_fk")
+
+  @@index([signer_account_id], map: "action_receipt_signer_account_id_idx")
+}
+
+model aggregated__circulating_supply {
+  computed_at_block_timestamp       Decimal @db.Decimal(20, 0)
+  computed_at_block_hash            String  @id
+  circulating_tokens_supply         Decimal @db.Decimal(45, 0)
+  total_tokens_supply               Decimal @db.Decimal(45, 0)
+  total_lockup_contracts_count      Int
+  unfinished_lockup_contracts_count Int
+  foundation_locked_tokens          Decimal @db.Decimal(45, 0)
+  lockups_locked_tokens             Decimal @db.Decimal(45, 0)
+  blocks                            blocks  @relation(fields: [computed_at_block_hash], references: [block_hash], onDelete: Cascade, onUpdate: NoAction, map: "aggregated__circulating_supply_fk")
+
+  @@index([computed_at_block_timestamp], map: "aggregated__circulating_supply_timestamp_idx")
+}
+
+model assets__fungible_token_events {
+  emitted_for_receipt_id                String
+  emitted_at_block_timestamp            Decimal       @db.Decimal(20, 0)
+  emitted_in_shard_id                   Decimal       @db.Decimal(20, 0)
+  emitted_index_of_event_entry_in_shard Int
+  emitted_by_contract_account_id        String
+  amount                                String
+  event_kind                            ft_event_kind
+  token_old_owner_account_id            String        @default("")
+  token_new_owner_account_id            String        @default("")
+  event_memo                            String        @default("")
+  receipts                              receipts      @relation(fields: [emitted_for_receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "assets__fungible_token_events_fk")
+
+  @@id([emitted_for_receipt_id, emitted_at_block_timestamp, emitted_in_shard_id, emitted_index_of_event_entry_in_shard, emitted_by_contract_account_id, amount, event_kind, token_old_owner_account_id, token_new_owner_account_id, event_memo])
+  @@unique([emitted_for_receipt_id, emitted_index_of_event_entry_in_shard], map: "assets__fungible_token_events_unique")
+  @@index([emitted_at_block_timestamp], map: "assets__fungible_token_events_block_timestamp_idx")
+  @@index([token_new_owner_account_id], map: "assets__fungible_token_events_new_owner_account_id_idx")
+  @@index([token_old_owner_account_id], map: "assets__fungible_token_events_old_owner_account_id_idx")
+  @@index([emitted_at_block_timestamp, emitted_in_shard_id, emitted_index_of_event_entry_in_shard], map: "assets__fungible_token_events_sorting_idx")
+}
+
+model assets__non_fungible_token_events {
+  emitted_for_receipt_id                String
+  emitted_at_block_timestamp            Decimal        @db.Decimal(20, 0)
+  emitted_in_shard_id                   Decimal        @db.Decimal(20, 0)
+  emitted_index_of_event_entry_in_shard Int
+  emitted_by_contract_account_id        String
+  token_id                              String
+  event_kind                            nft_event_kind
+  token_old_owner_account_id            String         @default("")
+  token_new_owner_account_id            String         @default("")
+  token_authorized_account_id           String         @default("")
+  event_memo                            String         @default("")
+  receipts                              receipts       @relation(fields: [emitted_for_receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "assets__non_fungible_token_events_fk")
+
+  @@id([emitted_for_receipt_id, emitted_at_block_timestamp, emitted_in_shard_id, emitted_index_of_event_entry_in_shard, emitted_by_contract_account_id, token_id, event_kind, token_old_owner_account_id, token_new_owner_account_id, token_authorized_account_id, event_memo])
+  @@unique([emitted_for_receipt_id, emitted_index_of_event_entry_in_shard], map: "assets__non_fungible_token_events_unique")
+  @@index([emitted_at_block_timestamp], map: "assets__non_fungible_token_events_block_timestamp_idx")
+  @@index([token_new_owner_account_id], map: "assets__non_fungible_token_events_new_owner_account_id_idx")
+  @@index([token_old_owner_account_id], map: "assets__non_fungible_token_events_old_owner_account_id_idx")
+  @@index([emitted_at_block_timestamp, emitted_in_shard_id, emitted_index_of_event_entry_in_shard], map: "assets__non_fungible_token_events_sorting_idx")
+}
+
+model blocks {
+  block_height                   Decimal                         @db.Decimal(20, 0)
+  block_hash                     String                          @id
+  prev_block_hash                String
+  block_timestamp                Decimal                         @db.Decimal(20, 0)
+  total_supply                   Decimal                         @db.Decimal(45, 0)
+  gas_price                      Decimal                         @db.Decimal(45, 0)
+  author_account_id              String
+  account_changes                account_changes[]
+  aggregated__circulating_supply aggregated__circulating_supply?
+  chunks                         chunks[]
+  execution_outcomes             execution_outcomes[]
+  receipts                       receipts[]
+  transactions                   transactions[]
+
+  @@index([block_height], map: "blocks_height_idx")
+  @@index([prev_block_hash], map: "blocks_prev_hash_idx")
+  @@index([block_timestamp], map: "blocks_timestamp_idx")
+}
+
+model chunks {
+  included_in_block_hash String
+  chunk_hash             String         @id
+  shard_id               Decimal        @db.Decimal(20, 0)
+  signature              String
+  gas_limit              Decimal        @db.Decimal(20, 0)
+  gas_used               Decimal        @db.Decimal(20, 0)
+  author_account_id      String
+  blocks                 blocks         @relation(fields: [included_in_block_hash], references: [block_hash], onDelete: Cascade, onUpdate: NoAction, map: "chunks_fk")
+  receipts               receipts[]
+  transactions           transactions[]
+
+  @@index([included_in_block_hash])
+}
+
+model data_receipts {
+  data_id    String   @id(map: "receipt_data_pkey")
+  receipt_id String
+  data       Bytes?
+  receipts   receipts @relation(fields: [receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "receipt_fk")
+
+  @@index([receipt_id])
+}
+
+model diesel_schema_migrations {
+  version String   @id @db.VarChar(50)
+  run_on  DateTime @default(now()) @db.Timestamp(6)
+
+  @@map("__diesel_schema_migrations")
+}
+
+model execution_outcome_receipts {
+  executed_receipt_id        String
+  index_in_execution_outcome Int
+  produced_receipt_id        String
+  execution_outcomes         execution_outcomes @relation(fields: [executed_receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "execution_outcome_fk")
+  receipts                   receipts           @relation(fields: [executed_receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "receipts_fk")
+
+  @@id([executed_receipt_id, index_in_execution_outcome, produced_receipt_id], map: "execution_outcome_receipt_pk")
+  @@index([produced_receipt_id], map: "execution_outcome_receipts_produced_receipt_id")
+}
+
+model execution_outcomes {
+  receipt_id                  String                       @id
+  executed_in_block_hash      String
+  executed_in_block_timestamp Decimal                      @db.Decimal(20, 0)
+  index_in_chunk              Int
+  gas_burnt                   Decimal                      @db.Decimal(20, 0)
+  tokens_burnt                Decimal                      @db.Decimal(45, 0)
+  executor_account_id         String
+  status                      execution_outcome_status
+  shard_id                    Decimal                      @db.Decimal(20, 0)
+  blocks                      blocks                       @relation(fields: [executed_in_block_hash], references: [block_hash], onDelete: Cascade, onUpdate: NoAction, map: "block_hash_execution_outcome_fk")
+  receipts                    receipts                     @relation(fields: [receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "receipt_execution_outcome_fk")
+  execution_outcome_receipts  execution_outcome_receipts[]
+
+  @@index([executed_in_block_timestamp], map: "execution_outcome_executed_in_block_timestamp")
+  @@index([executed_in_block_hash], map: "execution_outcomes_block_hash_idx")
+  @@index([status])
+}
+
+model receipts {
+  receipt_id                                              String                              @id
+  included_in_block_hash                                  String
+  included_in_chunk_hash                                  String
+  index_in_chunk                                          Int
+  included_in_block_timestamp                             Decimal                             @db.Decimal(20, 0)
+  predecessor_account_id                                  String
+  receiver_account_id                                     String
+  receipt_kind                                            receipt_kind
+  originated_from_transaction_hash                        String
+  blocks                                                  blocks                              @relation(fields: [included_in_block_hash], references: [block_hash], onDelete: Cascade, onUpdate: NoAction, map: "block_receipts_fk")
+  chunks                                                  chunks                              @relation(fields: [included_in_chunk_hash], references: [chunk_hash], onDelete: Cascade, onUpdate: NoAction, map: "chunk_receipts_fk")
+  transactions                                            transactions                        @relation(fields: [originated_from_transaction_hash], references: [transaction_hash], onDelete: Cascade, onUpdate: NoAction, map: "tx_receipt_fk")
+  access_keys_access_keys_created_by_receipt_idToreceipts access_keys[]                       @relation("access_keys_created_by_receipt_idToreceipts")
+  access_keys_access_keys_deleted_by_receipt_idToreceipts access_keys[]                       @relation("access_keys_deleted_by_receipt_idToreceipts")
+  account_changes                                         account_changes[]
+  accounts_accounts_created_by_receipt_idToreceipts       accounts[]                          @relation("accounts_created_by_receipt_idToreceipts")
+  accounts_accounts_deleted_by_receipt_idToreceipts       accounts[]                          @relation("accounts_deleted_by_receipt_idToreceipts")
+  action_receipt_actions                                  action_receipt_actions[]
+  action_receipt_input_data                               action_receipt_input_data[]
+  action_receipt_output_data                              action_receipt_output_data[]
+  action_receipts                                         action_receipts?
+  assets__fungible_token_events                           assets__fungible_token_events[]
+  assets__non_fungible_token_events                       assets__non_fungible_token_events[]
+  data_receipts                                           data_receipts[]
+  execution_outcome_receipts                              execution_outcome_receipts[]
+  execution_outcomes                                      execution_outcomes?
+
+  @@index([included_in_block_hash])
+  @@index([included_in_chunk_hash])
+  @@index([originated_from_transaction_hash])
+  @@index([predecessor_account_id])
+  @@index([receiver_account_id])
+  @@index([included_in_block_timestamp], map: "receipts_timestamp_idx")
+}
+
+model transaction_actions {
+  transaction_hash     String
+  index_in_transaction Int
+  action_kind          action_kind
+  args                 Json
+  transactions         transactions @relation(fields: [transaction_hash], references: [transaction_hash], onDelete: Cascade, onUpdate: NoAction, map: "tx_action_fk")
+
+  @@id([transaction_hash, index_in_transaction], map: "transaction_action_pk")
+  @@index([action_kind], map: "transactions_actions_action_kind_idx")
+}
+
+model transactions {
+  transaction_hash                String                   @id
+  included_in_block_hash          String
+  included_in_chunk_hash          String
+  index_in_chunk                  Int
+  block_timestamp                 Decimal                  @db.Decimal(20, 0)
+  signer_account_id               String
+  signer_public_key               String
+  nonce                           Decimal                  @db.Decimal(20, 0)
+  receiver_account_id             String
+  signature                       String
+  status                          execution_outcome_status
+  converted_into_receipt_id       String
+  receipt_conversion_gas_burnt    Decimal?                 @db.Decimal(20, 0)
+  receipt_conversion_tokens_burnt Decimal?                 @db.Decimal(45, 0)
+  blocks                          blocks                   @relation(fields: [included_in_block_hash], references: [block_hash], onDelete: Cascade, onUpdate: NoAction, map: "block_tx_fk")
+  chunks                          chunks                   @relation(fields: [included_in_chunk_hash], references: [chunk_hash], onDelete: Cascade, onUpdate: NoAction, map: "chunk_tx_fk")
+  account_changes                 account_changes[]
+  receipts                        receipts[]
+  transaction_actions             transaction_actions[]
+
+  @@index([converted_into_receipt_id], map: "transactions_converted_into_receipt_id_dx")
+  @@index([included_in_block_hash])
+  @@index([block_timestamp], map: "transactions_included_in_block_timestamp_idx")
+  @@index([included_in_chunk_hash])
+  @@index([receiver_account_id])
+  @@index([signer_account_id])
+  @@index([signer_public_key])
+  @@index([block_timestamp, index_in_chunk], map: "transactions_sorting_idx")
+}
+
+enum access_key_permission_kind {
+  FULL_ACCESS
+  FUNCTION_CALL
+}
+
+enum action_kind {
+  CREATE_ACCOUNT
+  DEPLOY_CONTRACT
+  FUNCTION_CALL
+  TRANSFER
+  STAKE
+  ADD_KEY
+  DELETE_KEY
+  DELETE_ACCOUNT
+}
+
+enum execution_outcome_status {
+  UNKNOWN
+  FAILURE
+  SUCCESS_VALUE
+  SUCCESS_RECEIPT_ID
+}
+
+enum ft_event_kind {
+  MINT
+  TRANSFER
+  BURN
+}
+
+enum nft_event_kind {
+  MINT
+  TRANSFER
+  BURN
+}
+
+enum receipt_kind {
+  ACTION
+  DATA
+}
+
+enum state_change_reason_kind {
+  TRANSACTION_PROCESSING
+  ACTION_RECEIPT_PROCESSING_STARTED
+  ACTION_RECEIPT_GAS_REWARD
+  RECEIPT_PROCESSING
+  POSTPONED_RECEIPT
+  UPDATED_DELAYED_RECEIPTS
+  VALIDATOR_ACCOUNTS_UPDATE
+  MIGRATION
+}
