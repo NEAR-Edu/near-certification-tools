@@ -25,7 +25,7 @@ Visitors can view the image at /api/cert/abcd.svg or /api/cert/abcd.png. See [/w
 ## Getting Started
 
 ```bash
-cp web-app/.env.local.example web-app/.env
+cp web-app/.env web-app/.env.local
 # Then edit those values. You'll need to replace the value of NEXT_PUBLIC_CERTIFICATE_CONTRACT_NAME with your own that you saw in the CLI. Ask Ryan for any other secrets.
 yarn
 yarn dev
