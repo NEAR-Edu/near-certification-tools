@@ -55,7 +55,7 @@ The app is at [http://localhost:3000/api/cert/303216412112497cb6c193152a27c49c.s
 1. Lower priority improvements:
    1. Add cert text details to `web-app/pages/certificate/[tokenId].tsx` but consider efficiency; it should fetch certificate data just once, and then pass that to the image generator. fetchCertificateDetails should not be inside `web-app/pages/api/cert/[imageFileName].ts`
 
-## Ozan and Çağatay to split up:
+## Ozan, Çağatay, Rasha to split up:
 
 (In approximate order of importance, but you can sometimes make progress on multiple items at once.)
 
@@ -64,7 +64,7 @@ Especially when working on a team that lives across time zones, it's important t
 1. Work with Dan to:
    - make sure he provides you a background SVG file for each program's certificate + designs for what the final output should look like once text is inserted. (This is a blocker for the `generateImage` task below.)
    - get his input on the overall design of the pages mentioned below. But this is less important than his design for the certificate images themselves. If Dan is too busy, consider just doing your best to improve how our site looks (using Tailwind themes/templates, which I don't know how to do yet, or maybe Bootstrap).
-1. Once you have Dan's designs, in `web-app/pages/api/cert/[imageFileName].ts`, update generateImage with designs for each program's certificate
+1. Once you have Dan's designs, in `web-app/pages/api/cert/[imageFileName].ts`, update generateImage and `web-app/helpers/certificate-designs.ts` with designs for each program's certificate
 1. improve the design of:
 
    - `web-app/components/Layout.tsx`
