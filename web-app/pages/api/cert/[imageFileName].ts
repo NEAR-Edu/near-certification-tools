@@ -7,6 +7,7 @@ import {
   createCanvas,
   loadImage,
 } from 'canvas';
+import dayjs, { Dayjs } from 'dayjs';
 import { getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
@@ -20,11 +21,17 @@ const fontFamily = 'signpainter';
 const svg = 'svg';
 const dot = '.';
 const imagePng = 'image/png';
+const expirationMonths = 6;
 
 // TODO registerFont(fontFile, { family: fontFamily });
 
 type CanvasTypeDef = 'pdf' | 'svg' | undefined;
 type BufferTypeDef = 'image/png' | undefined;
+
+function formatDate(dateTime: Dayjs) {
+  // https://day.js.org/docs/en/display/format
+  return dayjs(dateTime).format('YYYY-MM-DD HH:mm'); // TODO Check what time zone
+}
 
 function parseFileName(imageFileNameString: string) {
   const extension = imageFileNameString.split(dot).pop(); // https://stackoverflow.com/a/1203361/470749
@@ -84,17 +91,21 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   addText(canvas, programName, font, fillStyle, width * 0.05, height * 0.4);
   addText(canvas, accountName, font, fillStyle, width * 0.5, height * 0.3);
   addText(canvas, competencies, font, fillStyle, width * 0.5, height * 0.4);
-  // TODO: Will we show an expiration?
+  // TODO: Show an expiration
 
   // Convert the Canvas to a buffer
   const buffer = bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();
   return buffer;
 }
 
-async function getExpiration(accountName: string): Promise<string> {
-  // TODO: Will we show an expiration? Is it always 'most recent mainnet activity' + 6 months?
+async function getMostRecentActivityDateTime(accountName: string): Promise<string> {
   console.log({ accountName });
-  return '';
+  return ''; // TODO
+}
+
+async function getExpiration(accountName: string): Promise<string> {
+  const recent = await getMostRecentActivityDateTime(accountName);
+  return formatDate(dayjs(recent).add(expirationMonths, 'months'));
 }
 
 async function fetchCertificateDetails(tokenId: string) {
@@ -110,7 +121,7 @@ async function fetchCertificateDetails(tokenId: string) {
     const programCode = certificateMetadata.program;
     const competencies = certificateMetadata.memo || metadata.description; // TODO: Do we definitely want to show competencies? Where will they be stored?
     const expiration = await getExpiration(accountName);
-    const date = metadata.issued_at; // TODO: Choose how we want to format the date.
+    const date = formatDate(metadata.issued_at);
     const programName = metadata.title;
     return {
       tokenId,

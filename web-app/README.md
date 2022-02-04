@@ -43,8 +43,7 @@ The app is at [http://localhost:3000/api/cert/303216412112497cb6c193152a27c49c.s
 
 ## Ryan:
 
-1. fix fetchCertificateDetails
-   1. Will we show competencies? Expiration? How will we dynamically calculate the expiration date? https://discord.com/channels/828768337978195969/906115083250307103/938190056429092924 has hints.
+1. fix getMostRecentActivityDateTime. How will we dynamically calculate the expiration date? https://discord.com/channels/828768337978195969/906115083250307103/938190056429092924 has hints.
 1. figure out correct var values for the `.env` file
 1. Get access to Integromat (and Airtable if necessary), and paste our `API_KEY` (the arbitrary one in our `.env` file) into the appropriate place in Integromat's HTTP app.
 1. Ask Sherif to map his desired subdomain to the specific path at render.com/example
