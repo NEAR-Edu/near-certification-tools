@@ -110,13 +110,13 @@ NEAR_ENV=testnet near view dev-1643292007908-55838431863482 nft_metadata
 ### Issue a certificate
 You can now issue a certificate by running something like `NEAR_ENV=testnet near call <the contract ID> nft_mint '<a JSON payload similar to as shown in sample_mint.json>' --account-id <whichever account you logged in as>.testnet --deposit 0.2 --gas 300000000000000`. Example:
 ```bash
-NEAR_ENV=testnet near call dev-1643292007908-55838431863482 nft_mint '{  "token_id": "303216412112497cb6c193152a27c49c",  "receiver_account_id": "hatchet.testnet",  "token_metadata": {    "title": "Certified White Hat Hacker",    "description": "This certifies that the recipient has fulfilled Organization, Inc.s requirements as a white hat hacker.",    "media": null,    "media_hash": null,    "copies": 1,    "issued_at": "2021-11-28 13:00",    "expires_at": null,    "starts_at": null,    "updated_at": null,    "extra": null,    "reference": null,    "reference_hash": null  },  "certification_metadata": {    "authority_id": "john_instructor.near",    "authority_name": "John Instructor",    "program": "TR101",    "program_name": "White hat hacking with transferable certification",    "program_link": "https://near.university",    "program_start_date": null,    "program_end_date": null,    "original_recipient_id": "original_recipient.near",    "original_recipient_name": "Original Recipient",    "valid": true,    "memo": null  },  "memo": null}' --account-id ryancwalsh.testnet --deposit 0.2 --gas 300000000000000
+NEAR_ENV=testnet near call dev-1643292007908-55838431863482 nft_mint '{  "token_id": "103216412112497cb6c193152a27c49a",  "receiver_account_id": "hatchet.testnet",  "token_metadata": {    "title": "Certified White Hat Hacker",    "description": "This certifies that the recipient has fulfilled Organization, Inc.s requirements as a white hat hacker.",    "media": null,    "media_hash": null,    "copies": 1,    "issued_at": "2021-11-28 13:00",    "expires_at": null,    "starts_at": null,    "updated_at": null,    "extra": null,    "reference": null,    "reference_hash": null  },  "certification_metadata": {    "authority_id": "john_instructor.near",    "authority_name": "John Instructor",    "program": "TR101",    "program_name": "White hat hacking with transferable certification",    "program_link": "https://near.university",    "program_start_date": null,    "program_end_date": null,    "original_recipient_id": "hatchet.testnet",    "original_recipient_name": "Original Recipient",    "valid": true,    "memo": null  },  "memo": null}' --account-id ryancwalsh.testnet --deposit 0.2 --gas 300000000000000
 ```
 
 ### View Certificate
 Then you can view those details of that certificate on the blockchain by running something like `NEAR_ENV=testnet near view <contract ID> nft_token '{"token_id": "<token ID>"}'`. Example:
 ```bash
-NEAR_ENV=testnet near view dev-1643292007908-55838431863482 nft_token '{"token_id": "303216412112497cb6c193152a27c49c"}'
+NEAR_ENV=testnet near view dev-1643292007908-55838431863482 nft_token '{"token_id": "103216412112497cb6c193152a27c49a"}'
 ```
 
 ### View all NFTs (from this contract) owned by an account

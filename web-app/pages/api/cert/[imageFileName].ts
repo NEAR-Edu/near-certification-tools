@@ -2,14 +2,14 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createCanvas } from 'canvas';
-import dayjs, { Dayjs } from 'dayjs';
-import { Decimal } from '@prisma/client/runtime';
+import { Dayjs } from 'dayjs';
 import { getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
 import { height, populateAnalystCert, populateDeveloperCert, width } from '../../../helpers/certificate-designs';
 import prisma from '../../../helpers/prisma';
 import { addCacheHeader } from '../../../helpers/caching';
+import { convertTimestampDecimalToDayjsMoment, formatDate } from '../../../helpers/time';
 
 const HTTP_ERROR_CODE_MISSING = 404;
 const svg = 'svg';
@@ -20,11 +20,6 @@ const CACHE_SECONDS: number = Number(process.env.DYNAMIC_CERT_IMAGE_GENERATION_C
 
 type CanvasTypeDef = 'pdf' | 'svg' | undefined;
 type BufferTypeDef = 'image/png' | undefined;
-
-function formatDate(dateTime: Dayjs) {
-  // https://day.js.org/docs/en/display/format
-  return dayjs(dateTime).format('YYYY-MM-DD HH:mm'); // TODO Check what time zone
-}
 
 function parseFileName(imageFileNameString: string) {
   const extension = imageFileNameString.split(dot).pop(); // https://stackoverflow.com/a/1203361/470749
@@ -38,7 +33,6 @@ function parseFileName(imageFileNameString: string) {
 
 async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDef, details: any) {
   const { programCode } = details;
-  // TODO: Add more programs
 
   const canvas = createCanvas(width, height, canvasType);
 
@@ -46,6 +40,7 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
     case 'NCA':
       await populateAnalystCert(canvas, details);
       break;
+    // TODO: Add more programs
     default:
       await populateDeveloperCert(canvas, details);
   }
@@ -55,29 +50,29 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   return buffer;
 }
 
-function convertTimestampDecimalToDayjsMoment(timestampDecimal: Decimal): Dayjs {
-  const timestampNum = Number(timestampDecimal) / 1_000_000_000;
-  console.log({ timestampNum });
-  const moment = dayjs.unix(timestampNum); // https://day.js.org/docs/en/parse/unix-timestamp
-  return moment;
-}
-
 async function getMostRecentActivityDateTime(accountName: string): Promise<Dayjs> {
+  // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
+  /* This function includes an ugly temporary workaround. `findFirst` (instead of findMany with `take: 2`) should have worked but was causing a timeout.
+     Apparently it's not Prisma's fault though.Even running a LIMIT 1 query in pgAdmin causes a timeout, surprisingly, even though a LIMIT 2 query does not.
+     https://stackoverflow.com/questions/71026316/why-would-limit-2-queries-work-but-limit-1-always-times-out
+     This is suspicious but seems unrelated to this repo. */
   try {
-    const result = await prisma.receipts.findFirst({
-      // where: {  // TODO Figure out why these lines caused a timeout.
-      //   action_receipts: {
-      //     // https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting#filter-on-relations
-      //     signer_account_id: {
-      //       equals: accountName,
-      //     },
-      //   },
-      // },
+    const rows = await prisma.receipts.findMany({
+      where: {
+        action_receipts: {
+          // https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting#filter-on-relations
+          signer_account_id: {
+            equals: accountName,
+          },
+        },
+      },
       orderBy: {
         included_in_block_timestamp: 'desc',
       },
+      take: 2, // see comment above about workaround
     });
-    if (result) {
+    if (rows) {
+      const result = rows[0]; // see comment above about workaround
       console.log({ accountName, result });
       const moment = convertTimestampDecimalToDayjsMoment(result.included_in_block_timestamp);
       console.log({ accountName, result, moment }, moment.format());
@@ -87,7 +82,9 @@ async function getMostRecentActivityDateTime(accountName: string): Promise<Dayjs
     console.error({ error });
   }
 
-  throw new Error('getMostRecentActivityDateTime did not produce a result');
+  throw new Error(
+    'getMostRecentActivityDateTime did not produce a result. Perhaps a certificate for the original_recipient_id could not be found or the public indexer query timed out.',
+  );
 }
 
 async function getExpiration(accountName: string): Promise<string> {

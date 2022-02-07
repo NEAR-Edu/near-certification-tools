@@ -31,7 +31,7 @@ yarn
 yarn dev
 ```
 
-The app is at [http://localhost:3000/api/cert/303216412112497cb6c193152a27c49c.svg](http://localhost:3000/api/cert/303216412112497cb6c193152a27c49c.svg) and [http://localhost:3000/api/mint-cert](http://localhost:3000/api/mint-cert).
+The app is at [http://localhost:3000/api/cert/103216412112497cb6c193152a27c49a.svg](http://localhost:3000/api/cert/103216412112497cb6c193152a27c49a.svg) and [http://localhost:3000/api/mint-cert](http://localhost:3000/api/mint-cert).
 
 ## See also
 
@@ -43,7 +43,6 @@ The app is at [http://localhost:3000/api/cert/303216412112497cb6c193152a27c49c.s
 
 ## Ryan:
 
-1. fix getMostRecentActivityDateTime. How will we dynamically calculate the expiration date? https://discord.com/channels/828768337978195969/906115083250307103/938190056429092924 has hints.
 1. figure out correct var values for the `.env` file
 1. Get access to Integromat (and Airtable if necessary), and paste our `API_KEY` (the arbitrary one in our `.env` file) into the appropriate place in Integromat's HTTP app.
 1. Ask Sherif to map his desired subdomain to the specific path at render.com/example
@@ -73,6 +72,6 @@ Especially when working on a team that lives across time zones, it's important t
    - `web-app/pages/certificate/[tokenId].tsx`
 
 1. Learn about Open Graph https://ogp.me/. Edit the `<head>` tag (in a NextJs way) of the `web-app/pages/certificate/[tokenId].tsx` page to include social metadata to make that page generate a preview when people share it on social platforms. E.g. https://www.linkedin.com/post-inspector/ and https://cards-dev.twitter.com/validator will show you what sharing any particular URL will look like. Since we're working on localhost and don't automatically have a publicly-viewable URL, you'll probably need to generate a temporary public URL for your machine using localtunnel https://theboroer.github.io/localtunnel-www/ or something similar (in order to use those sharing-preview tools).
-1. Check that the sharing buttons at http://localhost:3000/certificate/303216412112497cb6c193152a27c49c successfully post to Twitter and LinkedIn. (See note above about localtunnel).
+1. Check that the sharing buttons at http://localhost:3000/certificate/103216412112497cb6c193152a27c49a successfully post to Twitter and LinkedIn. (See note above about localtunnel).
 1. Add Google Analytics tracking to the layout. You'll probably need to work with Sherif (get him to give you whatever tracking ID you need).
 1. Stay aware of what others (e.g. Ryan) are working on. Take opportunities whenever you can to volunteer to move a specific task off my list and onto your list. Any time you can stretch into doing something more difficult is a win for all of us.

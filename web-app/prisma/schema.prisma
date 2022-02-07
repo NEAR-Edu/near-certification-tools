@@ -1,4 +1,5 @@
 // Models were written automatically via `prisma db pull`. https://www.prisma.io/docs/concepts/components/introspection
+// Whenever changing this file, running `npx prisma generate` afterwards is required. https://www.prisma.io/docs/concepts/components/prisma-cli/installation
 
 generator client {
   provider = "prisma-client-js"
@@ -6,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_MAINNET_URL")
+  url      = env("DATABASE_URL")
 }
 
 model access_keys {
