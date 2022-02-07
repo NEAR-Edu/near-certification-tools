@@ -1,3 +1,5 @@
+// Models were written automatically via `prisma db pull`. https://www.prisma.io/docs/concepts/components/introspection
+
 generator client {
   provider = "prisma-client-js"
 }

@@ -3,6 +3,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createCanvas } from 'canvas';
 import dayjs, { Dayjs } from 'dayjs';
+import { Decimal } from '@prisma/client/runtime';
 import { getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
@@ -54,28 +55,39 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   return buffer;
 }
 
-async function getMostRecentActivityDateTime(accountName: string): Promise<Dayjs> {
-  // TODO
-  const result = await prisma.receipts.findFirst({
-    where: {
-      action_receipts: {
-        // https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting#filter-on-relations
-        signer_account_id: {
-          equals: accountName,
-        },
-      },
-    },
-    orderBy: {
-      included_in_block_timestamp: 'desc',
-    },
-  });
-  console.log({ accountName, result });
-  const moment = dayjs(); // TODO remove
-  // const timestamp: number = result?.included_in_block_timestamp;
-  // const moment = timestamp ? dayjs(timestamp) : null;
-  // console.log({ accountName, result, timestamp, moment });
-
+function convertTimestampDecimalToDayjsMoment(timestampDecimal: Decimal): Dayjs {
+  const timestampNum = Number(timestampDecimal) / 1_000_000_000;
+  console.log({ timestampNum });
+  const moment = dayjs.unix(timestampNum); // https://day.js.org/docs/en/parse/unix-timestamp
   return moment;
+}
+
+async function getMostRecentActivityDateTime(accountName: string): Promise<Dayjs> {
+  try {
+    const result = await prisma.receipts.findFirst({
+      // where: {  // TODO Figure out why these lines caused a timeout.
+      //   action_receipts: {
+      //     // https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting#filter-on-relations
+      //     signer_account_id: {
+      //       equals: accountName,
+      //     },
+      //   },
+      // },
+      orderBy: {
+        included_in_block_timestamp: 'desc',
+      },
+    });
+    if (result) {
+      console.log({ accountName, result });
+      const moment = convertTimestampDecimalToDayjsMoment(result.included_in_block_timestamp);
+      console.log({ accountName, result, moment }, moment.format());
+      return moment;
+    }
+  } catch (error) {
+    console.error({ error });
+  }
+
+  throw new Error('getMostRecentActivityDateTime did not produce a result');
 }
 
 async function getExpiration(accountName: string): Promise<string> {
@@ -94,7 +106,6 @@ async function fetchCertificateDetails(tokenId: string) {
     console.log({ contract, response, certificateMetadata });
     const accountName = certificateMetadata.original_recipient_id;
     const programCode = certificateMetadata.program;
-    // const competencies = certificateMetadata.memo || metadata.description; // TODO: Do we definitely want to show competencies? Where will they be stored?
     const expiration = await getExpiration(accountName);
     const date = formatDate(metadata.issued_at);
     const programName = metadata.title;
