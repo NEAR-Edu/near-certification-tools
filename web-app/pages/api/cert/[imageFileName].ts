@@ -8,12 +8,14 @@ import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
 import { height, populateAnalystCert, populateDeveloperCert, width } from '../../../helpers/certificate-designs';
 import prisma from '../../../helpers/prisma';
+import { addCacheHeader } from '../../../helpers/caching';
 
 const HTTP_ERROR_CODE_MISSING = 404;
 const svg = 'svg';
 const dot = '.';
 const imagePng = 'image/png';
 const expirationMonths = 6;
+const CACHE_SECONDS: number = Number(process.env.DYNAMIC_CERT_IMAGE_GENERATION_CACHE_SECONDS) || 60 * 60 * 6;
 
 type CanvasTypeDef = 'pdf' | 'svg' | undefined;
 type BufferTypeDef = 'image/png' | undefined;
@@ -122,7 +124,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     // Provide each piece of text to generateImage.
     const imageBuffer = await generateImage(canvasType, bufferType, details);
     res.setHeader('Content-Type', contentType);
-    // TODO: cache
+    addCacheHeader(res, CACHE_SECONDS);
+    // Caching is important especially because of getMostRecentActivityDateTime, which pulls from the public indexer database.
     res.send(imageBuffer);
   } else {
     res.status(HTTP_ERROR_CODE_MISSING).json({ error: `No certificate exists with this Token ID (${tokenId}).` });
