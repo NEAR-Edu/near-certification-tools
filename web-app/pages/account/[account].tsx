@@ -90,6 +90,9 @@ const Account: NextPage<AccountPageProps> = ({ accountId, certificates }: Accoun
           </div>
         </div>
       </div>
+      {/* <div className={styles.grid}>
+        {certificates.length > 0 ? certificates.map((tokenId: string) => <Tile tokenId={tokenId} key={tokenId} />) : <span>No certificates yet!</span>}
+      </div> */}
     </Layout>
   );
 };
