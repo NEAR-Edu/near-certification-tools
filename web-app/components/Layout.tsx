@@ -19,7 +19,9 @@ export default function Layout({ children }: { children: JSX.Element | JSX.Eleme
         />
       </Head>
       <div>
-        <a href="/">NEAR University Certificate Browser</a>
+        <a className="ml-2 text-sm font-medium text-gray-500 hover:text-gray-700" href="/">
+          NEAR University Certificate Browser
+        </a>
       </div>
       <main className={styles.main}>{children}</main>
       <footer className={styles.footer}>
