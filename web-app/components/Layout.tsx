@@ -2,6 +2,7 @@
 
 import Head from 'next/head';
 import styles from '../styles/Layout.module.scss';
+import Footer from './Footer';
 
 export default function Layout({ children }: { children: JSX.Element | JSX.Element[] }) {
   return (
@@ -18,17 +19,16 @@ export default function Layout({ children }: { children: JSX.Element | JSX.Eleme
           referrerPolicy="no-referrer"
         />
       </Head>
-      <div>
+      <div className="mt-4">
         <a className="ml-2 text-sm font-medium text-gray-500 hover:text-gray-700" href="/">
           NEAR University Certificate Browser
         </a>
       </div>
       <main className={styles.main}>{children}</main>
-      <footer className={styles.footer}>
-        <a href="https://NEAR.University" target="_blank" rel="noopener noreferrer">
-          <img alt="NEAR University logo" src="https://assets-global.website-files.com/617fd6a2d7dd9a6b1c4c4dc6/618466f043553984d596b38d_nu_logo.svg" />
-        </a>
-      </footer>
+      <Footer />
+      {/* <footer className={styles.footer}>
+
+      </footer> */}
     </div>
   );
 }
