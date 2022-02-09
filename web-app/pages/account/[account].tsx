@@ -6,6 +6,7 @@ import styles from '../../styles/Account.module.scss';
 import { getImageUrl, getSimpleStringFromParam } from '../../helpers/strings';
 import { AccountId, getNearAccountWithoutAccountIdOrKeyStoreForFrontend } from '../../helpers/near';
 import { getNftContract, NFT } from '../api/mint-cert';
+import { Certificate, isValid } from '../../helpers/certificate';
 
 function Tile({ tokenId }: { tokenId: string }): JSX.Element {
   const svgUrl = getImageUrl(tokenId);
@@ -18,7 +19,6 @@ function Tile({ tokenId }: { tokenId: string }): JSX.Element {
   );
 }
 
-type Certificate = any;
 type AccountPageProps = { accountId: AccountId; certificates: Certificate[] };
 
 async function getCertificates(accountId: string): Promise<string[]> {
@@ -26,7 +26,7 @@ async function getCertificates(accountId: string): Promise<string[]> {
   const contract = getNftContract(account);
   const response = await (contract as NFT).nft_tokens_for_owner({ account_id: accountId });
   console.log({ account, accountId, response });
-  return response.map((cert: Certificate) => cert.token_id);
+  return response.filter((cert: Certificate) => isValid(cert)).map((cert: Certificate) => cert.token_id);
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

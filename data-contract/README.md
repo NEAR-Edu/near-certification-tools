@@ -124,4 +124,10 @@ Run something like `NEAR_ENV=testnet near view <the contract ID> nft_tokens_for_
 ```bash
 NEAR_ENV=testnet near view dev-1643292007908-55838431863482 nft_tokens_for_owner '{"account_id": "hatchet.testnet"}'
 ```
+
+### Invalidate a cert
+Run something like `NEAR_ENV=testnet near call <the contract ID> cert_invalidate '{ "token_id": "<some token ID>"}' --account-id <whichever account you logged in as>.testnet --depositYocto 1 --gas 300000000000000`. Example:
+```bash
+NEAR_ENV=testnet near call dev-1643292007908-55838431863482 cert_invalidate '{ "token_id": "303216412112497cb6c193152a27c49c"}' --account-id ryancwalsh.testnet --depositYocto 1 --gas 300000000000000
+```
 ----

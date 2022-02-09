@@ -29,6 +29,16 @@ function buildLinkedInUrl(pngUrl: string) {
   return url;
 }
 
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//   // https://nextjs.org/docs/api-reference/data-fetching/get-server-side-props
+//   // TODO: In getServerSideProps, check for existence of cert of this tokenId, and ensure that it's valid. If does not exist or is invalid, return HTTP_ERROR_CODE_MISSING error.
+//   const { account } = context.query; // https://nextjs.org/docs/routing/dynamic-routes
+
+//   // Pass data to the page via props
+//   const props: PageProps = { };
+//   return { props };
+// };
+
 const Certificate: NextPage = () => {
   const router = useRouter();
   const { tokenId } = router.query; // https://nextjs.org/docs/routing/dynamic-routes

@@ -11,7 +11,7 @@ import prisma from '../../../helpers/prisma';
 import { addCacheHeader } from '../../../helpers/caching';
 import { convertTimestampDecimalToDayjsMoment, formatDate } from '../../../helpers/time';
 
-const HTTP_ERROR_CODE_MISSING = 404;
+export const HTTP_ERROR_CODE_MISSING = 404;
 const svg = 'svg';
 const dot = '.';
 const imagePng = 'image/png';
@@ -101,23 +101,24 @@ async function fetchCertificateDetails(tokenId: string) {
     const { extra } = metadata;
     const certificateMetadata = JSON.parse(extra);
     console.log({ contract, response, certificateMetadata });
-    const accountName = certificateMetadata.original_recipient_id;
-    const programCode = certificateMetadata.program;
-    const expiration = await getExpiration(accountName);
-    const date = formatDate(metadata.issued_at);
-    const programName = metadata.title;
-    return {
-      tokenId,
-      date,
-      programCode, // This will determine which background image gets used.
-      programName,
-      accountName,
-      // competencies,
-      expiration,
-    };
-  } else {
-    return null;
+    // similar to isValid function but without re-running some of those lines
+    if (certificateMetadata.valid) {
+      const accountName = certificateMetadata.original_recipient_id;
+      const programCode = certificateMetadata.program;
+      const expiration = await getExpiration(accountName); // TODO: Wrap in try/catch blocks to handle when indexer service is unavailable.
+      const date = formatDate(metadata.issued_at);
+      const programName = metadata.title;
+      return {
+        tokenId,
+        date,
+        programCode, // This will determine which background image gets used.
+        programName,
+        accountName,
+        expiration,
+      };
+    }
   }
+  return null;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Buffer | { error: string }>) {
