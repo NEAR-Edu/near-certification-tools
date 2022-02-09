@@ -5,7 +5,7 @@ import { Account, Contract, utils } from 'near-api-js'; // https://github.com/ne
 import { AccountId, getNearAccount } from '../../helpers/near';
 import { getImageUrl } from '../../helpers/strings';
 
-const privateKey = process.env.NEAR_PRIVATE_KEY || '';
+const privateKey = process.env.ISSUING_AUTHORITY_PRIVATE_KEY || '';
 const apiKey = process.env.API_KEY || '';
 // public vars:
 const certificateContractName = process.env.NEXT_PUBLIC_CERTIFICATE_CONTRACT_NAME || 'example-contract.testnet';

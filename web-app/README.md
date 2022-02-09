@@ -48,7 +48,7 @@ The app is at [http://localhost:3000/api/cert/103216412112497cb6c193152a27c49a.s
 1. Ensure that HTTP is blocked (because HTTPS is enforced via `web-app/pages/_middleware.ts`). (We wouldn't want `web-app/pages/api/mint-cert.ts` exposed via HTTP because our secret `API_KEY` would be leaked, and anyone could issue any certificate.)
    1. 2022-02-02 13:00 ET http://near-certification-tools.onrender.com/ does seem to successfully redirect to https://near-certification-tools.onrender.com/ but we'll want to test the minting later.
 1. Sherif will deploy the production contract.
-1. figure out correct var values for the `.env` file
+1. Figure out correct var values for the `.env` file. E.g. replace NEXT_PUBLIC_ISSUING_AUTHORITY_ACCOUNT_ID and ISSUING_AUTHORITY_PRIVATE_KEY in https://dashboard.render.com/env-group/evg-c822des6fj315u4tmckg
 1. Lower priority improvements:
    1. Add documentation at deployment_notes.md about Integromat, etc
    1. Add validation to minting
