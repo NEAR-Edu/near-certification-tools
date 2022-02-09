@@ -57,7 +57,7 @@ export function getNftContract(account: Account) {
 }
 
 function generateUUIDForTokenId(): string {
-  return randomUUID().replaceAll('-', ''); // https://stackoverflow.com/a/67624847/470749 https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID
+  return randomUUID().replace(/-/g, ''); // https://stackoverflow.com/a/67624847/470749 https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID
 }
 
 function buildMetadata(certificateRequiredFields: CertificateRequiredFields) {
@@ -117,12 +117,14 @@ async function mintCertificate(tokenId: string, certificateRequiredFields: Certi
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   // Require that this request is authenticated!
+  const tokenId = generateUUIDForTokenId();
+  console.log({ tokenId });
   const { headers } = req; // https://stackoverflow.com/a/63529345/470749
   if (headers?.[apiKeyHeaderName] === apiKey) {
     const body = req?.body;
     console.log({ headers, body });
     const certificateRequiredFields = body?.details; // Eventually we will want to add error-handling / validation.
-    const tokenId = generateUUIDForTokenId();
+    // const tokenId = generateUUIDForTokenId();
     console.log('minting', { tokenId, certificateRequiredFields });
     try {
       const result = await mintCertificate(tokenId, certificateRequiredFields);
