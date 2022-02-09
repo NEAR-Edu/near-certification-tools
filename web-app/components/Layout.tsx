@@ -26,9 +26,6 @@ export default function Layout({ children }: { children: JSX.Element | JSX.Eleme
       </div>
       <main className={styles.main}>{children}</main>
       <Footer />
-      {/* <footer className={styles.footer}>
-
-      </footer> */}
     </div>
   );
 }
