@@ -127,6 +127,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const detailsJson = getSimpleStringFromParam(details);
     const certificateRequiredFields = JSON.parse(detailsJson); // Eventually we will want to add error-handling / validation.
     const tokenId = generateUUIDForTokenId();
+    console.log('minting', { tokenId, certificateRequiredFields });
     mintCertificate(tokenId, certificateRequiredFields)
       .then((result) => {
         const url = getSvgUrl(req.headers.host || '', tokenId);
@@ -136,6 +137,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         res.status(HTTP_ERROR).json({ status: 'error', message: 'Issuing the certificate failed.' });
       });
   } else {
-    res.status(HTTP_UNAUTHORIZED).json({ status: 'error', message: 'Unauthorized. Please provide the API key.' });
+    const errorMsg = 'Unauthorized. Please provide the API key.';
+    console.log({ errorMsg, headers });
+    res.status(HTTP_UNAUTHORIZED).json({ status: 'error', message: errorMsg });
   }
 }
