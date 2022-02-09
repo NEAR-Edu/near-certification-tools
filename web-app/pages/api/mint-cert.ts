@@ -19,7 +19,7 @@ const HTTP_ERROR = 500;
 const HTTP_UNAUTHORIZED = 401; // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
 // Could also use https://github.com/near/units-js#parsing-strings for this:
 const depositAmountYoctoNear = utils.format.parseNearAmount('0.2'); // 0.2Ⓝ is max. There will be a certain deposit required to pay for the storage of the data on chain. Contract will automatically refund any excess.
-const apiKeyHeaderName = 'X-API-Key'; // matches the default API key header name of Integromat
+const apiKeyHeaderName = 'x-api-key'; // Although the user interface of Integromat shows the capitalization as "X-API-Key", inspecting the actual header reveals that lowercase is used.
 
 type CertificateRequiredFields = {
   title: string;
