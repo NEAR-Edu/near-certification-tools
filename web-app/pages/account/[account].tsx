@@ -25,8 +25,10 @@ async function getCertificates(accountId: string): Promise<string[]> {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForFrontend();
   const contract = getNftContract(account);
   const response = await (contract as NFT).nft_tokens_for_owner({ account_id: accountId });
-  console.log({ account, accountId, response });
-  return response.map((cert: Certificate) => cert.token_id);
+  // console.log('responses', { account, accountId, response });
+  // const devReact = devs.filter(obj => obj.tech.includes("React")).map(obj => ({"name":obj.name, "tech":obj.tech}));
+
+  return response.filter((obj: any) => JSON.parse(obj.metadata.extra).valid === true).map((cert: Certificate) => cert.token_id);
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
