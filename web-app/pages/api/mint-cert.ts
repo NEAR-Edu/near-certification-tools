@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { randomUUID } from 'crypto'; // Added in: node v14.17.0
 import { Account, Contract, utils } from 'near-api-js'; // https://github.com/near/near-api-js/blob/master/examples/quick-reference.md
 import { AccountId, getNearAccount } from '../../helpers/near';
-import { getImagePath, getSimpleStringFromParam } from '../../helpers/strings';
+import { getImageUrl } from '../../helpers/strings';
 
 const privateKey = process.env.NEAR_PRIVATE_KEY || '';
 const apiKey = process.env.API_KEY || '';
@@ -115,27 +115,23 @@ async function mintCertificate(tokenId: string, certificateRequiredFields: Certi
   return result;
 }
 
-function getSvgUrl(baseUrl: string, tokenId: string) {
-  return `${baseUrl}${getImagePath(tokenId)}`;
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   // Require that this request is authenticated!
   const { headers } = req; // https://stackoverflow.com/a/63529345/470749
   if (headers?.[apiKeyHeaderName] === apiKey) {
-    const { details } = req.query;
-    const detailsJson = getSimpleStringFromParam(details);
-    const certificateRequiredFields = JSON.parse(detailsJson); // Eventually we will want to add error-handling / validation.
+    const body = req?.body;
+    console.log({ headers, body });
+    const certificateRequiredFields = body?.details; // Eventually we will want to add error-handling / validation.
     const tokenId = generateUUIDForTokenId();
     console.log('minting', { tokenId, certificateRequiredFields });
-    mintCertificate(tokenId, certificateRequiredFields)
-      .then((result) => {
-        const url = getSvgUrl(req.headers.host || '', tokenId);
-        res.status(HTTP_SUCCESS).json({ result, tokenId, url });
-      })
-      .catch(() => {
-        res.status(HTTP_ERROR).json({ status: 'error', message: 'Issuing the certificate failed.' });
-      });
+    try {
+      const result = await mintCertificate(tokenId, certificateRequiredFields);
+      const url = getImageUrl(tokenId);
+      res.status(HTTP_SUCCESS).json({ url, tokenId, result });
+    } catch (err) {
+      console.error(err);
+      res.status(HTTP_ERROR).json({ status: 'error', message: 'Issuing the certificate failed.' });
+    }
   } else {
     const errorMsg = 'Unauthorized. Please provide the API key.';
     console.log({ errorMsg, headers });
