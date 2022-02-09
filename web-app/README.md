@@ -43,7 +43,6 @@ The app is at [http://localhost:3000/api/cert/103216412112497cb6c193152a27c49a.s
 
 ## Ryan:
 
-1. Make Integromat work with the /api/mint-cert endpoint here.
 1. Integrate Airtable with Integromat
 1. Ask Sherif to map his desired subdomain in the Custom Domains section of https://dashboard.render.com/web/srv-c821j246fj315u4tlj90/settings
 1. Ensure that HTTP is blocked (because HTTPS is enforced via `web-app/pages/_middleware.ts`). (We wouldn't want `web-app/pages/api/mint-cert.ts` exposed via HTTP because our secret `API_KEY` would be leaked, and anyone could issue any certificate.)
@@ -74,7 +73,12 @@ Especially when working on a team that lives across time zones, it's important t
    - `web-app/pages/account/[account].tsx`
    - `web-app/pages/certificate/[tokenId].tsx`
 
-1. Learn about Open Graph https://ogp.me/. Edit the `<head>` tag (in a NextJs way) of the `web-app/pages/certificate/[tokenId].tsx` page to include social metadata to make that page generate a preview when people share it on social platforms. E.g. https://www.linkedin.com/post-inspector/ and https://cards-dev.twitter.com/validator will show you what sharing any particular URL will look like. Since we're working on localhost and don't automatically have a publicly-viewable URL, you'll probably need to generate a temporary public URL for your machine using localtunnel https://theboroer.github.io/localtunnel-www/ or something similar (in order to use those sharing-preview tools).
+1. Learn about Open Graph https://ogp.me/. Edit the `<head>` tag (in a NextJs way) of the `web-app/pages/certificate/[tokenId].tsx` page to include social metadata to make that page generate a preview when people share it on social platforms. E.g. https://www.linkedin.com/post-inspector/ and https://cards-dev.twitter.com/validator will show you what sharing any particular URL will look like. Since we're working on localhost and don't automatically have a publicly-viewable URL, you'll probably need to generate a temporary public URL for your machine using localtunnel https://theboroer.github.io/localtunnel-www/ or https://github.com/fusebit/tunnel or something similar (in order to use those sharing-preview tools).
 1. Check that the sharing buttons at http://localhost:3000/certificate/103216412112497cb6c193152a27c49a successfully post to Twitter and LinkedIn. (See note above about localtunnel).
 1. Add Google Analytics tracking to the layout. You'll probably need to work with Sherif (get him to give you whatever tracking ID you need).
 1. Stay aware of what others (e.g. Ryan) are working on. Take opportunities whenever you can to volunteer to move a specific task off my list and onto your list. Any time you can stretch into doing something more difficult is a win for all of us.
+
+# Helpful tools
+
+- https://github.com/fusebit/tunnel
+- https://reqbin.com/post-online
