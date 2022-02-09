@@ -1,6 +1,6 @@
 # Overview
 
-This project will be accessible at https://cert.near.university (and hosted via https://dashboard.render.com/web/srv-c7sqr03ru51p1aabjuk0/settings).
+This project will be accessible at https://cert.near.university. See [deployment_notes.md](deployment_notes.md).
 
 ## Frontend
 
@@ -43,16 +43,19 @@ The app is at [http://localhost:3000/api/cert/103216412112497cb6c193152a27c49a.s
 
 ## Ryan:
 
-1. figure out correct var values for the `.env` file
-1. Get access to Integromat (and Airtable if necessary), and paste our `API_KEY` (the arbitrary one in our `.env` file) into the appropriate place in Integromat's HTTP app.
-1. Ask Sherif to map his desired subdomain to the specific path at render.com/example
+1. Make Integromat work with the /api/mint-cert endpoint here.
+1. Integrate Airtable with Integromat
+1. Ask Sherif to map his desired subdomain in the Custom Domains section of https://dashboard.render.com/web/srv-c821j246fj315u4tlj90/settings
 1. Ensure that HTTP is blocked (because HTTPS is enforced via `web-app/pages/_middleware.ts`). (We wouldn't want `web-app/pages/api/mint-cert.ts` exposed via HTTP because our secret `API_KEY` would be leaked, and anyone could issue any certificate.)
    1. 2022-02-02 13:00 ET http://near-certification-tools.onrender.com/ does seem to successfully redirect to https://near-certification-tools.onrender.com/ but we'll want to test the minting later.
 1. Sherif will deploy the production contract.
-1. Add documentation here about Integromat, etc
-1. Configure https://github.com/NEAR-Edu/near-certification-tools/settings/branch_protection_rules/new
+1. figure out correct var values for the `.env` file
 1. Lower priority improvements:
+   1. Add documentation at deployment_notes.md about Integromat, etc
+   1. Add validation to minting
    1. Add cert text details to `web-app/pages/certificate/[tokenId].tsx` but consider efficiency; it should fetch certificate data just once, and then pass that to the image generator. fetchCertificateDetails should not be inside `web-app/pages/api/cert/[imageFileName].ts`
+   1. `web-app/pages/certificate/[tokenId].tsx` getServerSideProps 404 error for missing or invalid token
+   1. Check whether `NODE_ENV=development` at https://dashboard.render.com/web/srv-c821j246fj315u4tlj90/settings ought to say `NODE_ENV=production`. If not, document in deployment_notes.md why, because that's surprising.
 
 ## Ozan, Çağatay, Rasha to split up:
 
