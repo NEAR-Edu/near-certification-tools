@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 // https://dev.to/sudo_overflow/diy-generating-dynamic-images-on-the-fly-for-email-marketing-h51
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -108,6 +109,8 @@ async function fetchCertificateDetails(tokenId: string) {
       const expiration = await getExpiration(accountName); // TODO: Wrap in try/catch blocks to handle when indexer service is unavailable.
       const date = formatDate(metadata.issued_at);
       const programName = metadata.title;
+      const programDescription = metadata.description;
+      const instructor = certificateMetadata.authority_id;
       return {
         tokenId,
         date,
@@ -115,6 +118,8 @@ async function fetchCertificateDetails(tokenId: string) {
         programName,
         accountName,
         expiration,
+        programDescription,
+        instructor,
       };
     }
   }
