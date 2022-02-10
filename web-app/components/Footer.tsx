@@ -1,5 +1,10 @@
 /* eslint-disable react/jsx-props-no-spreading */
 const navigation = {
+  main: [
+    { name: 'Discord', href: 'https://discord.gg/k4pxafjMWA' },
+    { name: 'Youtube', href: 'https://www.youtube.com/c/NEARProtocol' },
+    { name: 'Jobs', href: 'https://jobs.near.university/' },
+  ],
   social: [
     {
       name: 'Instagram',
@@ -42,12 +47,21 @@ const navigation = {
 export default function Example() {
   return (
     <footer className="bg-white">
-      <div className="flex justify-center">
+      <div className="pb-8 flex justify-center">
         <a href="https://NEAR.University" target="_blank" rel="noopener noreferrer">
           <img alt="NEAR University logo" width="200px" src="/near_university_logo.svg" />
         </a>
       </div>
       <div className="max-w-7xl mx-auto pb-12 px-4 overflow-hidden sm:px-6 lg:px-8 ">
+        <nav className="-mx-5 -my-2 flex flex-wrap justify-center" aria-label="Footer">
+          {navigation.main.map((item) => (
+            <div key={item.name} className="px-5 py-2">
+              <a href={item.href} className="text-base text-gray-500 hover:text-gray-900">
+                {item.name}
+              </a>
+            </div>
+          ))}
+        </nav>
         <div className="mt-8 flex justify-center space-x-6">
           {navigation.social.map((item) => (
             <a key={item.name} href={item.href} className="text-gray-400 hover:text-gray-500">
