@@ -3,6 +3,7 @@
 import Head from 'next/head';
 import styles from '../styles/Layout.module.scss';
 import Footer from './Footer';
+import Header from './Header';
 
 export default function Layout({ children }: { children: JSX.Element | JSX.Element[] }) {
   return (
@@ -19,11 +20,7 @@ export default function Layout({ children }: { children: JSX.Element | JSX.Eleme
           referrerPolicy="no-referrer"
         />
       </Head>
-      <div className="mt-4">
-        <a className="ml-2 text-sm font-medium text-gray-500 hover:text-gray-700" href="/">
-          NEAR University Certificate Browser
-        </a>
-      </div>
+      <Header />
       <main className={styles.main}>{children}</main>
       <Footer />
     </div>
