@@ -1,17 +1,13 @@
 // https://dev.to/sudo_overflow/diy-generating-dynamic-images-on-the-fly-for-email-marketing-h51
-import {
-  Canvas,
-  // registerFont,
-  loadImage,
-} from 'canvas';
+import { Canvas, registerFont, loadImage } from 'canvas';
 
 // TODO: Update this section:
 export const width = 1080; // width of the image
 export const height = 1080; // height of the image
-// const fontFile = './fonts/Sign-Painter-Regular.ttf';
+const fontFile = './fonts/Manrope-VariableFont_wght.ttf';
 const fontFamily = 'manrope';
 
-// TODO registerFont(fontFile, { family: fontFamily });
+registerFont(fontFile, { family: fontFamily });
 
 function getBaseContext(canvas: Canvas) {
   const context = canvas.getContext('2d');
@@ -31,7 +27,6 @@ function addText(canvas: Canvas, text: string, font: string, fillStyle: string, 
 export async function populateDeveloperCert(canvas: Canvas, details: any) {
   // TODO
   console.log('populateDeveloperCert', { details });
-  console.log('test');
   const { tokenId, date, programName, accountName, expiration, programDescription, instructor } = details;
 
   const newDate = date.split(' ')[0];
@@ -55,12 +50,12 @@ export async function populateDeveloperCert(canvas: Canvas, details: any) {
   context.drawImage(image, 0, 0, width, height);
 
   addText(canvas, accountName, accountFont, black, 302, 304);
-  addText(canvas, programName, programFont, black, 220, 680);
-  addText(canvas, programDescription1, dateFont, grey, 65, 500);
-  addText(canvas, programDescription2, dateFont, grey, 65, 550);
-  addText(canvas, instructor, dateFont, black, 200, 810);
-  addText(canvas, newDate, dateFont, black, 830, 810);
-  addText(canvas, newExpiration, dateFont, black, 830, 865);
+  addText(canvas, programName, programFont, black, 240, 670);
+  addText(canvas, programDescription1, dateFont, grey, 65, 450);
+  addText(canvas, programDescription2, dateFont, grey, 65, 500);
+  addText(canvas, instructor, dateFont, black, 200, 800);
+  addText(canvas, newDate, dateFont, black, 830, 803);
+  addText(canvas, newExpiration, dateFont, black, 830, 860);
   addText(canvas, tokenId, tokenIdFont, black, 250, 995);
 }
 
