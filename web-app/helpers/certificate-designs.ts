@@ -6,10 +6,10 @@ import {
 } from 'canvas';
 
 // TODO: Update this section:
-export const width = 1160; // width of the image
-export const height = 653; // height of the image
+export const width = 1080; // width of the image
+export const height = 1080; // height of the image
 // const fontFile = './fonts/Sign-Painter-Regular.ttf';
-const fontFamily = 'signpainter';
+const fontFamily = 'manrope';
 
 // TODO registerFont(fontFile, { family: fontFamily });
 
@@ -31,23 +31,37 @@ function addText(canvas: Canvas, text: string, font: string, fillStyle: string, 
 export async function populateDeveloperCert(canvas: Canvas, details: any) {
   // TODO
   console.log('populateDeveloperCert', { details });
-  const { tokenId, date, programName, accountName, expiration } = details;
+  console.log('test');
+  const { tokenId, date, programName, accountName, expiration, programDescription, instructor } = details;
 
-  const fillStyle = `#${Math.floor(Math.random() * 16777215).toString(16)}`; // This is just temporary and will be removed once we have final designs for each program's certificate. https://css-tricks.com/snippets/javascript/random-hex-color/
-  const font = `40px '${fontFamily}' bold`;
+  const newDate = date.split(' ')[0];
+  const newExpiration = expiration.split(' ')[0];
+  const programDescription1 = programDescription.split(',')[0];
+  const programDescription2 = programDescription.split(',')[1];
+  console.log(newDate);
+
+  const grey = '#757575';
+  const black = '#000000';
+  const accountFont = `60px '${fontFamily}' bold`;
+  const dateFont = `33px '${fontFamily}' regular`;
+  const tokenIdFont = `30px '${fontFamily}' medium`;
+  const programFont = `48px '${fontFamily}' bold`;
 
   // Load and draw the background image first
-  const certificateBackgroundSvgImage = './public/certificate-backgrounds/NCD_background.svg'; // Background images must be in SVG format
+  const certificateBackgroundSvgImage = './public/certificate-backgrounds/ncd_certificate.svg'; // Background images must be in SVG format
   const image = await loadImage(certificateBackgroundSvgImage);
   console.log({ image });
   const context = getBaseContext(canvas);
   context.drawImage(image, 0, 0, width, height);
 
-  addText(canvas, tokenId, font, fillStyle, width * 0.5, height * 0.9);
-  addText(canvas, date, font, fillStyle, width * 0.2, height * 0.8);
-  addText(canvas, programName, font, fillStyle, width * 0.05, height * 0.4);
-  addText(canvas, accountName, font, fillStyle, width * 0.5, height * 0.3);
-  addText(canvas, expiration, font, fillStyle, width * 0.5, height * 0.4);
+  addText(canvas, accountName, accountFont, black, 302, 304);
+  addText(canvas, programName, programFont, black, 220, 680);
+  addText(canvas, programDescription1, dateFont, grey, 65, 500);
+  addText(canvas, programDescription2, dateFont, grey, 65, 550);
+  addText(canvas, instructor, dateFont, black, 200, 810);
+  addText(canvas, newDate, dateFont, black, 830, 810);
+  addText(canvas, newExpiration, dateFont, black, 830, 865);
+  addText(canvas, tokenId, tokenIdFont, black, 250, 995);
 }
 
 export async function populateAnalystCert(canvas: Canvas, details: any) {
