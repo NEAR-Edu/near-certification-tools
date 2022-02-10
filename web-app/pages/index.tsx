@@ -21,7 +21,7 @@ const Home: NextPage = () => {
       <div className="">
         <div className="flex flex-col justify-center items-center h/5-screen mt-10 relative px-4 py-7 overflow-hidden sm:px-6 sm:py-8 lg:p-12 xl:p-16">
           <h1 className="text-2xl font-semibold font-display text-black sm:text-2xl">Welcome to NEAR University&rsquo;s Certificate Browser!</h1>
-          <p className="mt-5 max-w-xl text-base text-black text-xl">Choose an account to view:</p>
+          <p className="mt-5 max-w-xl text-base text-black">Choose an account to view:</p>
           <div className="sm:flex flex-col jusitfy-center mt-6">
             <form onSubmit={onSubmit} className="flex flex-col md:flex-row w-full md:w-full max-w-sm md:space-x-3 space-y-3 md:space-y-0 justify-center">
               <input
