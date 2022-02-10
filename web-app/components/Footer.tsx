@@ -70,7 +70,7 @@ export default function Example() {
     <footer className="bg-white">
       <div className="flex justify-center">
         <a href="https://NEAR.University" target="_blank" rel="noopener noreferrer">
-          <img alt="NEAR University logo" src="https://assets-global.website-files.com/617fd6a2d7dd9a6b1c4c4dc6/618466f043553984d596b38d_nu_logo.svg" />
+          <img alt="NEAR University logo" width="200px" src="/near_university_logo.svg" />
         </a>
       </div>
       <div className="max-w-7xl mx-auto pb-12 px-4 overflow-hidden sm:px-6 lg:px-8 ">
