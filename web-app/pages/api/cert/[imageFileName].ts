@@ -6,7 +6,7 @@ import { Dayjs } from 'dayjs';
 import { getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
-import { height, populateAnalystCert, populateDeveloperCert, width } from '../../../helpers/certificate-designs';
+import { height, populateDeveloperCert, width } from '../../../helpers/certificate-designs';
 import prisma from '../../../helpers/prisma';
 import { addCacheHeader } from '../../../helpers/caching';
 import { convertTimestampDecimalToDayjsMoment, formatDate } from '../../../helpers/time';
@@ -32,18 +32,9 @@ function parseFileName(imageFileNameString: string) {
 }
 
 async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDef, details: any) {
-  const { programCode } = details;
-
   const canvas = createCanvas(width, height, canvasType);
 
-  switch (programCode) {
-    case 'NCA':
-      await populateAnalystCert(canvas, details);
-      break;
-    // TODO: Add more programs
-    default:
-      await populateDeveloperCert(canvas, details);
-  }
+  await populateDeveloperCert(canvas, details);
 
   // Convert the Canvas to a buffer
   const buffer = bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();
