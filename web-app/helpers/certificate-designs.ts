@@ -24,10 +24,11 @@ function addText(canvas: Canvas, text: string, font: string, fillStyle: string, 
   context.fillText(text, leftPos, rightPos);
 }
 
+// eslint-disable-next-line max-lines-per-function
 export async function populateDeveloperCert(canvas: Canvas, details: any) {
   // TODO
   console.log('populateDeveloperCert', { details });
-  const { tokenId, date, programName, accountName, expiration, programDescription, instructor } = details;
+  const { tokenId, date, programName, accountName, expiration, programDescription, instructor, programCode } = details;
 
   const programDescription1 = programDescription.split(',')[0];
   const programDescription2 = programDescription.split(',')[1];
@@ -40,9 +41,25 @@ export async function populateDeveloperCert(canvas: Canvas, details: any) {
   const programFont = `48px '${fontFamily}' bold`;
 
   // Load and draw the background image first
-  const certificateBackgroundSvgImage = './public/certificate-backgrounds/NCD_certificate.svg'; // Background images must be in SVG format
-  const image = await loadImage(certificateBackgroundSvgImage);
-  console.log({ image });
+  // Background images must be in SVG format
+  const certificateBackgroundNcdImage = './public/certificate-backgrounds/NCD_certificate.svg';
+  const certificateBackgroundNcaImage = './public/certificate-backgrounds/NCD_background.svg';
+
+  let image;
+
+  switch (programCode) {
+    case 'TR101': // programCode needs to change in a meaningfull way.
+      image = await loadImage(certificateBackgroundNcdImage);
+      console.log({ image });
+      break;
+    case 'TR102':
+      image = await loadImage(certificateBackgroundNcaImage);
+      console.log({ image });
+      break;
+    default:
+      image = await loadImage(certificateBackgroundNcaImage); // Need to think about what should be the default one
+      console.log({ image });
+  }
   const context = getBaseContext(canvas);
   context.drawImage(image, 0, 0, width, height);
 
@@ -54,9 +71,4 @@ export async function populateDeveloperCert(canvas: Canvas, details: any) {
   addText(canvas, date, dateFont, black, 830, 803);
   addText(canvas, expiration, dateFont, black, 830, 860);
   addText(canvas, tokenId, tokenIdFont, black, 250, 995);
-}
-
-export async function populateAnalystCert(canvas: Canvas, details: any) {
-  // TODO
-  console.log({ canvas, details });
 }
