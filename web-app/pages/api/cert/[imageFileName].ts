@@ -1,4 +1,3 @@
-/* eslint-disable max-lines-per-function */
 // https://dev.to/sudo_overflow/diy-generating-dynamic-images-on-the-fly-for-email-marketing-h51
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -93,6 +92,7 @@ async function getExpiration(accountName: string): Promise<string> {
   return formatDate(recent.add(expirationMonths, 'months'));
 }
 
+// eslint-disable-next-line max-lines-per-function
 async function fetchCertificateDetails(tokenId: string) {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForBackend();
   const contract = getNftContract(account);
