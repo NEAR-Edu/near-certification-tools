@@ -29,11 +29,9 @@ export async function populateDeveloperCert(canvas: Canvas, details: any) {
   console.log('populateDeveloperCert', { details });
   const { tokenId, date, programName, accountName, expiration, programDescription, instructor } = details;
 
-  const newDate = date.split(' ')[0];
   const newExpiration = expiration.split(' ')[0];
   const programDescription1 = programDescription.split(',')[0];
   const programDescription2 = programDescription.split(',')[1];
-  console.log(newDate);
 
   const gray = '#757575';
   const black = '#000000';
@@ -54,7 +52,7 @@ export async function populateDeveloperCert(canvas: Canvas, details: any) {
   addText(canvas, programDescription1, dateFont, gray, 65, 450);
   addText(canvas, programDescription2, dateFont, gray, 65, 500);
   addText(canvas, instructor, dateFont, black, 200, 800);
-  addText(canvas, newDate, dateFont, black, 830, 803);
+  addText(canvas, date, dateFont, black, 830, 803);
   addText(canvas, newExpiration, dateFont, black, 830, 860);
   addText(canvas, tokenId, tokenIdFont, black, 250, 995);
 }
