@@ -41,7 +41,7 @@ export async function populateDeveloperCert(canvas: Canvas, details: any) {
   const programFont = `48px '${fontFamily}' bold`;
 
   // Load and draw the background image first
-  const certificateBackgroundSvgImage = './public/certificate-backgrounds/ncd_certificate.svg'; // Background images must be in SVG format
+  const certificateBackgroundSvgImage = './public/certificate-backgrounds/NCD_certificate.svg'; // Background images must be in SVG format
   const image = await loadImage(certificateBackgroundSvgImage);
   console.log({ image });
   const context = getBaseContext(canvas);
