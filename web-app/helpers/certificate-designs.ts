@@ -40,10 +40,12 @@ export async function populateDeveloperCert(canvas: Canvas, details: any) {
 
   const gray = '#757575';
   const black = '#000000';
+  const blue = '#5F8AFA';
   const accountFont = `60px '${fontFamily}' bold`;
   const dateFont = `33px '${fontFamily}' regular`;
   const tokenIdFont = `30px '${fontFamily}' medium`;
   const programFont = `48px '${fontFamily}' bold`;
+  const titleFont = `64px '${fontFamily}' extraBold`; // extraBold doesn't seem to be working
 
   // Load and draw the background image first
   // Background images must be in SVG format
@@ -93,6 +95,7 @@ export async function populateDeveloperCert(canvas: Canvas, details: any) {
   const context = getBaseContext(canvas);
   context.drawImage(image, 0, 0, width, height);
 
+  addText(canvas, 'CERTIFICATE OF ACHIEVEMENT', titleFont, blue, 90, 170); //  do we need this or not?
   addText(canvas, accountName, accountFont, black, 302, 304);
   addText(canvas, programName, programFont, black, 240, 670);
   addText(canvas, programDescription1, dateFont, gray, 65, 450);
