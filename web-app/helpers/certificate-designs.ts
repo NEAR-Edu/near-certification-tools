@@ -24,28 +24,49 @@ function addText(canvas: Canvas, text: string, font: string, fillStyle: string, 
   context.fillText(text, leftPos, rightPos);
 }
 
+// split long text into shorter lines
+function wrapText(canvas: Canvas, text: string, x: number, y: number, maxWidth: number, lineHeight: number, font: string, fillStyle: string) {
+  const context = getBaseContext(canvas);
+  const words = text.split(' ');
+  let line = '';
+  let y2 = y;
+  for (let n = 0; n < words.length; n += 1) {
+    const testLine = `${line} ${words[n]}`;
+    const metrics = context.measureText(testLine); // Check the width of the text, before writing it on the canvas
+    const testWidth = metrics.width;
+
+    // doesn't really understand the condition
+    // ask Ryan about it
+    if (testWidth > maxWidth && n > 6) {
+      context.fillStyle = fillStyle;
+      context.font = font;
+      // The x-axis coordinate of the point at which to begin drawing the text, in pixels.
+      // The y-axis coordinate of the baseline on which to begin drawing the text, in pixels.
+      context.fillText(line, x, y2);
+      line = `${words[n]}`;
+
+      y2 += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  context.fillText(line, x, y2);
+}
+
 // eslint-disable-next-line max-lines-per-function
 export async function populateDeveloperCert(canvas: Canvas, details: any) {
-  // TODO
   console.log('populateDeveloperCert', { details });
   const { tokenId, date, programName, accountName, expiration, programDescription, instructor, programCode } = details;
-
-  // splitting the sentence into 3 so that we
-  // can properly display them on the cert
-  // needs a better solution than this!
-  const programDescription4 = programDescription.split('program ')[1];
-  const programDescription1 = programDescription.split('by')[0];
-  const programDescription2 = programDescription4.split('on ')[0];
-  const programDescription3 = programDescription4.split('contracts ')[1];
 
   const gray = '#757575';
   const black = '#000000';
   const blue = '#5F8AFA';
+  // font weight doesn't really work at all!
   const accountFont = `60px '${fontFamily}' bold`;
   const dateFont = `33px '${fontFamily}' regular`;
   const tokenIdFont = `30px '${fontFamily}' medium`;
   const programFont = `48px '${fontFamily}' bold`;
-  const titleFont = `64px '${fontFamily}' extraBold`; // extraBold doesn't seem to be working
+  const titleFont = `64px '${fontFamily}' extraBold`;
 
   // Load and draw the background image first
   // Background images must be in SVG format
@@ -98,9 +119,7 @@ export async function populateDeveloperCert(canvas: Canvas, details: any) {
   addText(canvas, 'CERTIFICATE OF ACHIEVEMENT', titleFont, blue, 90, 170); //  do we need this or not?
   addText(canvas, accountName, accountFont, black, 302, 304);
   addText(canvas, programName, programFont, black, 240, 670);
-  addText(canvas, programDescription1, dateFont, gray, 65, 450);
-  addText(canvas, programDescription2, dateFont, gray, 65, 500);
-  addText(canvas, programDescription3, dateFont, gray, 65, 550);
+  wrapText(canvas, programDescription, 65, 450, 950, 50, dateFont, gray);
   addText(canvas, instructor, dateFont, black, 200, 800);
   addText(canvas, date, dateFont, black, 830, 803);
   addText(canvas, expiration, dateFont, black, 830, 860);
