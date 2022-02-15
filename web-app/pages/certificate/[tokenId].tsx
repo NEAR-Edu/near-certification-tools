@@ -7,6 +7,7 @@ https://cards-dev.twitter.com/validator
 */
 
 import type { NextPage } from 'next';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import { baseUrl } from '../../helpers/strings';
@@ -38,6 +39,7 @@ function buildLinkedInUrl(pngUrl: string) {
 //   return { props };
 // };
 
+// eslint-disable-next-line max-lines-per-function
 const Certificate: NextPage = () => {
   const router = useRouter();
   const { tokenId } = router.query; // https://nextjs.org/docs/routing/dynamic-routes
