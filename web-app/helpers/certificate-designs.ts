@@ -47,7 +47,7 @@ function wrapText(canvas: Canvas, text: string, x: number, y: number, maxWidth: 
 
       y2 += lineHeight;
     } else {
-      line = testLine;
+      line = testLine.trim();
     }
   }
   context.fillText(line, x, y2);
