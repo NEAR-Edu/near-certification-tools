@@ -11,5 +11,5 @@ export function convertTimestampDecimalToDayjsMoment(timestampDecimal: Decimal):
 
 export function formatDate(dateTime: Dayjs) {
   // https://day.js.org/docs/en/display/format
-  return dayjs(dateTime).format('YYYY-MM-DD HH:mm'); // TODO Check what time zone
+  return dayjs(dateTime).format('YYYY-MM-DD'); // TODO Check what time zone
 }

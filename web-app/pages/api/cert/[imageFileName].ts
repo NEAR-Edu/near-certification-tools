@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 // https://dev.to/sudo_overflow/diy-generating-dynamic-images-on-the-fly-for-email-marketing-h51
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -6,7 +7,7 @@ import { Dayjs } from 'dayjs';
 import { getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
-import { height, populateAnalystCert, populateDeveloperCert, width } from '../../../helpers/certificate-designs';
+import { height, populateDeveloperCert, width } from '../../../helpers/certificate-designs';
 import prisma from '../../../helpers/prisma';
 import { addCacheHeader } from '../../../helpers/caching';
 import { convertTimestampDecimalToDayjsMoment, formatDate } from '../../../helpers/time';
@@ -32,18 +33,9 @@ function parseFileName(imageFileNameString: string) {
 }
 
 async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDef, details: any) {
-  const { programCode } = details;
-
   const canvas = createCanvas(width, height, canvasType);
 
-  switch (programCode) {
-    case 'NCA':
-      await populateAnalystCert(canvas, details);
-      break;
-    // TODO: Add more programs
-    default:
-      await populateDeveloperCert(canvas, details);
-  }
+  await populateDeveloperCert(canvas, details);
 
   // Convert the Canvas to a buffer
   const buffer = bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();
@@ -92,6 +84,7 @@ async function getExpiration(accountName: string): Promise<string> {
   return formatDate(recent.add(expirationMonths, 'months'));
 }
 
+// eslint-disable-next-line max-lines-per-function
 async function fetchCertificateDetails(tokenId: string) {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForBackend();
   const contract = getNftContract(account);
@@ -108,6 +101,8 @@ async function fetchCertificateDetails(tokenId: string) {
       const expiration = await getExpiration(accountName); // TODO: Wrap in try/catch blocks to handle when indexer service is unavailable.
       const date = formatDate(metadata.issued_at);
       const programName = metadata.title;
+      const programDescription = metadata.description;
+      const instructor = certificateMetadata.authority_id;
       return {
         tokenId,
         date,
@@ -115,6 +110,8 @@ async function fetchCertificateDetails(tokenId: string) {
         programName,
         accountName,
         expiration,
+        programDescription,
+        instructor,
       };
     }
   }

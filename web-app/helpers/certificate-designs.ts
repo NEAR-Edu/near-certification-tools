@@ -1,17 +1,16 @@
 // https://dev.to/sudo_overflow/diy-generating-dynamic-images-on-the-fly-for-email-marketing-h51
-import {
-  Canvas,
-  // registerFont,
-  loadImage,
-} from 'canvas';
+import { Canvas, registerFont, loadImage } from 'canvas';
 
 // TODO: Update this section:
-export const width = 1160; // width of the image
-export const height = 653; // height of the image
-// const fontFile = './fonts/Sign-Painter-Regular.ttf';
-const fontFamily = 'signpainter';
+export const width = 1080; // width of the image
+export const height = 1080; // height of the image
+const fontFile = './fonts/Manrope-VariableFont_wght.ttf';
+const fontFamily = 'Manrope, Sans Serif';
+const fontFile2 = './fonts/DMMono-Medium.ttf';
+const fontFamily2 = 'DM Mono, monospace';
 
-// TODO registerFont(fontFile, { family: fontFamily });
+registerFont(fontFile, { family: fontFamily });
+registerFont(fontFile2, { family: fontFamily2 });
 
 function getBaseContext(canvas: Canvas) {
   const context = canvas.getContext('2d');
@@ -28,29 +27,105 @@ function addText(canvas: Canvas, text: string, font: string, fillStyle: string, 
   context.fillText(text, leftPos, rightPos);
 }
 
-export async function populateDeveloperCert(canvas: Canvas, details: any) {
-  // TODO
-  console.log('populateDeveloperCert', { details });
-  const { tokenId, date, programName, accountName, expiration } = details;
+// split long text into shorter lines
+function wrapText(canvas: Canvas, text: string, x: number, y: number, maxWidth: number, lineHeight: number, font: string, fillStyle: string) {
+  const context = getBaseContext(canvas);
+  const words = text.split(' ');
+  let line = '';
+  let y2 = y;
+  for (let n = 0; n < words.length; n += 1) {
+    const testLine = `${line} ${words[n]}`;
+    const metrics = context.measureText(testLine); // Check the width of the text, before writing it on the canvas
+    const testWidth = metrics.width;
 
-  const fillStyle = `#${Math.floor(Math.random() * 16777215).toString(16)}`; // This is just temporary and will be removed once we have final designs for each program's certificate. https://css-tricks.com/snippets/javascript/random-hex-color/
-  const font = `40px '${fontFamily}' bold`;
+    // doesn't really understand the condition
+    // ask Ryan about it
+    if (testWidth > maxWidth && n > 6) {
+      context.fillStyle = fillStyle;
+      context.font = font;
+      // The x-axis coordinate of the point at which to begin drawing the text, in pixels.
+      // The y-axis coordinate of the baseline on which to begin drawing the text, in pixels.
+      context.fillText(line, x, y2);
+      line = `${words[n]}`;
+
+      y2 += lineHeight;
+    } else {
+      line = testLine.trim();
+    }
+  }
+  context.fillText(line, x, y2);
+}
+
+// eslint-disable-next-line max-lines-per-function
+export async function populateDeveloperCert(canvas: Canvas, details: any) {
+  console.log('populateDeveloperCert', { details });
+  const { tokenId, date, programName, accountName, expiration, programDescription, instructor, programCode } = details;
+
+  const gray = '#757575';
+  const black = '#000000';
+  const blue = '#5F8AFA';
+  // font weight doesn't really work at all!
+  const accountFont = `60px '${fontFamily2}' medium`;
+  const dateFont = `30px '${fontFamily2}' medium`;
+  const descriptionFont = `33px '${fontFamily}' regular`;
+  const tokenIdFont = `30px '${fontFamily2}' medium`;
+  const programFont = `40px '${fontFamily2}' medium`;
+  const titleFont = `64px '${fontFamily}' extraBold`;
 
   // Load and draw the background image first
-  const certificateBackgroundSvgImage = './public/certificate-backgrounds/NCD_background.svg'; // Background images must be in SVG format
-  const image = await loadImage(certificateBackgroundSvgImage);
-  console.log({ image });
+  // Background images must be in SVG format
+  const certificateBackgroundNcdImage = './public/certificate-backgrounds/NCD_certificate.svg';
+  const certificateBackgroundNcaImage = './public/certificate-backgrounds/NCA_certificate.svg';
+  const certificateBackgroundNceImage = './public/certificate-backgrounds/NCE_certificate.svg';
+  const certificateBackgroundNciImage = './public/certificate-backgrounds/NCI_certificate.svg';
+  const certificateBackgroundNcarImage = './public/certificate-backgrounds/NCAR_certificate.svg';
+  const certificateBackgroundNcsImage = './public/certificate-backgrounds/NCS_certificate.svg';
+  const certificateBackgroundNcuxImage = './public/certificate-backgrounds/NCUX_certificate.svg';
+
+  let image;
+
+  switch (programCode) {
+    case 'TR101': // programCode needs to change in a meaningful way.
+      image = await loadImage(certificateBackgroundNcdImage);
+      console.log({ image });
+      break;
+    case 'TR102':
+      image = await loadImage(certificateBackgroundNcaImage);
+      console.log({ image });
+      break;
+    case 'TR103':
+      image = await loadImage(certificateBackgroundNceImage);
+      console.log({ image });
+      break;
+    case 'TR104':
+      image = await loadImage(certificateBackgroundNciImage);
+      console.log({ image });
+      break;
+    case 'TR105':
+      image = await loadImage(certificateBackgroundNcarImage);
+      console.log({ image });
+      break;
+    case 'TR106':
+      image = await loadImage(certificateBackgroundNcsImage);
+      console.log({ image });
+      break;
+    case 'TR107':
+      image = await loadImage(certificateBackgroundNcuxImage);
+      console.log({ image });
+      break;
+    default:
+      image = await loadImage(certificateBackgroundNcaImage); // Need to think about what should be the default one
+      console.log({ image });
+  }
   const context = getBaseContext(canvas);
   context.drawImage(image, 0, 0, width, height);
 
-  addText(canvas, tokenId, font, fillStyle, width * 0.5, height * 0.9);
-  addText(canvas, date, font, fillStyle, width * 0.2, height * 0.8);
-  addText(canvas, programName, font, fillStyle, width * 0.05, height * 0.4);
-  addText(canvas, accountName, font, fillStyle, width * 0.5, height * 0.3);
-  addText(canvas, expiration, font, fillStyle, width * 0.5, height * 0.4);
-}
-
-export async function populateAnalystCert(canvas: Canvas, details: any) {
-  // TODO
-  console.log({ canvas, details });
+  addText(canvas, 'CERTIFICATE OF ACHIEVEMENT', titleFont, blue, 90, 170); //  do we need this or not?
+  addText(canvas, accountName, accountFont, black, 270, 304);
+  addText(canvas, programName, programFont, black, 240, 680);
+  wrapText(canvas, programDescription, 65, 450, 950, 50, descriptionFont, gray);
+  addText(canvas, instructor, dateFont, black, 200, 807);
+  addText(canvas, date, dateFont, black, 830, 807);
+  addText(canvas, expiration, dateFont, black, 830, 864);
+  addText(canvas, tokenId, tokenIdFont, black, 250, 995);
 }
