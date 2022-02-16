@@ -5,7 +5,7 @@ import { Canvas, registerFont, loadImage } from 'canvas';
 export const width = 1080; // width of the image
 export const height = 1080; // height of the image
 const fontFile = './fonts/Manrope-VariableFont_wght.ttf';
-const fontFamily = 'manrope';
+const fontFamily = 'Manrope, Sans Serif';
 
 registerFont(fontFile, { family: fontFamily });
 
