@@ -40,16 +40,32 @@ function buildLinkedInUrl(pngUrl: string) {
 // };
 
 // eslint-disable-next-line max-lines-per-function
-const Certificate: NextPage = () => {
+const Certificate: NextPage = (...props) => {
   const router = useRouter();
   const { tokenId } = router.query; // https://nextjs.org/docs/routing/dynamic-routes
 
   console.log({ tokenId });
-  const pngUrl = `${baseUrl}/api/cert/${tokenId}.png`;
-
+  const data = props[0].children;
+  const pngUrl = `${baseUrl}/api/cert/${data}.png`;
+  // eslint-disable-next-line react/destructuring-assignment
+  console.log('************************', { data });
   return (
     <Layout>
-      <a href={`/api/cert/${tokenId}.svg`} className="md:max-w-xl lg:max-w-2xl">
+      <Head>
+        <meta property="og:url" content={`/api/cert/${data}`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="I got certified with NEAR university" />
+        <meta property="og:description" content="View NEAR University certificates of any .near account" />
+        <meta property="og:image" content={`/api/cert/${data}.png`} />
+        <meta property="twitter:site" content="@NEARProtocol" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta property="twitter:domain" content="/" />
+        <meta property="twitter:url" content={`/certificate/${data}`} />
+        <meta name="twitter:title" content="I got certified with NEAR university" />
+        <meta name="twitter:description" content="View NEAR University certificates of any .near account" />
+        <meta name="twitter:image" content={`/api/cert/${data}.png`} />
+      </Head>
+      <a href={`/api/cert/${tokenId}.svg`}>
         <img src={pngUrl} alt={`certificate ${tokenId}`} />
       </a>
       <div className="text-sm mt-2 ml-2">
@@ -64,5 +80,24 @@ const Certificate: NextPage = () => {
     </Layout>
   );
 };
-
+export async function getServerSideProps(context: any) {
+  const { tokenId } = context.query;
+  console.log('---------------------------', { tokenId });
+  const url = `${baseUrl}/api/cert/${tokenId}`;
+  console.log('++++++++++++++++++++++++++++++++++++++++', { url });
+  const requestOptions = {
+    method: 'GET',
+    contentType: 'image/png',
+  };
+  const results = tokenId;
+  const res = await fetch(url, requestOptions);
+  console.log('+++++++++++++++++++++++++++++++++++++++++', res);
+  const resJson = await res.json();
+  console.log('+++++++++++++++++++++', resJson);
+  return {
+    props: {
+      children: results,
+    },
+  };
+}
 export default Certificate;
