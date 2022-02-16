@@ -2,8 +2,6 @@
 
 import Head from 'next/head';
 import styles from '../styles/Layout.module.scss';
-// eslint-disable-next-line import/no-named-as-default
-// eslint-disable-next-line import/no-named-as-default-member
 import Footer from './Footer';
 import Header from './Header';
 
