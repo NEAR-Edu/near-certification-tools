@@ -10,7 +10,6 @@ import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import { baseUrl } from '../../helpers/strings';
-import styles from '../../styles/Account.module.scss';
 
 function buildTwitterUrl(pngUrl: string) {
   // https://stevenwestmoreland.com/2018/07/creating-social-sharing-links-without-javascript.html
@@ -48,7 +47,6 @@ const Certificate: NextPage = () => {
 
   return (
     <Layout>
-      <h1 className={styles.title}>{tokenId}</h1>
       <a href={`/api/cert/${tokenId}.svg`}>
         <img src={pngUrl} alt={`certificate ${tokenId}`} />
       </a>
