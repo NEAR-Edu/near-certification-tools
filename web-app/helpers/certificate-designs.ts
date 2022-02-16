@@ -6,8 +6,11 @@ export const width = 1080; // width of the image
 export const height = 1080; // height of the image
 const fontFile = './fonts/Manrope-VariableFont_wght.ttf';
 const fontFamily = 'Manrope, Sans Serif';
+const fontFile2 = './fonts/DMMono-Medium.ttf';
+const fontFamily2 = 'DM Mono, monospace';
 
 registerFont(fontFile, { family: fontFamily });
+registerFont(fontFile2, { family: fontFamily2 });
 
 function getBaseContext(canvas: Canvas) {
   const context = canvas.getContext('2d');
@@ -62,10 +65,11 @@ export async function populateDeveloperCert(canvas: Canvas, details: any) {
   const black = '#000000';
   const blue = '#5F8AFA';
   // font weight doesn't really work at all!
-  const accountFont = `60px '${fontFamily}' bold`;
-  const dateFont = `33px '${fontFamily}' regular`;
-  const tokenIdFont = `30px '${fontFamily}' medium`;
-  const programFont = `48px '${fontFamily}' bold`;
+  const accountFont = `60px '${fontFamily2}' medium`;
+  const dateFont = `30px '${fontFamily2}' medium`;
+  const descriptionFont = `33px '${fontFamily}' regular`;
+  const tokenIdFont = `30px '${fontFamily2}' medium`;
+  const programFont = `40px '${fontFamily2}' medium`;
   const titleFont = `64px '${fontFamily}' extraBold`;
 
   // Load and draw the background image first
@@ -117,11 +121,11 @@ export async function populateDeveloperCert(canvas: Canvas, details: any) {
   context.drawImage(image, 0, 0, width, height);
 
   addText(canvas, 'CERTIFICATE OF ACHIEVEMENT', titleFont, blue, 90, 170); //  do we need this or not?
-  addText(canvas, accountName, accountFont, black, 302, 304);
-  addText(canvas, programName, programFont, black, 240, 670);
-  wrapText(canvas, programDescription, 65, 450, 950, 50, dateFont, gray);
-  addText(canvas, instructor, dateFont, black, 200, 800);
-  addText(canvas, date, dateFont, black, 830, 803);
-  addText(canvas, expiration, dateFont, black, 830, 860);
+  addText(canvas, accountName, accountFont, black, 270, 304);
+  addText(canvas, programName, programFont, black, 240, 680);
+  wrapText(canvas, programDescription, 65, 450, 950, 50, descriptionFont, gray);
+  addText(canvas, instructor, dateFont, black, 200, 807);
+  addText(canvas, date, dateFont, black, 830, 807);
+  addText(canvas, expiration, dateFont, black, 830, 864);
   addText(canvas, tokenId, tokenIdFont, black, 250, 995);
 }
