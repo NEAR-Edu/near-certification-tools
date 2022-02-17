@@ -4,13 +4,13 @@ import { Canvas, registerFont, loadImage } from 'canvas';
 // TODO: Update this section:
 export const width = 1080; // width of the image
 export const height = 1080; // height of the image
-const fontFile = './fonts/Manrope-VariableFont_wght.ttf';
-const fontFamily = 'Manrope, Sans Serif';
-const fontFile2 = './fonts/DMMono-Medium.ttf';
-const fontFamily2 = 'DM Mono, monospace';
+const manropeFontFile = './fonts/Manrope-VariableFont_wght.ttf';
+const manropeFontFamily = 'Manrope, Sans Serif';
+const monoFontFile = './fonts/DMMono-Medium.ttf';
+const monoFontFamily = 'DM Mono, monospace';
 
-registerFont(fontFile, { family: fontFamily });
-registerFont(fontFile2, { family: fontFamily2 });
+registerFont(manropeFontFile, { family: manropeFontFamily });
+registerFont(monoFontFile, { family: monoFontFamily });
 
 function getBaseContext(canvas: Canvas) {
   const context = canvas.getContext('2d');
@@ -65,12 +65,12 @@ export async function populateDeveloperCert(canvas: Canvas, details: any) {
   const black = '#000000';
   const blue = '#5F8AFA';
   // font weight doesn't really work at all!
-  const accountFont = `60px '${fontFamily2}' medium`;
-  const dateFont = `30px '${fontFamily2}' medium`;
-  const descriptionFont = `33px '${fontFamily}' regular`;
-  const tokenIdFont = `30px '${fontFamily2}' medium`;
-  const programFont = `40px '${fontFamily2}' medium`;
-  const titleFont = `64px '${fontFamily}' extraBold`;
+  const accountFont = `60px '${monoFontFamily}' medium`;
+  const dateFont = `30px '${monoFontFamily}' medium`;
+  const descriptionFont = `33px '${manropeFontFamily}' regular`;
+  const tokenIdFont = `30px '${monoFontFamily}' medium`;
+  const programFont = `40px '${monoFontFamily}' medium`;
+  const titleFont = `64px '${manropeFontFamily}' extraBold`;
 
   // Load and draw the background image first
   // Background images must be in SVG format
