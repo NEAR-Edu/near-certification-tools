@@ -38,8 +38,6 @@ function wrapText(canvas: Canvas, text: string, x: number, y: number, maxWidth: 
     const metrics = context.measureText(testLine); // Check the width of the text, before writing it on the canvas
     const testWidth = metrics.width;
 
-    // doesn't really understand the condition
-    // ask Ryan about it
     if (testWidth > maxWidth && n > 6) {
       context.fillStyle = fillStyle;
       context.font = font;
@@ -64,7 +62,7 @@ export async function populateDeveloperCert(canvas: Canvas, details: any) {
   const gray = '#757575';
   const black = '#000000';
   const blue = '#5F8AFA';
-  // font weight doesn't really work at all!
+
   const accountFont = `60px '${monoFontFamily}' medium`;
   const dateFont = `30px '${monoFontFamily}' medium`;
   const descriptionFont = `33px '${manropeFontFamily}' regular`;
@@ -87,36 +85,29 @@ export async function populateDeveloperCert(canvas: Canvas, details: any) {
   switch (programCode) {
     case 'TR101': // programCode needs to change in a meaningful way.
       image = await loadImage(certificateBackgroundNcdImage);
-      console.log({ image });
       break;
     case 'TR102':
       image = await loadImage(certificateBackgroundNcaImage);
-      console.log({ image });
       break;
     case 'TR103':
       image = await loadImage(certificateBackgroundNceImage);
-      console.log({ image });
       break;
     case 'TR104':
       image = await loadImage(certificateBackgroundNciImage);
-      console.log({ image });
       break;
     case 'TR105':
       image = await loadImage(certificateBackgroundNcarImage);
-      console.log({ image });
       break;
     case 'TR106':
       image = await loadImage(certificateBackgroundNcsImage);
-      console.log({ image });
       break;
     case 'TR107':
       image = await loadImage(certificateBackgroundNcuxImage);
-      console.log({ image });
       break;
     default:
       image = await loadImage(certificateBackgroundNcaImage); // Need to think about what should be the default one
-      console.log({ image });
   }
+
   const context = getBaseContext(canvas);
   context.drawImage(image, 0, 0, width, height);
 
