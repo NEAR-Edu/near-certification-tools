@@ -1,7 +1,6 @@
 // https://dev.to/sudo_overflow/diy-generating-dynamic-images-on-the-fly-for-email-marketing-h51
 import { Canvas, registerFont, loadImage } from 'canvas';
 
-// TODO: Update this section:
 export const width = 1080; // width of the image
 export const height = 1080; // height of the image
 const manropeFontFile = './fonts/Manrope-VariableFont_wght.ttf';
@@ -129,7 +128,6 @@ export async function populateCert(canvas: Canvas, details: any) {
   addText(canvas, programName, programFont, black, X_POSITION, 680);
   wrapText(canvas, programDescription, X_POSITION_OF_DESCRIPTION, 450, WIDTH_OF_CERTIFICATE, 50, descriptionFont, gray);
   wrapText(canvas, instructor, X_POSITION_OF_INSTRUCTOR, 807, WIDTH_OF_CERTIFICATE, 50, dateFont, black);
-  // addText(canvas, instructor, dateFont, black, X_POSITION_OF_INSTRUCTOR, 807);
   addText(canvas, date, dateFont, black, X_POSITION_OF_DATE, 807);
   addText(canvas, expiration, dateFont, black, X_POSITION_OF_DATE, 864);
   addText(canvas, tokenId, tokenIdFont, black, X_POSITION, 995);
