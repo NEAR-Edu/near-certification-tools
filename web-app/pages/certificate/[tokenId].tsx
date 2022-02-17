@@ -47,7 +47,7 @@ const Certificate: NextPage = () => {
 
   return (
     <Layout>
-      <a href={`/api/cert/${tokenId}.svg`}>
+      <a href={`/api/cert/${tokenId}.svg`} className="md:max-w-xl lg:max-w-2xl">
         <img src={pngUrl} alt={`certificate ${tokenId}`} />
       </a>
       <div className="text-sm mt-2 ml-2">
