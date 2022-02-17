@@ -44,7 +44,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 const Account: NextPage<AccountPageProps> = ({ accountId, certificates }: AccountPageProps) => {
   return (
     <Layout>
-      <h1 className={styles.title}>{accountId}&rsquo;s Certificates</h1>
+      <h1 className="text-center text-3xl sm:text-4xl">{accountId}&rsquo;s Certificates</h1>
 
       <div className={styles.grid}>
         {certificates.length > 0 ? certificates.map((tokenId: string) => <Tile tokenId={tokenId} key={tokenId} />) : <span>No certificates yet!</span>}
