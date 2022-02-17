@@ -83,42 +83,9 @@ export async function populateCert(canvas: Canvas, details: any) {
   const titleFont = `64px '${manropeFontFamily}' extraBold`;
 
   // Load and draw the background image first
-  // Background images must be in SVG format
-  const certificateBackgroundNcdImage = './public/certificate-backgrounds/NCD_certificate.svg';
-  const certificateBackgroundNcaImage = './public/certificate-backgrounds/NCA_certificate.svg';
-  const certificateBackgroundNceImage = './public/certificate-backgrounds/NCE_certificate.svg';
-  const certificateBackgroundNciImage = './public/certificate-backgrounds/NCI_certificate.svg';
-  const certificateBackgroundNcarImage = './public/certificate-backgrounds/NCAR_certificate.svg';
-  const certificateBackgroundNcsImage = './public/certificate-backgrounds/NCS_certificate.svg';
-  const certificateBackgroundNcuxImage = './public/certificate-backgrounds/NCUX_certificate.svg';
+  const certificateBackgroundImage = `./public/certificate-backgrounds/${programCode}_certificate.svg`; // Background images must be in SVG format
 
-  let image;
-
-  switch (programCode) {
-    case 'TR101': // programCode needs to change in a meaningful way.
-      image = await loadImage(certificateBackgroundNcdImage);
-      break;
-    case 'TR102':
-      image = await loadImage(certificateBackgroundNcaImage);
-      break;
-    case 'TR103':
-      image = await loadImage(certificateBackgroundNceImage);
-      break;
-    case 'TR104':
-      image = await loadImage(certificateBackgroundNciImage);
-      break;
-    case 'TR105':
-      image = await loadImage(certificateBackgroundNcarImage);
-      break;
-    case 'TR106':
-      image = await loadImage(certificateBackgroundNcsImage);
-      break;
-    case 'TR107':
-      image = await loadImage(certificateBackgroundNcuxImage);
-      break;
-    default:
-      image = await loadImage(certificateBackgroundNcaImage); // Need to think about what should be the default one
-  }
+  const image = await loadImage(certificateBackgroundImage);
 
   const context = getBaseContext(canvas);
   context.drawImage(image, 0, 0, width, height);
