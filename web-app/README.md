@@ -45,34 +45,16 @@ The app is at [http://localhost:3000/api/cert/103216412112497cb6c193152a27c49a.s
 
 1. Integrate Airtable with Integromat
 1. Ask Sherif to map his desired subdomain in the Custom Domains section of https://dashboard.render.com/web/srv-c821j246fj315u4tlj90/settings
-1. Ensure that HTTP is blocked (because HTTPS is enforced via `web-app/pages/_middleware.ts`). (We wouldn't want `web-app/pages/api/mint-cert.ts` exposed via HTTP because our secret `API_KEY` would be leaked, and anyone could issue any certificate.)
-   1. 2022-02-02 13:00 ET http://near-certification-tools.onrender.com/ does seem to successfully redirect to https://near-certification-tools.onrender.com/ but we'll want to test the minting later.
-1. Sherif will deploy the production contract.
 1. Figure out correct var values for the `.env` file. E.g. replace NEXT_PUBLIC_ISSUING_AUTHORITY_ACCOUNT_ID and ISSUING_AUTHORITY_PRIVATE_KEY in https://dashboard.render.com/env-group/evg-c822des6fj315u4tmckg
+1. Deploy the production contract.
+1. Upgrade our Render plan for this project.
 1. Lower priority improvements:
    1. Add documentation at deployment_notes.md about Integromat, etc
+   1. Ensure that HTTP is blocked (because HTTPS is enforced via `web-app/pages/_middleware.ts`). (We wouldn't want `web-app/pages/api/mint-cert.ts` exposed via HTTP because our secret `API_KEY` would be leaked, and anyone could issue any certificate.)
+      1. 2022-02-02 13:00 ET http://near-certification-tools.onrender.com/ does seem to successfully redirect to https://near-certification-tools.onrender.com/ but we'll want to test the minting later.
    1. Add validation to minting
    1. Add cert text details to `web-app/pages/certificate/[tokenId].tsx` but consider efficiency; it should fetch certificate data just once, and then pass that to the image generator. fetchCertificateDetails should not be inside `web-app/pages/api/cert/[imageFileName].ts`
    1. `web-app/pages/certificate/[tokenId].tsx` getServerSideProps 404 error for missing or invalid token
-   1. Check whether `NODE_ENV=development` at https://dashboard.render.com/web/srv-c821j246fj315u4tlj90/settings ought to say `NODE_ENV=production`. If not, document in deployment_notes.md why, because that's surprising.
-
-## Ozan, Çağatay, Rasha to split up:
-
-(In approximate order of importance, but you can sometimes make progress on multiple items at once.)
-
-Especially when working on a team that lives across time zones, it's important to overcommunicate and also always push your commits to the GitHub repo at the end of each day (or ideally even more frequently than that) so that we can all stay aware of progress and not double-do work.
-
-1. improve the design of:
-
-   - `web-app/components/Layout.tsx`
-   - `web-app/pages/index.tsx`
-   - `web-app/pages/account/[account].tsx`
-   - `web-app/pages/certificate/[tokenId].tsx`
-
-1. Learn about Open Graph https://ogp.me/. Edit the `<head>` tag (in a NextJs way) of the `web-app/pages/certificate/[tokenId].tsx` page to include social metadata to make that page generate a preview when people share it on social platforms. E.g. https://www.linkedin.com/post-inspector/ and https://cards-dev.twitter.com/validator will show you what sharing any particular URL will look like. Since we're working on localhost and don't automatically have a publicly-viewable URL, you'll probably need to generate a temporary public URL for your machine using localtunnel https://theboroer.github.io/localtunnel-www/ or https://github.com/fusebit/tunnel or something similar (in order to use those sharing-preview tools).
-   1. Check that the sharing buttons at http://localhost:3000/certificate/103216412112497cb6c193152a27c49a successfully post to Twitter and LinkedIn. (See note above about localtunnel.) Currently https://near-certification-tools-tpq1.onrender.com/certificate/103216412112497cb6c193152a27c49a doesn't look like it attaches the image to Twitter yet, probably because the https://near-certification-tools-tpq1.onrender.com/api/cert/103216412112497cb6c193152a27c49a.png URL that it shares doesn't yet have an Open Graph meta data that specifies that it's an image.
-1. Add Google Analytics tracking to the layout. You'll probably need to work with Sherif (get him to give you whatever tracking ID you need).
-1. Stay aware of what others (e.g. Ryan) are working on. Take opportunities whenever you can to volunteer to move a specific task off my list and onto your list. Any time you can stretch into doing something more difficult is a win for all of us.
 
 # Helpful tools
 
