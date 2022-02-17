@@ -14,7 +14,7 @@ registerFont(monoFontFile, { family: monoFontFamily });
 
 function getBaseContext(canvas: Canvas) {
   const context = canvas.getContext('2d');
-  context.textAlign = 'left';
+  context.textAlign = 'center';
   context.textBaseline = 'top';
   return context;
 }
@@ -32,6 +32,7 @@ function addText(canvas: Canvas, text: string, font: string, fillStyle: string, 
  */
 function wrapText(canvas: Canvas, text: string, x: number, y: number, maxWidth: number, lineHeight: number, font: string, fillStyle: string) {
   const context = getBaseContext(canvas);
+  context.textAlign = 'left';
   const words = text.split(' ');
   let line = '';
   let y2 = y;
@@ -65,6 +66,9 @@ export async function populateCerts(canvas: Canvas, details: any) {
   const gray = '#757575';
   const black = '#000000';
   const blue = '#5F8AFA';
+
+  const WIDTH_OF_CERTIFICATE = 950;
+  const CERTIFICATE_OF_ACHIEVEMENT = 'CERTIFICATE OF ACHIEVEMENT';
 
   const accountFont = `60px '${monoFontFamily}' medium`;
   const dateFont = `30px '${monoFontFamily}' medium`;
@@ -114,12 +118,12 @@ export async function populateCerts(canvas: Canvas, details: any) {
   const context = getBaseContext(canvas);
   context.drawImage(image, 0, 0, width, height);
 
-  addText(canvas, 'CERTIFICATE OF ACHIEVEMENT', titleFont, blue, 90, 170); //  do we need this or not?
-  addText(canvas, accountName, accountFont, black, 270, 304);
-  addText(canvas, programName, programFont, black, 240, 680);
-  wrapText(canvas, programDescription, 65, 450, 950, 50, descriptionFont, gray);
-  addText(canvas, instructor, dateFont, black, 200, 807);
-  addText(canvas, date, dateFont, black, 830, 807);
-  addText(canvas, expiration, dateFont, black, 830, 864);
-  addText(canvas, tokenId, tokenIdFont, black, 250, 995);
+  addText(canvas, CERTIFICATE_OF_ACHIEVEMENT, titleFont, blue, width / 2, 170); //  do we need this or not?
+  addText(canvas, accountName, accountFont, black, width / 2, 304);
+  addText(canvas, programName, programFont, black, width / 2, 680);
+  wrapText(canvas, programDescription, width / 2 - WIDTH_OF_CERTIFICATE / 2, 450, WIDTH_OF_CERTIFICATE, 50, descriptionFont, gray);
+  addText(canvas, instructor, dateFont, black, width / 2 - WIDTH_OF_CERTIFICATE / 4, 807);
+  addText(canvas, date, dateFont, black, width / 2 + WIDTH_OF_CERTIFICATE / 2.5, 807);
+  addText(canvas, expiration, dateFont, black, width / 2 + WIDTH_OF_CERTIFICATE / 2.5, 864);
+  addText(canvas, tokenId, tokenIdFont, black, width / 2, 995);
 }
