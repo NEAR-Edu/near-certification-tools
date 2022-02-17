@@ -27,18 +27,21 @@ function addText(canvas: Canvas, text: string, font: string, fillStyle: string, 
   context.fillText(text, leftPos, rightPos);
 }
 
-// split long text into shorter lines
+/**
+ * split long text into shorter lines
+ */
 function wrapText(canvas: Canvas, text: string, x: number, y: number, maxWidth: number, lineHeight: number, font: string, fillStyle: string) {
   const context = getBaseContext(canvas);
   const words = text.split(' ');
   let line = '';
   let y2 = y;
+  const NUMBER_OF_WORDS = 6;
   for (let n = 0; n < words.length; n += 1) {
     const testLine = `${line} ${words[n]}`;
     const metrics = context.measureText(testLine); // Check the width of the text, before writing it on the canvas
     const testWidth = metrics.width;
 
-    if (testWidth > maxWidth && n > 6) {
+    if (testWidth > maxWidth && n > NUMBER_OF_WORDS) {
       context.fillStyle = fillStyle;
       context.font = font;
       // The x-axis coordinate of the point at which to begin drawing the text, in pixels.
