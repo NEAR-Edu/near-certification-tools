@@ -15,7 +15,7 @@ export const HTTP_ERROR_CODE_MISSING = 404;
 const svg = 'svg';
 const dot = '.';
 const imagePng = 'image/png';
-const expirationMonths = 6;
+const expirationDays = 180;
 const CACHE_SECONDS: number = Number(process.env.DYNAMIC_CERT_IMAGE_GENERATION_CACHE_SECONDS) || 60 * 60 * 6;
 
 type CanvasTypeDef = 'pdf' | 'svg' | undefined;
@@ -41,46 +41,14 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   return buffer;
 }
 
-async function getMostRecentActivityDateTime(accountName: string): Promise<Dayjs> {
+async function getExpiration(accountName: string): Promise<string> {
   // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
   /* This function includes an ugly temporary workaround. `findFirst` (instead of findMany with `take: 2`) should have worked but was causing a timeout.
      Apparently it's not Prisma's fault though.Even running a LIMIT 1 query in pgAdmin causes a timeout, surprisingly, even though a LIMIT 2 query does not.
      https://stackoverflow.com/questions/71026316/why-would-limit-2-queries-work-but-limit-1-always-times-out
      This is suspicious but seems unrelated to this repo. */
-  try {
-    const rows = await prisma.receipts.findMany({
-      where: {
-        action_receipts: {
-          // https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting#filter-on-relations
-          signer_account_id: {
-            equals: accountName,
-          },
-        },
-      },
-      orderBy: {
-        included_in_block_timestamp: 'desc',
-      },
-      take: 2, // see comment above about workaround
-    });
-    if (rows) {
-      const result = rows[0]; // see comment above about workaround
-      console.log({ accountName, result });
-      const moment = convertTimestampDecimalToDayjsMoment(result.included_in_block_timestamp);
-      console.log({ accountName, result, moment }, moment.format());
-      return moment;
-    }
-  } catch (error) {
-    console.error({ error });
-  }
-
-  throw new Error(
-    'getMostRecentActivityDateTime did not produce a result. Perhaps a certificate for the original_recipient_id could not be found or the public indexer query timed out.',
-  );
-}
-
-async function getExpiration(accountName: string): Promise<string> {
-  const recent = await getMostRecentActivityDateTime(accountName);
-  return formatDate(recent.add(expirationMonths, 'months'));
+  return 'TBD';
+  // return formatDate(recent.add(expirationMonths, 'months'));
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -97,7 +65,12 @@ async function fetchCertificateDetails(tokenId: string) {
     if (certificateMetadata.valid) {
       const accountName = certificateMetadata.original_recipient_id;
       const programCode = certificateMetadata.program;
-      const expiration = await getExpiration(accountName); // TODO: Wrap in try/catch blocks to handle when indexer service is unavailable.
+      let expiration = null; // The UI (see `generateImage`) will need to gracefully handle this case when indexer service is unavailable.
+      try {
+        expiration = await getExpiration(accountName);
+      } catch (error) {
+        console.error('Perhaps a certificate for the original_recipient_id could not be found or the public indexer query timed out.', error);
+      }
       const date = formatDate(metadata.issued_at);
       const programName = metadata.title;
       const programDescription = metadata.description;
