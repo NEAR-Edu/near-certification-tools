@@ -2,7 +2,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createCanvas } from 'canvas';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
@@ -70,36 +70,38 @@ async function getMostRecentActivityDateTime(accountName: string): Promise<Dayjs
   return moment;
 }
 
-async function getStartOfFirstLongPeriodOfInactivity(accountName: string, issuedAt: number): Promise<Dayjs | null> {
+async function getStartOfFirstLongPeriodOfInactivity(accountName: string, issuedAt: string): Promise<Dayjs | null> {
   // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
   /* This function includes an ugly temporary workaround. `findFirst` (instead of findMany with `take: 2`) should have worked but was causing a timeout.
      Apparently it's not Prisma's fault though.Even running a LIMIT 1 query in pgAdmin causes a timeout, surprisingly, even though a LIMIT 2 query does not.
      https://stackoverflow.com/questions/71026316/why-would-limit-2-queries-work-but-limit-1-always-times-out
      This is suspicious but seems unrelated to this repo. */
-
+  const issuedAtUnix = 0; // TODO dayjs(issuedAt).unix(); //* 1_000_000_000
+  console.log({ issuedAt, issuedAtUnix, accountName });
   const secondsPerDay = 60 * 60 * 24;
-  /* // TODO
+  // TODO
   // https://www.prisma.io/docs/concepts/components/prisma-client/raw-database-access#queryraw
-  const result = await prisma.$queryRaw`SELECT * FROM
-(
-SELECT 
-moment,
-diff_to_previous
-FROM (SELECT *,
-      
-      ((EXTRACT(epoch FROM moment) - EXTRACT(epoch FROM lag(moment) over (ORDER BY moment))) / ${secondsPerDay})::int 
-      AS diff_to_previous
-      FROM (SELECT TO_TIMESTAMP(r."included_in_block_timestamp"/1000000000) as moment
-FROM PUBLIC.RECEIPTS R
-LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
-WHERE '${accountName}' IN (SIGNER_ACCOUNT_ID)
-AND moment > ${issuedAt}
-ORDER BY moment DESC) as t1) as t2
-) as t3
-WHERE diff_to_previous > ${expirationDays}
-ORDER BY moment ASC 
-LIMIT 1`;
-  console.log({ result }); */
+  // const tempQuery =
+  // console.log({ tempQuery });
+  const result = await prisma.$queryRaw`
+  SELECT moment, diff_to_previous FROM
+  (
+      SELECT *,
+        ((EXTRACT(epoch FROM moment) - EXTRACT(epoch FROM lag(moment) over (ORDER BY moment))) / ${secondsPerDay})::int 
+        AS diff_to_previous
+        FROM (SELECT TO_TIMESTAMP(r."included_in_block_timestamp"/1000000000) as moment
+      FROM PUBLIC.RECEIPTS R
+      LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR 
+      ON R.RECEIPT_ID = AR.RECEIPT_ID
+      WHERE SIGNER_ACCOUNT_ID = ${accountName}
+      AND r."included_in_block_timestamp" > ${issuedAtUnix}
+      ORDER BY moment DESC
+      ) as relevantActivity
+    ) as activityWithDiffs
+  WHERE diff_to_previous > ${expirationDays}
+  ORDER BY moment ASC 
+  LIMIT 1`;
+  console.log({ result });
   return null;
 }
 
@@ -107,7 +109,7 @@ LIMIT 1`;
  * If the account doesn't have a period where it hasn't been active for 180 days straight after the issue date: Expiration date = last activity + 180 days
  * Otherwise, if 1 or more >180-day periods of inactivity exist after issueDate, expiration = the beginning of the *first* such period + 180 days.
  */
-async function getExpiration(accountName: string, issuedAt: number): Promise<string> {
+async function getExpiration(accountName: string, issuedAt: string): Promise<string> {
   const startOfFirstLongPeriodOfInactivity = await getStartOfFirstLongPeriodOfInactivity(accountName, issuedAt);
   console.log({ startOfFirstLongPeriodOfInactivity });
   const moment = startOfFirstLongPeriodOfInactivity || (await getMostRecentActivityDateTime(accountName));
