@@ -41,14 +41,77 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   return buffer;
 }
 
-async function getExpiration(accountName: string): Promise<string> {
+async function getMostRecentActivityDateTime(accountName: string): Promise<Dayjs> {
   // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
   /* This function includes an ugly temporary workaround. `findFirst` (instead of findMany with `take: 2`) should have worked but was causing a timeout.
      Apparently it's not Prisma's fault though.Even running a LIMIT 1 query in pgAdmin causes a timeout, surprisingly, even though a LIMIT 2 query does not.
      https://stackoverflow.com/questions/71026316/why-would-limit-2-queries-work-but-limit-1-always-times-out
      This is suspicious but seems unrelated to this repo. */
-  return 'TBD';
-  // return formatDate(recent.add(expirationMonths, 'months'));
+
+  const rows = await prisma.receipts.findMany({
+    where: {
+      action_receipts: {
+        // https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting#filter-on-relations
+        signer_account_id: {
+          equals: accountName,
+        },
+      },
+    },
+    orderBy: {
+      included_in_block_timestamp: 'desc',
+    },
+    take: 2, // see comment above about workaround
+  });
+
+  const result = rows[0]; // see comment above about workaround
+  console.log({ accountName, result });
+  const moment = convertTimestampDecimalToDayjsMoment(result.included_in_block_timestamp);
+  console.log({ accountName, result, moment }, moment.format());
+  return moment;
+}
+
+async function getStartOfFirstLongPeriodOfInactivity(accountName: string, issuedAt: number): Promise<Dayjs | null> {
+  // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
+  /* This function includes an ugly temporary workaround. `findFirst` (instead of findMany with `take: 2`) should have worked but was causing a timeout.
+     Apparently it's not Prisma's fault though.Even running a LIMIT 1 query in pgAdmin causes a timeout, surprisingly, even though a LIMIT 2 query does not.
+     https://stackoverflow.com/questions/71026316/why-would-limit-2-queries-work-but-limit-1-always-times-out
+     This is suspicious but seems unrelated to this repo. */
+
+  const secondsPerDay = 60 * 60 * 24;
+  /* // TODO
+  // https://www.prisma.io/docs/concepts/components/prisma-client/raw-database-access#queryraw
+  const result = await prisma.$queryRaw`SELECT * FROM
+(
+SELECT 
+moment,
+diff_to_previous
+FROM (SELECT *,
+      
+      ((EXTRACT(epoch FROM moment) - EXTRACT(epoch FROM lag(moment) over (ORDER BY moment))) / ${secondsPerDay})::int 
+      AS diff_to_previous
+      FROM (SELECT TO_TIMESTAMP(r."included_in_block_timestamp"/1000000000) as moment
+FROM PUBLIC.RECEIPTS R
+LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
+WHERE '${accountName}' IN (SIGNER_ACCOUNT_ID)
+AND moment > ${issuedAt}
+ORDER BY moment DESC) as t1) as t2
+) as t3
+WHERE diff_to_previous > ${expirationDays}
+ORDER BY moment ASC 
+LIMIT 1`;
+  console.log({ result }); */
+  return null;
+}
+
+/**
+ * If the account doesn't have a period where it hasn't been active for 180 days straight after the issue date: Expiration date = last activity + 180 days
+ * Otherwise, if 1 or more >180-day periods of inactivity exist after issueDate, expiration = the beginning of the *first* such period + 180 days.
+ */
+async function getExpiration(accountName: string, issuedAt: number): Promise<string> {
+  const startOfFirstLongPeriodOfInactivity = await getStartOfFirstLongPeriodOfInactivity(accountName, issuedAt);
+  console.log({ startOfFirstLongPeriodOfInactivity });
+  const moment = startOfFirstLongPeriodOfInactivity || (await getMostRecentActivityDateTime(accountName));
+  return formatDate(moment.add(expirationDays, 'days'));
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -67,7 +130,7 @@ async function fetchCertificateDetails(tokenId: string) {
       const programCode = certificateMetadata.program;
       let expiration = null; // The UI (see `generateImage`) will need to gracefully handle this case when indexer service is unavailable.
       try {
-        expiration = await getExpiration(accountName);
+        expiration = await getExpiration(accountName, metadata.issued_at);
       } catch (error) {
         console.error('Perhaps a certificate for the original_recipient_id could not be found or the public indexer query timed out.', error);
       }
