@@ -7,7 +7,7 @@ import { Dayjs } from 'dayjs';
 import { getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
-import { height, populateCerts, width } from '../../../helpers/certificate-designs';
+import { height, populateCert, width } from '../../../helpers/certificate-designs';
 import prisma from '../../../helpers/prisma';
 import { addCacheHeader } from '../../../helpers/caching';
 import { convertTimestampDecimalToDayjsMoment, formatDate } from '../../../helpers/time';
@@ -35,7 +35,7 @@ function parseFileName(imageFileNameString: string) {
 async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDef, details: any) {
   const canvas = createCanvas(width, height, canvasType);
 
-  await populateCerts(canvas, details);
+  await populateCert(canvas, details);
 
   // Convert the Canvas to a buffer
   const buffer = bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();

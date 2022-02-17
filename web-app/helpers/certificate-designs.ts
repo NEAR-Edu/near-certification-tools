@@ -61,7 +61,7 @@ function wrapText(canvas: Canvas, text: string, x: number, y: number, maxWidth: 
 }
 
 // eslint-disable-next-line max-lines-per-function
-export async function populateCerts(canvas: Canvas, details: any) {
+export async function populateCert(canvas: Canvas, details: any) {
   console.log('populateCerts', { details });
   const { tokenId, date, programName, accountName, expiration, programDescription, instructor, programCode } = details;
 
