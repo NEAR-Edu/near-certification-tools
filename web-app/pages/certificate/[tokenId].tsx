@@ -47,7 +47,7 @@ const Certificate: NextPage = () => {
   const pngUrl = `${baseUrl}/api/cert/${tokenId}.png`;
   console.log('pngUrl', { pngUrl });
   return (
-    <>
+    <Layout>
       <Head>
         <meta property="og:url" content={`/api/cert/${tokenId}`} />
         <meta property="og:type" content="website" />
@@ -62,21 +62,19 @@ const Certificate: NextPage = () => {
         <meta name="twitter:description" content="View NEAR University certificates of any .near account" />
         <meta name="twitter:image" content={pngUrl} />
       </Head>
-      <Layout>
-        <a href={`/api/cert/${tokenId}.svg`}>
-          <img src={pngUrl} alt={`certificate ${tokenId}`} />
+      <a href={`/api/cert/${tokenId}.svg`}>
+        <img src={pngUrl} alt={`certificate ${tokenId}`} />
+      </a>
+      <div className="text-sm mt-2 ml-2">
+        Share:{' '}
+        <a href={buildTwitterUrl(pngUrl)} target="_blank" rel="noreferrer">
+          <i className="fab fa-twitter-square not-italic text-sky-700 p-1" />
         </a>
-        <div className="text-sm mt-2 ml-2">
-          Share:{' '}
-          <a href={buildTwitterUrl(pngUrl)} target="_blank" rel="noreferrer">
-            <i className="fab fa-twitter-square not-italic text-sky-700 p-1" />
-          </a>
-          <a href={buildLinkedInUrl(pngUrl)} target="_blank" rel="noreferrer">
-            <i className="fab fa-linkedin-in not-italic text-sky-700 p-1" />
-          </a>
-        </div>
-      </Layout>
-    </>
+        <a href={buildLinkedInUrl(pngUrl)} target="_blank" rel="noreferrer">
+          <i className="fab fa-linkedin-in not-italic text-sky-700 p-1" />
+        </a>
+      </div>
+    </Layout>
   );
 };
 export default Certificate;
