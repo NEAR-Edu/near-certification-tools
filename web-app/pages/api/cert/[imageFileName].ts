@@ -20,6 +20,12 @@ const CACHE_SECONDS: number = Number(process.env.DYNAMIC_CERT_IMAGE_GENERATION_C
 
 type CanvasTypeDef = 'pdf' | 'svg' | undefined;
 type BufferTypeDef = 'image/png' | undefined;
+type RawQueryResult = [
+  {
+    moment: string;
+    diff_to_previous: number;
+  },
+];
 
 function parseFileName(imageFileNameString: string) {
   const extension = imageFileNameString.split(dot).pop(); // https://stackoverflow.com/a/1203361/470749
@@ -76,33 +82,29 @@ async function getStartOfFirstLongPeriodOfInactivity(accountName: string, issued
      Apparently it's not Prisma's fault though.Even running a LIMIT 1 query in pgAdmin causes a timeout, surprisingly, even though a LIMIT 2 query does not.
      https://stackoverflow.com/questions/71026316/why-would-limit-2-queries-work-but-limit-1-always-times-out
      This is suspicious but seems unrelated to this repo. */
-  const issuedAtUnix = 0; // TODO dayjs(issuedAt).unix(); //* 1_000_000_000
-  console.log({ issuedAt, issuedAtUnix, accountName });
-  const secondsPerDay = 60 * 60 * 24;
-  // TODO
+  const issuedAtUnixNano = dayjs(issuedAt).unix() * 1_000_000_000;
+  console.log({ issuedAt, issuedAtUnixNano, accountName });
   // https://www.prisma.io/docs/concepts/components/prisma-client/raw-database-access#queryraw
-  // const tempQuery =
-  // console.log({ tempQuery });
-  const result = await prisma.$queryRaw`
+  const result: RawQueryResult = await prisma.$queryRaw<RawQueryResult>`
   SELECT moment, diff_to_previous FROM
   (
       SELECT *,
-        ((EXTRACT(epoch FROM moment) - EXTRACT(epoch FROM lag(moment) over (ORDER BY moment))) / ${secondsPerDay})::int 
+        ((EXTRACT(epoch FROM moment) - EXTRACT(epoch FROM lag(moment) over (ORDER BY moment))) / (60 * 60 * 24))::int 
         AS diff_to_previous
         FROM (SELECT TO_TIMESTAMP(r."included_in_block_timestamp"/1000000000) as moment
       FROM PUBLIC.RECEIPTS R
       LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR 
       ON R.RECEIPT_ID = AR.RECEIPT_ID
       WHERE SIGNER_ACCOUNT_ID = ${accountName}
-      AND r."included_in_block_timestamp" > ${issuedAtUnix}
+      AND r."included_in_block_timestamp" > ${issuedAtUnixNano}
       ORDER BY moment DESC
       ) as relevantActivity
     ) as activityWithDiffs
   WHERE diff_to_previous > ${expirationDays}
   ORDER BY moment ASC 
   LIMIT 1`;
-  console.log({ result });
-  return null;
+  console.log('getStartOfFirstLongPeriodOfInactivity', { result });
+  return result ? dayjs(result[0].moment) : null;
 }
 
 /**
