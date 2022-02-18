@@ -42,10 +42,8 @@ function buildLinkedInUrl(pngUrl: string) {
 // eslint-disable-next-line max-lines-per-function
 const Certificate: NextPage = (...props) => {
   const router = useRouter();
-  const { tokenId } = router.query; // https://nextjs.org/docs/routing/dynamic-routes
-
-  console.log({ tokenId });
-  const data = props[0].children;
+  const { tokenId } = router.query; // https://nextjs.org/docs/routing/dynamic-routes  
+  const data = tokenId;
   const pngUrl = `${baseUrl}/api/cert/${data}.png`;
   // eslint-disable-next-line react/destructuring-assignment
   console.log('************************', { data });
@@ -83,17 +81,20 @@ const Certificate: NextPage = (...props) => {
 export async function getServerSideProps(context: any) {
   const { tokenId } = context.query;
   console.log('---------------------------', { tokenId });
-  const url = `${baseUrl}/api/cert/${tokenId}`;
+  const url = `${baseUrl}/api/cert/${tokenId}.png`;
   console.log('++++++++++++++++++++++++++++++++++++++++', { url });
   const requestOptions = {
     method: 'GET',
-    contentType: 'image/png',
+    headers: {
+      'Content-Type': 'image/png',
+    },
   };
+  console.log('++++++++++++++++++++++++++++++++++++++++', { requestOptions });
   const results = tokenId;
-  const res = await fetch(url, requestOptions);
-  console.log('+++++++++++++++++++++++++++++++++++++++++', res);
-  const resJson = await res.json();
-  console.log('+++++++++++++++++++++', resJson);
+  const fetchRes = await fetch(url, requestOptions);
+  console.log('+++++++++++++++++++++++++++++++++++++++++', { fetchRes });
+  // const resJson = await fetchRes.json();
+  // console.log('+++++++++++++++++++++', resJson);
   return {
     props: {
       children: results,
