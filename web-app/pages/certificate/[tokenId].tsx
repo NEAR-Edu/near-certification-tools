@@ -6,21 +6,19 @@ https://www.linkedin.com/post-inspector/
 https://cards-dev.twitter.com/validator
 */
 
-import type { NextPage } from 'next';
+import type { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
-import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../helpers/near';
 import { baseUrl } from '../../helpers/strings';
-import { formatDate } from '../../helpers/time';
-import { getNftContract, NFT } from '../api/mint-cert';
+
+const title = 'I got certified on the NEAR blockchain!';
+const description = 'View NEAR University certificates of any .near account';
 
 function buildTwitterUrl(pngUrl: string) {
   // https://stevenwestmoreland.com/2018/07/creating-social-sharing-links-without-javascript.html
-  const text = 'I got certified on the NEAR blockchain!';
   const hashtags = ['NEAR', 'blockchain', 'NEARUniversity'];
   const via = 'NEARedu';
-  const url = encodeURI(`https://twitter.com/intent/tweet?text=${text}&url=${pngUrl}&hashtags=${hashtags.join(',')}&via=${via}`);
+  const url = encodeURI(`https://twitter.com/intent/tweet?text=${title}&url=${pngUrl}&hashtags=${hashtags.join(',')}&via=${via}`);
   console.log({ url });
   return url;
 }
@@ -32,40 +30,47 @@ function buildLinkedInUrl(pngUrl: string) {
   return url;
 }
 
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//   // https://nextjs.org/docs/api-reference/data-fetching/get-server-side-props
-//   // TODO: In getServerSideProps, check for existence of cert of this tokenId, and ensure that it's valid. If does not exist or is invalid, return HTTP_ERROR_CODE_MISSING error.
-//   const { account } = context.query; // https://nextjs.org/docs/routing/dynamic-routes
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  // https://nextjs.org/docs/api-reference/data-fetching/get-server-side-props
+  const { tokenId } = context.query; // https://nextjs.org/docs/routing/dynamic-routes
+  console.log({ tokenId });
+  // TODO: In getServerSideProps, check for existence of cert of this tokenId, and ensure that it's valid. If does not exist or is invalid, return HTTP_ERROR_CODE_MISSING error.
 
-//   // Pass data to the page via props
-//   const props: PageProps = { };
-//   return { props };
-// };
+  return {
+    props: {
+      tokenId,
+    },
+  };
+};
 
-// eslint-disable-next-line max-lines-per-function
-const Certificate: NextPage = (...props) => {
-  const router = useRouter();
-  const { tokenId } = router.query; // https://nextjs.org/docs/routing/dynamic-routes
-  const tokenUrl = tokenId;
-  const metaProps = props[0];
-  const metadataResult = Object.values(metaProps);
-  const pngUrl = `${baseUrl}/api/cert/${tokenUrl}.png`;
+function OpenGraphMetaData({ tokenId, pngUrl }: { tokenId: string; pngUrl: string }) {
+  return (
+    <Head>
+      <meta property="og:url" content={pngUrl} />
+      <meta property="og:type" content="website" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:image" content={pngUrl} />
+      <meta property="twitter:site" content="@NEARProtocol" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta property="twitter:domain" content="/" />
+      <meta property="twitter:url" content={`/certificate/${tokenId}`} />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={pngUrl} />
+    </Head>
+  );
+}
+
+type CertificatePageProps = { tokenId: string };
+
+const CertificatePage: NextPage<CertificatePageProps> = ({ tokenId }: CertificatePageProps) => {
+  // https://nextjs.org/docs/routing/dynamic-routes
+  const pngUrl = `${baseUrl}/api/cert/${tokenId}.png`;
+
   return (
     <>
-      <Head>
-        <meta property="og:url" content={`/api/cert/${tokenUrl}`} />
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content={`${metadataResult[0]}`} />
-        <meta property="og:description" content={`${metadataResult[1]}`} />
-        <meta property="og:image" content={`/api/cert/${tokenUrl}.png`} />
-        <meta property="twitter:site" content="@NEARProtocol" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta property="twitter:domain" content="/" />
-        <meta property="twitter:url" content={`/certificate/${tokenUrl}`} />
-        <meta name="twitter:title" content={`${metadataResult[0]}`} />
-        <meta name="twitter:description" content={`${metadataResult[1]}`} />
-        <meta name="twitter:image" content={`/api/cert/${tokenUrl}.png`} />
-      </Head>
+      <OpenGraphMetaData tokenId={tokenId} pngUrl={pngUrl} />
       <Layout>
         <a href={`/api/cert/${tokenId}.svg`}>
           <img src={pngUrl} alt={`certificate ${tokenId}`} />
@@ -83,22 +88,5 @@ const Certificate: NextPage = (...props) => {
     </>
   );
 };
-export async function getServerSideProps(context: any) {
-  const { tokenId } = context.query;
-  const account = await getNearAccountWithoutAccountIdOrKeyStoreForBackend();
-  const contract = getNftContract(account);
-  const response = await (contract as NFT).nft_token({ token_id: tokenId });
-  const { metadata } = response;
 
-  const programName = metadata.title;
-  const programDescription = metadata.description;
-  const date = formatDate(metadata.issued_at);
-  return {
-    props: {
-      title: programName,
-      description: programDescription,
-      date,
-    },
-  };
-}
-export default Certificate;
+export default CertificatePage;
