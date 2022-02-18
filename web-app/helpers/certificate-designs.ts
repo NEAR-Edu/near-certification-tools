@@ -18,12 +18,12 @@ function getBaseContext(canvas: Canvas) {
   return context;
 }
 
-function addText(canvas: Canvas, text: string, font: string, fillStyle: string, leftPos: number, rightPos: number) {
+function addText(canvas: Canvas, text: string, font: string, fillStyle: string, xPos: number, yPos: number) {
   const context = getBaseContext(canvas);
   // Define the font style
   context.fillStyle = fillStyle;
   context.font = font;
-  context.fillText(text, leftPos, rightPos);
+  context.fillText(text, xPos, yPos);
 }
 
 /**
