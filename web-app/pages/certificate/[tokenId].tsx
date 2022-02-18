@@ -81,7 +81,7 @@ const Certificate: NextPage = (...props) => {
 export async function getServerSideProps(context: any) {
   const { tokenId } = context.query;
   console.log('---------------------------', { tokenId });
-  const url = `${baseUrl}/api/cert/${tokenId}.png`;
+  const url = `${baseUrl}/api/cert/${tokenId}`;
   console.log('++++++++++++++++++++++++++++++++++++++++', { url });
   const requestOptions = {
     method: 'GET',
