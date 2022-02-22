@@ -43,7 +43,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-function OpenGraphMetaData({ tokenId, pngUrl }: { tokenId: string; pngUrl: string }) {
+function OpenGraphMetaData({ pngUrl }: { pngUrl: string }) {
   return (
     <Head>
       <meta property="og:url" content={pngUrl} />
@@ -54,10 +54,12 @@ function OpenGraphMetaData({ tokenId, pngUrl }: { tokenId: string; pngUrl: strin
       <meta property="twitter:site" content="@NEARProtocol" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta property="twitter:domain" content="/" />
-      <meta property="twitter:url" content={`/certificate/${tokenId}`} />
+      <meta property="twitter:url" content={pngUrl} />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={pngUrl} />
+      <meta property="og:image:width" content="1080" />
+      <meta property="og:image:height" content="1080" />
     </Head>
   );
 }
@@ -70,7 +72,7 @@ const CertificatePage: NextPage<CertificatePageProps> = ({ tokenId }: Certificat
 
   return (
     <>
-      <OpenGraphMetaData tokenId={tokenId} pngUrl={pngUrl} />
+      <OpenGraphMetaData pngUrl={pngUrl} />
       <Layout>
         <a href={`/api/cert/${tokenId}.svg`}>
           <img src={pngUrl} alt={`certificate ${tokenId}`} />
@@ -88,11 +90,5 @@ const CertificatePage: NextPage<CertificatePageProps> = ({ tokenId }: Certificat
     </>
   );
 };
-// export async function getServerSideProps(context: any) {
-//   const { tokenId } = context.query;
-//   const account = await getNearAccountWithoutAccountIdOrKeyStoreForBackend();
-//   const contract = getNftContract(account);
-//   const response = await (contract as NFT).nft_token({ token_id: tokenId });
-//   const { metadata } = response;
-// }
+
 export default CertificatePage;
