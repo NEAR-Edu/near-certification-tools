@@ -8,26 +8,44 @@ const manropeFontFamily = 'Manrope, Sans Serif';
 const monoFontFile = './fonts/DMMono-Medium.ttf';
 const monoFontFamily = 'DM Mono, monospace';
 
+const gray = '#757575';
+const black = '#000000';
+const blue = '#5F8AFA';
+
+const CERTIFICATE_OF_ACHIEVEMENT = 'CERTIFICATE OF ACHIEVEMENT';
+const X_POSITION_OF_INSTRUCTOR = 190; // TODO: https://www.figma.com/file/sTYSqGHiCoH0p82uh1TsTs/NC-Certs?node-id=0%3A1 does not have the actual measurements needed for left-align. Get from Dan.
+const X_POSITION_OF_DATE = 65 + 950 - 180; // TODO: Either figure out how to use textAlign: 'right' and use 65 for the X, or get from Dan the correct X value to use for left-align since https://www.figma.com/file/sTYSqGHiCoH0p82uh1TsTs/NC-Certs?node-id=0%3A1 does not have the actual measurements needed for left-align and is fudged here.
+const X_POSITION_OF_DESCRIPTION = 65;
+const X_CENTER = width / 2;
+
+const accountFont = `60px '${monoFontFamily}' medium`;
+const dateFont = `30px '${monoFontFamily}' medium`;
+const descriptionFont = `33px '${manropeFontFamily}' regular`;
+const tokenIdFont = `30px '${monoFontFamily}' medium`;
+const programFont = `40px '${monoFontFamily}' medium`;
+const titleFont = `64px '${manropeFontFamily}' extraBold`;
+
 registerFont(manropeFontFile, { family: manropeFontFamily });
 registerFont(monoFontFile, { family: monoFontFamily });
 
 function getBaseContext(canvas: Canvas) {
   const context = canvas.getContext('2d');
-  context.textAlign = 'center';
   context.textBaseline = 'top';
   return context;
 }
 
-function addText(canvas: Canvas, text: string, font: string, fillStyle: string, xPos: number, yPos: number) {
+function addText(canvas: Canvas, text: string, font: string, fillStyle: string, xPos: number, yPos: number, textAlign: CanvasTextAlign) {
   const context = getBaseContext(canvas);
   // Define the font style
   context.fillStyle = fillStyle;
   context.font = font;
-  context.fillText(text, xPos, yPos);
+  context.textAlign = textAlign;
+  context.fillText(text, xPos, yPos); // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillText
 }
 
 /**
- * split long text into shorter lines
+ * Split long text into shorter lines.
+ * // TODO: This looks for 6 words, which have unpredictable length, so instead we should replace with a better function. https://github.com/NEAR-Edu/near-certification-tools/issues/22
  */
 function wrapText(canvas: Canvas, text: string, x: number, y: number, maxWidth: number, lineHeight: number, font: string, fillStyle: string) {
   const context = getBaseContext(canvas);
@@ -59,28 +77,9 @@ function wrapText(canvas: Canvas, text: string, x: number, y: number, maxWidth: 
   context.fillText(line, x, y2);
 }
 
-// eslint-disable-next-line max-lines-per-function
 export async function populateCert(canvas: Canvas, details: any) {
   console.log('populateCert', { details });
   const { tokenId, date, programName, accountName, expiration, programDescription, instructor, programCode } = details;
-
-  const gray = '#757575';
-  const black = '#000000';
-  const blue = '#5F8AFA';
-
-  const WIDTH_OF_CERTIFICATE = 950;
-  const CERTIFICATE_OF_ACHIEVEMENT = 'CERTIFICATE OF ACHIEVEMENT';
-  const X_POSITION_OF_DATE = width / 2 + WIDTH_OF_CERTIFICATE / 2.5;
-  const X_POSITION_OF_INSTRUCTOR = width / 2 - WIDTH_OF_CERTIFICATE / 3 - 30;
-  const X_POSITION_OF_DESCRIPTION = width / 2 - WIDTH_OF_CERTIFICATE / 2;
-  const X_POSITION = width / 2;
-
-  const accountFont = `60px '${monoFontFamily}' medium`;
-  const dateFont = `30px '${monoFontFamily}' medium`;
-  const descriptionFont = `33px '${manropeFontFamily}' regular`;
-  const tokenIdFont = `30px '${monoFontFamily}' medium`;
-  const programFont = `40px '${monoFontFamily}' medium`;
-  const titleFont = `64px '${manropeFontFamily}' extraBold`;
 
   // Load and draw the background image first
   const certificateBackgroundImage = `./public/certificate-backgrounds/${programCode}_certificate.svg`; // Background images must be in SVG format
@@ -90,12 +89,12 @@ export async function populateCert(canvas: Canvas, details: any) {
   const context = getBaseContext(canvas);
   context.drawImage(image, 0, 0, width, height);
 
-  addText(canvas, CERTIFICATE_OF_ACHIEVEMENT, titleFont, blue, X_POSITION, 170); //  do we need this or not?
-  addText(canvas, accountName, accountFont, black, X_POSITION, 304);
-  addText(canvas, programName, programFont, black, X_POSITION, 680);
-  wrapText(canvas, programDescription, X_POSITION_OF_DESCRIPTION, 450, WIDTH_OF_CERTIFICATE, 50, descriptionFont, gray);
-  wrapText(canvas, instructor, X_POSITION_OF_INSTRUCTOR, 807, WIDTH_OF_CERTIFICATE, 50, dateFont, black);
-  addText(canvas, date, dateFont, black, X_POSITION_OF_DATE, 807);
-  addText(canvas, expiration, dateFont, black, X_POSITION_OF_DATE, 864);
-  addText(canvas, tokenId, tokenIdFont, black, X_POSITION, 995);
+  addText(canvas, CERTIFICATE_OF_ACHIEVEMENT, titleFont, blue, X_CENTER, 170, 'center');
+  addText(canvas, accountName, accountFont, black, X_CENTER, 304, 'center'); // TODO: https://github.com/NEAR-Edu/near-certification-tools/issues/14
+  wrapText(canvas, programDescription, X_POSITION_OF_DESCRIPTION, 450, 0, 50, descriptionFont, gray);
+  addText(canvas, programName, programFont, black, X_CENTER, 680, 'center');
+  addText(canvas, instructor, dateFont, black, X_POSITION_OF_INSTRUCTOR, 807, 'left'); // TODO: https://github.com/NEAR-Edu/near-certification-tools/issues/14
+  addText(canvas, date, dateFont, black, X_POSITION_OF_DATE, 807, 'left');
+  addText(canvas, expiration, dateFont, black, X_POSITION_OF_DATE, 864, 'left');
+  addText(canvas, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
 }
