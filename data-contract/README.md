@@ -9,10 +9,13 @@ is stored on-chain. This is for the purpose of reducing overhead to client imple
 NEAR is so darn cheap.
 
 # Install Rust and Cargo
+
 https://doc.rust-lang.org/cargo/getting-started/installation.html#install-rust-and-cargo
+
 ```bash
 curl https://sh.rustup.rs -sSf | sh
 ```
+
 You might want to close and reopen your IDE (e.g. VSC) and install any Rust-related extensions too.
 
 # Build
@@ -52,11 +55,11 @@ For example, to deploy to a new dev address (ignoring a previously generated add
 
 This contract implements the following standards:
 
-* [NEP171 v1.0.0 - NFT Core](https://github.com/near/NEPs/blob/master/specs/Standards/NonFungibleToken/Core.md) (Only
+- [NEP171 v1.0.0 - NFT Core](https://github.com/near/NEPs/blob/master/specs/Standards/NonFungibleToken/Core.md) (Only
   completely compliant if the `can_transfer` option is `true` during initialization.)
-* [NEP177 v2.0.0 - NFT Metadata](https://github.com/near/NEPs/blob/master/specs/Standards/NonFungibleToken/Metadata.md)
-* [NEP178 v1.0.0 - NFT Approval Managemenet](https://github.com/near/NEPs/blob/master/specs/Standards/NonFungibleToken/ApprovalManagement.md)
-* [NEP181 v1.0.0 - NFT Enumeration](https://github.com/near/NEPs/blob/master/specs/Standards/NonFungibleToken/Enumeration.md)
+- [NEP177 v2.0.0 - NFT Metadata](https://github.com/near/NEPs/blob/master/specs/Standards/NonFungibleToken/Metadata.md)
+- [NEP178 v1.0.0 - NFT Approval Managemenet](https://github.com/near/NEPs/blob/master/specs/Standards/NonFungibleToken/ApprovalManagement.md)
+- [NEP181 v1.0.0 - NFT Enumeration](https://github.com/near/NEPs/blob/master/specs/Standards/NonFungibleToken/Enumeration.md)
 
 This contract also serves as the de-facto standard for NEAR Edu Certification compatible contracts:
 
@@ -98,36 +101,58 @@ The 'memo' field at the root (outer) level of [sample_mint.json](sample_mint.jso
 
 In token_metadata, 'title', 'description', and 'issued_at' are the only fields we will use.
 
-----
+Please change the `program` under the `certification_metada` in the `sample_mint.json` or change it while minting a certificate, with one of the followings:
+
+- Analyst
+- Architect
+- Designer
+- Developer
+- Entrepreneur
+- Instructor
+- Security
+
+---
+
 ## Example Interactions
 
 ### View certificate metadata
+
 After deploying a contract, such as via `./dev-deploy.sh`, you can view certificate metadata by running something like `NEAR_ENV=testnet near view <contract ID> nft_metadata`. Example:
+
 ```bash
 NEAR_ENV=testnet near view dev-1643292007908-55838431863482 nft_metadata
 ```
 
 ### Issue a certificate
+
 You can now issue a certificate by running something like `NEAR_ENV=testnet near call <the contract ID> nft_mint '<a JSON payload similar to as shown in sample_mint.json>' --account-id <whichever account you logged in as>.testnet --deposit 0.2 --gas 300000000000000`. Example:
+
 ```bash
-NEAR_ENV=testnet near call dev-1643292007908-55838431863482 nft_mint '{  "token_id": "103216412112497cb6c193152a27c49a",  "receiver_account_id": "hatchet.testnet",  "token_metadata": {    "title": "Certified White Hat Hacker",    "description": "This certifies that the recipient has fulfilled Organization, Inc.s requirements as a white hat hacker.",    "media": null,    "media_hash": null,    "copies": 1,    "issued_at": "2021-11-28 13:00",    "expires_at": null,    "starts_at": null,    "updated_at": null,    "extra": null,    "reference": null,    "reference_hash": null  },  "certification_metadata": {    "authority_id": "john_instructor.near",    "authority_name": "John Instructor",    "program": "TR101",    "program_name": "White hat hacking with transferable certification",    "program_link": "https://near.university",    "program_start_date": null,    "program_end_date": null,    "original_recipient_id": "hatchet.testnet",    "original_recipient_name": "Original Recipient",    "valid": true,    "memo": null  },  "memo": null}' --account-id ryancwalsh.testnet --deposit 0.2 --gas 300000000000000
+NEAR_ENV=testnet near call dev-1643292007908-55838431863482 nft_mint '{  "token_id": "103216412112497cb6c193152a27c49a",  "receiver_account_id": "hatchet.testnet",  "token_metadata": {    "title": "Certified White Hat Hacker",    "description": "This certifies that the recipient has fulfilled Organization, Inc.s requirements as a white hat hacker.",    "media": null,    "media_hash": null,    "copies": 1,    "issued_at": "2021-11-28 13:00",    "expires_at": null,    "starts_at": null,    "updated_at": null,    "extra": null,    "reference": null,    "reference_hash": null  },  "certification_metadata": {    "authority_id": "john_instructor.near",    "authority_name": "John Instructor",    "program": "Developer",    "program_name": "White hat hacking with transferable certification",    "program_link": "https://near.university",    "program_start_date": null,    "program_end_date": null,    "original_recipient_id": "hatchet.testnet",    "original_recipient_name": "Original Recipient",    "valid": true,    "memo": null  },  "memo": null}' --account-id ryancwalsh.testnet --deposit 0.2 --gas 300000000000000
 ```
 
 ### View Certificate
+
 Then you can view those details of that certificate on the blockchain by running something like `NEAR_ENV=testnet near view <contract ID> nft_token '{"token_id": "<token ID>"}'`. Example:
+
 ```bash
 NEAR_ENV=testnet near view dev-1643292007908-55838431863482 nft_token '{"token_id": "103216412112497cb6c193152a27c49a"}'
 ```
 
 ### View all NFTs (from this contract) owned by an account
+
 Run something like `NEAR_ENV=testnet near view <the contract ID> nft_tokens_for_owner '{"account_id": "<the account ID>"}'`. See https://nomicon.io/Standards/NonFungibleToken/Enumeration.html#interface . `from_index` defaults to 0 and `limit` defaults to unlimited. Example:
+
 ```bash
 NEAR_ENV=testnet near view dev-1643292007908-55838431863482 nft_tokens_for_owner '{"account_id": "hatchet.testnet"}'
 ```
 
 ### Invalidate a cert
+
 Run something like `NEAR_ENV=testnet near call <the contract ID> cert_invalidate '{ "token_id": "<some token ID>"}' --account-id <whichever account you logged in as>.testnet --depositYocto 1 --gas 300000000000000`. Example:
+
 ```bash
 NEAR_ENV=testnet near call dev-1643292007908-55838431863482 cert_invalidate '{ "token_id": "303216412112497cb6c193152a27c49c"}' --account-id ryancwalsh.testnet --depositYocto 1 --gas 300000000000000
 ```
-----
+
+---
