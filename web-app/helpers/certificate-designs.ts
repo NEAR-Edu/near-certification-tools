@@ -15,8 +15,8 @@ const blue = '#5F8AFA';
 const CERTIFICATE_OF_ACHIEVEMENT = 'CERTIFICATE OF ACHIEVEMENT';
 const BODY_WIDTH = 950;
 const LEFT_PADDING = 65;
-const X_POSITION_OF_INSTRUCTOR = 200; // TODO: https://www.figma.com/file/sTYSqGHiCoH0p82uh1TsTs/NC-Certs?node-id=0%3A1 does not have the actual measurements needed for left-align. Get from Dan.
-const X_POSITION_OF_DATE = LEFT_PADDING + BODY_WIDTH - 180; // TODO: Either figure out how to use textAlign: 'right' and use 65 for the X, or get from Dan the correct X value to use for left-align since https://www.figma.com/file/sTYSqGHiCoH0p82uh1TsTs/NC-Certs?node-id=0%3A1 does not have the actual measurements needed for left-align and is fudged here.
+const X_POSITION_OF_INSTRUCTOR = 200; // https://www.figma.com/file/sTYSqGHiCoH0p82uh1TsTs/NC-Certs?node-id=0%3A1 does not have the actual measurements needed for left-align, so this is just a guess, but it's possibly good enough.
+const X_POSITION_OF_DATE = LEFT_PADDING + BODY_WIDTH;
 const X_POSITION_OF_DESCRIPTION = LEFT_PADDING;
 const X_CENTER = width / 2;
 
@@ -96,7 +96,7 @@ export async function populateCert(canvas: Canvas, details: any) {
   wrapText(canvas, programDescription, X_POSITION_OF_DESCRIPTION, 450, BODY_WIDTH, 50, descriptionFont, gray);
   addText(canvas, programName, programFont, black, X_CENTER, 680, 'center');
   addText(canvas, instructor, dateFont, black, X_POSITION_OF_INSTRUCTOR, 807, 'left'); // TODO: https://github.com/NEAR-Edu/near-certification-tools/issues/14
-  addText(canvas, date, dateFont, black, X_POSITION_OF_DATE, 807, 'left');
-  addText(canvas, expiration, dateFont, black, X_POSITION_OF_DATE, 864, 'left');
+  addText(canvas, date, dateFont, black, X_POSITION_OF_DATE, 807, 'right');
+  addText(canvas, expiration, dateFont, black, X_POSITION_OF_DATE, 864, 'right');
   addText(canvas, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
 }
