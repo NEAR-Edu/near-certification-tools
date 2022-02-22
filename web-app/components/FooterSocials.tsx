@@ -3,7 +3,7 @@ import { faTwitter, faDiscord, faYoutube, faInstagram, faGithub } from '@fortawe
 
 export default function FooterSocials() {
   return (
-    <div className="flex justify-center sm:mr-32 pt-5 sm:pb-5 items-center space-x-6">
+    <div className="flex justify-center mr-8 pt-5 pb-5 items-center space-x-4">
       <a href="https://twitter.com/NEARedu?s=2" target="_blank" rel="noopener noreferrer" className="text-base text-gray-500 hover:text-gray-900">
         <FontAwesomeIcon icon={faTwitter} style={{ width: '18px' }} />{' '}
       </a>{' '}
