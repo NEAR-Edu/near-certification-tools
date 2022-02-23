@@ -20,7 +20,6 @@ const X_POSITION_OF_DATE = LEFT_PADDING + BODY_WIDTH;
 const X_POSITION_OF_DESCRIPTION = LEFT_PADDING;
 const X_CENTER = width / 2;
 
-const accountFont = `60px '${monoFontFamily}' medium`;
 const dateFont = `30px '${monoFontFamily}' medium`;
 const descriptionFont = `33px '${manropeFontFamily}' regular`;
 const tokenIdFont = `30px '${monoFontFamily}' medium`;
@@ -36,8 +35,7 @@ function getBaseContext(canvas: Canvas) {
   return context;
 }
 
-function addText(canvas: Canvas, text: string, font: string, fillStyle: string, xPos: number, yPos: number, textAlign: CanvasTextAlign) {
-  const context = getBaseContext(canvas);
+function addText(context: CanvasRenderingContext2D, text: string, font: string, fillStyle: string, xPos: number, yPos: number, textAlign: CanvasTextAlign) {
   // Define the font style
   context.fillStyle = fillStyle;
   context.font = font;
@@ -46,17 +44,44 @@ function addText(canvas: Canvas, text: string, font: string, fillStyle: string, 
 }
 
 /**
+ * Adds text (via addText) but also iteratively decreases the fontSize until the whole string fits the context.
+ */
+function fitText(
+  context: CanvasRenderingContext2D,
+  text: string,
+  fontSize: number,
+  fillStyle: string,
+  x: number,
+  y: number,
+  textWidth: number,
+  textAlign: CanvasTextAlign,
+  fontWeight = 'medium',
+) {
+  let font;
+  let currentFontSize = fontSize;
+  let currentY = y;
+
+  // Decrease the font size until the text fits the context.
+  do {
+    currentY += 1;
+    font = `${currentFontSize}px '${monoFontFamily}' ${fontWeight}`;
+    context.font = font; // The font needs to be applied to the context here so that context.measureText can work.
+    console.log({ font });
+    console.log(context.measureText(text).width);
+    currentFontSize -= 1;
+  } while (context.measureText(text).width > textWidth);
+
+  addText(context, text, font, fillStyle, x, currentY, textAlign);
+}
+
+/**
  * Split long text into shorter lines.
  * Dynamic Width (Build Regex) https://stackoverflow.com/a/51506718
  * maxChars is the max number of characters per line
  */
-function wrapText(canvas: Canvas, text: string, x: number, y: number, maxChars: number, font: string, fillStyle: string) {
-  const context = getBaseContext(canvas);
+function wrapText(context: CanvasRenderingContext2D, text: string, x: number, y: number, maxChars: number, font: string, fillStyle: string) {
   const replacedText = text.replace(new RegExp(`(?![^\\n]{1,${maxChars}}$)([^\\n]{1,${maxChars}})\\s`, 'g'), '$1\n');
-  context.textAlign = 'left';
-  context.fillStyle = fillStyle;
-  context.font = font;
-  context.fillText(replacedText, x, y);
+  addText(context, replacedText, font, fillStyle, x, y, 'left');
 }
 
 export async function populateCert(canvas: Canvas, details: any) {
@@ -71,12 +96,12 @@ export async function populateCert(canvas: Canvas, details: any) {
   const context = getBaseContext(canvas);
   context.drawImage(image, 0, 0, width, height);
 
-  addText(canvas, CERTIFICATE_OF_ACHIEVEMENT, titleFont, blue, X_CENTER, 170, 'center');
-  addText(canvas, accountName, accountFont, black, X_CENTER, 304, 'center'); // TODO: https://github.com/NEAR-Edu/near-certification-tools/issues/14
-  wrapText(canvas, programDescription, X_POSITION_OF_DESCRIPTION, 450, 60, descriptionFont, gray);
-  addText(canvas, programName, programFont, black, X_CENTER, 680, 'center');
-  addText(canvas, instructor, dateFont, black, X_POSITION_OF_INSTRUCTOR, 807, 'left'); // TODO: https://github.com/NEAR-Edu/near-certification-tools/issues/14
-  addText(canvas, date, dateFont, black, X_POSITION_OF_DATE, 807, 'right');
-  addText(canvas, expiration, dateFont, black, X_POSITION_OF_DATE, 864, 'right');
-  addText(canvas, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
+  addText(context, CERTIFICATE_OF_ACHIEVEMENT, titleFont, blue, X_CENTER, 170, 'center');
+  fitText(context, accountName, 60, black, X_CENTER, 304, BODY_WIDTH, 'center');
+  wrapText(context, programDescription, X_POSITION_OF_DESCRIPTION, 450, 60, descriptionFont, gray);
+  addText(context, programName, programFont, black, X_CENTER, 680, 'center');
+  fitText(context, instructor, 30, black, X_POSITION_OF_INSTRUCTOR, 807, 550, 'left');
+  addText(context, date, dateFont, black, X_POSITION_OF_DATE, 807, 'right');
+  addText(context, expiration, dateFont, black, X_POSITION_OF_DATE, 864, 'right');
+  addText(context, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
 }
