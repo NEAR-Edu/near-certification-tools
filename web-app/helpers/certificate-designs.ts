@@ -35,29 +35,7 @@ function getBaseContext(canvas: Canvas) {
   return context;
 }
 
-function fitTextOnCanvas(canvas: Canvas, text: string, fontSize: number, fillStyle: string, x: number, y: number, textWidth: number, textAlign: CanvasTextAlign) {
-  const context = getBaseContext(canvas);
-
-  let currentFontSize = fontSize;
-  let y2 = y;
-
-  // lower the font size until the text fits the canvas
-  do {
-    y2 += 1;
-    context.font = `${currentFontSize}px '${monoFontFamily}' medium`;
-    console.log(context.font);
-    console.log(context.measureText(text).width);
-    currentFontSize -= 1;
-  } while (context.measureText(text).width > textWidth);
-
-  // draw the text
-  context.fillStyle = fillStyle;
-  context.textAlign = textAlign;
-  context.fillText(text, x, y2);
-}
-
-function addText(canvas: Canvas, text: string, font: string, fillStyle: string, xPos: number, yPos: number, textAlign: CanvasTextAlign) {
-  const context = getBaseContext(canvas);
+function addText(context: CanvasRenderingContext2D, text: string, font: string, fillStyle: string, xPos: number, yPos: number, textAlign: CanvasTextAlign) {
   // Define the font style
   context.fillStyle = fillStyle;
   context.font = font;
@@ -66,17 +44,44 @@ function addText(canvas: Canvas, text: string, font: string, fillStyle: string, 
 }
 
 /**
+ * Adds text (via addText) but also iteratively decreases the fontSize until the whole string fits the context.
+ */
+function fitText(
+  context: CanvasRenderingContext2D,
+  text: string,
+  fontSize: number,
+  fillStyle: string,
+  x: number,
+  y: number,
+  textWidth: number,
+  textAlign: CanvasTextAlign,
+  fontWeight = 'medium',
+) {
+  let font;
+  let currentFontSize = fontSize;
+  let currentY = y;
+
+  // Decrease the font size until the text fits the context.
+  do {
+    currentY += 1;
+    font = `${currentFontSize}px '${monoFontFamily}' ${fontWeight}`;
+    context.font = font; // The font needs to be applied to the context here so that context.measureText can work.
+    console.log({ font });
+    console.log(context.measureText(text).width);
+    currentFontSize -= 1;
+  } while (context.measureText(text).width > textWidth);
+
+  addText(context, text, font, fillStyle, x, currentY, textAlign);
+}
+
+/**
  * Split long text into shorter lines.
  * Dynamic Width (Build Regex) https://stackoverflow.com/a/51506718
  * maxChars is the max number of characters per line
  */
-function wrapText(canvas: Canvas, text: string, x: number, y: number, maxChars: number, font: string, fillStyle: string) {
-  const context = getBaseContext(canvas);
+function wrapText(context: CanvasRenderingContext2D, text: string, x: number, y: number, maxChars: number, font: string, fillStyle: string) {
   const replacedText = text.replace(new RegExp(`(?![^\\n]{1,${maxChars}}$)([^\\n]{1,${maxChars}})\\s`, 'g'), '$1\n');
-  context.textAlign = 'left';
-  context.fillStyle = fillStyle;
-  context.font = font;
-  context.fillText(replacedText, x, y);
+  addText(context, replacedText, font, fillStyle, x, y, 'left');
 }
 
 export async function populateCert(canvas: Canvas, details: any) {
@@ -91,12 +96,12 @@ export async function populateCert(canvas: Canvas, details: any) {
   const context = getBaseContext(canvas);
   context.drawImage(image, 0, 0, width, height);
 
-  addText(canvas, CERTIFICATE_OF_ACHIEVEMENT, titleFont, blue, X_CENTER, 170, 'center');
-  fitTextOnCanvas(canvas, accountName, 60, black, X_CENTER, 304, BODY_WIDTH, 'center');
-  wrapText(canvas, programDescription, X_POSITION_OF_DESCRIPTION, 450, 60, descriptionFont, gray);
-  addText(canvas, programName, programFont, black, X_CENTER, 680, 'center');
-  fitTextOnCanvas(canvas, instructor, 30, black, X_POSITION_OF_INSTRUCTOR, 807, BODY_WIDTH / 2, 'left');
-  addText(canvas, date, dateFont, black, X_POSITION_OF_DATE, 807, 'right');
-  addText(canvas, expiration, dateFont, black, X_POSITION_OF_DATE, 864, 'right');
-  addText(canvas, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
+  addText(context, CERTIFICATE_OF_ACHIEVEMENT, titleFont, blue, X_CENTER, 170, 'center');
+  fitText(context, accountName, 60, black, X_CENTER, 304, BODY_WIDTH, 'center');
+  wrapText(context, programDescription, X_POSITION_OF_DESCRIPTION, 450, 60, descriptionFont, gray);
+  addText(context, programName, programFont, black, X_CENTER, 680, 'center');
+  fitText(context, instructor, 30, black, X_POSITION_OF_INSTRUCTOR, 807, BODY_WIDTH / 2, 'left');
+  addText(context, date, dateFont, black, X_POSITION_OF_DATE, 807, 'right');
+  addText(context, expiration, dateFont, black, X_POSITION_OF_DATE, 864, 'right');
+  addText(context, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
 }
