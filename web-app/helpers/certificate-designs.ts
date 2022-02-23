@@ -100,7 +100,7 @@ export async function populateCert(canvas: Canvas, details: any) {
   fitText(context, accountName, 60, black, X_CENTER, 304, BODY_WIDTH, 'center');
   wrapText(context, programDescription, X_POSITION_OF_DESCRIPTION, 450, 60, descriptionFont, gray);
   addText(context, programName, programFont, black, X_CENTER, 680, 'center');
-  fitText(context, instructor, 30, black, X_POSITION_OF_INSTRUCTOR, 807, BODY_WIDTH / 2, 'left');
+  fitText(context, instructor, 30, black, X_POSITION_OF_INSTRUCTOR, 807, 550, 'left');
   addText(context, date, dateFont, black, X_POSITION_OF_DATE, 807, 'right');
   addText(context, expiration, dateFont, black, X_POSITION_OF_DATE, 864, 'right');
   addText(context, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
