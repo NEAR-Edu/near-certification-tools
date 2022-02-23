@@ -67,36 +67,16 @@ function addText(canvas: Canvas, text: string, font: string, fillStyle: string, 
 
 /**
  * Split long text into shorter lines.
- * // TODO: This looks for 6 words, which have unpredictable length, so instead we should replace with a better function. https://github.com/NEAR-Edu/near-certification-tools/issues/22
+ * Dynamic Width (Build Regex) https://stackoverflow.com/a/51506718
+ * maxChars is the max number of characters per line
  */
-function wrapText(canvas: Canvas, text: string, x: number, y: number, maxWidth: number, lineHeight: number, font: string, fillStyle: string) {
+function wrapText(canvas: Canvas, text: string, x: number, y: number, maxChars: number, font: string, fillStyle: string) {
   const context = getBaseContext(canvas);
+  const replacedText = text.replace(new RegExp(`(?![^\\n]{1,${maxChars}}$)([^\\n]{1,${maxChars}})\\s`, 'g'), '$1\n');
   context.textAlign = 'left';
-  const words = text.split(' ');
-  let line = '';
-  let y2 = y;
-  const NUMBER_OF_WORDS = 6;
-  for (let n = 0; n < words.length; n += 1) {
-    const testLine = `${line} ${words[n]}`;
-    const metrics = context.measureText(testLine); // Check the width of the text, before writing it on the canvas
-    const testWidth = metrics.width;
-
-    if (testWidth > maxWidth && n > NUMBER_OF_WORDS) {
-      context.fillStyle = fillStyle;
-      context.font = font;
-      // The x-axis coordinate of the point at which to begin drawing the text, in pixels.
-      // The y-axis coordinate of the baseline on which to begin drawing the text, in pixels.
-      context.fillText(line, x, y2);
-      line = `${words[n]}`;
-
-      y2 += lineHeight;
-    } else {
-      line = testLine.trim();
-    }
-  }
   context.fillStyle = fillStyle;
   context.font = font;
-  context.fillText(line, x, y2);
+  context.fillText(replacedText, x, y);
 }
 
 export async function populateCert(canvas: Canvas, details: any) {
@@ -112,8 +92,8 @@ export async function populateCert(canvas: Canvas, details: any) {
   context.drawImage(image, 0, 0, width, height);
 
   addText(canvas, CERTIFICATE_OF_ACHIEVEMENT, titleFont, blue, X_CENTER, 170, 'center');
-  wrapText(canvas, programDescription, X_POSITION_OF_DESCRIPTION, 450, BODY_WIDTH, 50, descriptionFont, gray);
   fitTextOnCanvas(canvas, accountName, 60, black, X_CENTER, 304, BODY_WIDTH, 'center');
+  wrapText(canvas, programDescription, X_POSITION_OF_DESCRIPTION, 450, 60, descriptionFont, gray);
   addText(canvas, programName, programFont, black, X_CENTER, 680, 'center');
   fitTextOnCanvas(canvas, instructor, 30, black, X_POSITION_OF_INSTRUCTOR, 807, BODY_WIDTH / 2, 'left');
   addText(canvas, date, dateFont, black, X_POSITION_OF_DATE, 807, 'right');
