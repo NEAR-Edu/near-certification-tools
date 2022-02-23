@@ -35,19 +35,19 @@ function getBaseContext(canvas: Canvas) {
   return context;
 }
 
-function fitTextOnCanvas(canvas: Canvas, text: string, font: number, fillStyle: string, x: number, y: number, textWidth: number, textAlign: CanvasTextAlign) {
+function fitTextOnCanvas(canvas: Canvas, text: string, fontSize: number, fillStyle: string, x: number, y: number, textWidth: number, textAlign: CanvasTextAlign) {
   const context = getBaseContext(canvas);
 
-  let fontsize = font;
+  let currentFontSize = fontSize;
   let y2 = y;
 
   // lower the font size until the text fits the canvas
   do {
-    fontsize -= 1;
     y2 += 1;
-    context.font = `${fontsize}px '${monoFontFamily}' medium`;
+    context.font = `${currentFontSize}px '${monoFontFamily}' medium`;
     console.log(context.font);
     console.log(context.measureText(text).width);
+    currentFontSize -= 1;
   } while (context.measureText(text).width > textWidth);
 
   // draw the text
@@ -113,9 +113,9 @@ export async function populateCert(canvas: Canvas, details: any) {
 
   addText(canvas, CERTIFICATE_OF_ACHIEVEMENT, titleFont, blue, X_CENTER, 170, 'center');
   wrapText(canvas, programDescription, X_POSITION_OF_DESCRIPTION, 450, BODY_WIDTH, 50, descriptionFont, gray);
-  fitTextOnCanvas(canvas, accountName, 61, black, X_CENTER, 304, BODY_WIDTH, 'center');
+  fitTextOnCanvas(canvas, accountName, 60, black, X_CENTER, 304, BODY_WIDTH, 'center');
   addText(canvas, programName, programFont, black, X_CENTER, 680, 'center');
-  fitTextOnCanvas(canvas, instructor, 31, black, X_POSITION_OF_INSTRUCTOR, 807, BODY_WIDTH / 2, 'left');
+  fitTextOnCanvas(canvas, instructor, 30, black, X_POSITION_OF_INSTRUCTOR, 807, BODY_WIDTH / 2, 'left');
   addText(canvas, date, dateFont, black, X_POSITION_OF_DATE, 807, 'right');
   addText(canvas, expiration, dateFont, black, X_POSITION_OF_DATE, 864, 'right');
   addText(canvas, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
