@@ -136,13 +136,17 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
         ? `Expired at ${formatDate(moment.add(expirationDays, 'days'))}`
         : formatDate(moment.add(expirationDays, 'days'));
   } else {
-    // >180-day period of inactivity exists
-    // moment is the end date of such period
-    // Extract 180 from moment to get the exact days between inactivity period in days and 180
+    /**
+     * >180-day period of inactivity exists.
+     * moment is the end date of such period.
+     * Extract 180 from moment to get the exact days between inactivity period in days and 180
+     */
     const daysToMomentOfExpiration = result[0].diff_to_previous - 180;
 
-    // Substract daysToMomentOfExpiration from moment to get the specific date of expiration
-    // This substraction equals to (start of inactivity period + 180 days)
+    /**
+     * Subtract daysToMomentOfExpiration from moment to get the specific date of expiration.
+     * This subtraction equals to (start of inactivity period + 180 days)
+     */
     expirationDate = `Expired at ${formatDate(moment.subtract(daysToMomentOfExpiration, 'days'))}`;
   }
 
