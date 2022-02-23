@@ -71,7 +71,7 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
 
   // Both diff_from_last_activity_to_render_date and diff_to_previous show days as integers
   // The 'password' used as 1234567890 days equals to 3382377.780822 years
-  // Using this value should be fine for 3382377 years.
+  // Using this value should be fine for 3382378 years.
 
   const issuedAtUnixNano = dayjs(issuedAt).unix() * 1_000_000_000;
   console.log({ issuedAt, issuedAtUnixNano, accountName });
@@ -124,24 +124,25 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
    * If the account doesn't have a period where it hasn't been active for 180 days straight after the issue date:
    * Days between last activity and render date is checked:
    * If this value is  >180; Certificate is expired. Expiration date = last activity + 180 days
-   * If this value is <180; Expiration date = last activity + 180 days
+   * If this value is <180; Certificate hasn't expired yet. Expiration date = last activity + 180 days
    * Otherwise, if >180-day period of inactivity exist after issueDate, expiration = the beginning of the *first* such period + 180 days.
    */
   const moment = dayjs(result[0].moment);
   let expirationDate;
 
   if (result[0].diff_to_previous === QUERY_DEFAULT_CELL_VALUE) {
-    if (result[0].diff_from_last_activity_to_render_date > expirationDays) {
-      expirationDate = `Expired at ${formatDate(moment.add(expirationDays, 'days'))}`;
-    } else {
-      expirationDate = formatDate(moment.add(expirationDays, 'days'));
-    }
+    expirationDate =
+      result[0].diff_from_last_activity_to_render_date > expirationDays
+        ? `Expired at ${formatDate(moment.add(expirationDays, 'days'))}`
+        : formatDate(moment.add(expirationDays, 'days'));
   } else {
     // >180-day period of inactivity exists
     // moment is the end date of such period
-    // Extract 180 from moment to get the exact days between inactivity day value and 180
+    // Extract 180 from moment to get the exact days between inactivity period in days and 180
     const daysToMomentOfExpiration = result[0].diff_to_previous - 180;
-    // The difference is being subtracted from moment to get the specific date of expiration
+
+    // Substract daysToMomentOfExpiration from moment to get the specific date of expiration
+    // This substraction equals to (start of inactivity period + 180 days)
     expirationDate = `Expired at ${formatDate(moment.subtract(daysToMomentOfExpiration, 'days'))}`;
   }
 
