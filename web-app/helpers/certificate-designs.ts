@@ -20,7 +20,6 @@ const X_POSITION_OF_DATE = LEFT_PADDING + BODY_WIDTH;
 const X_POSITION_OF_DESCRIPTION = LEFT_PADDING;
 const X_CENTER = width / 2;
 
-const accountFont = `60px '${monoFontFamily}' medium`;
 const dateFont = `30px '${monoFontFamily}' medium`;
 const descriptionFont = `33px '${manropeFontFamily}' regular`;
 const tokenIdFont = `30px '${monoFontFamily}' medium`;
@@ -34,6 +33,27 @@ function getBaseContext(canvas: Canvas) {
   const context = canvas.getContext('2d');
   context.textBaseline = 'top';
   return context;
+}
+
+function fitTextOnCanvas(canvas: Canvas, text: string, font: number, fillStyle: string, x: number, y: number, textWidth: number, textAlign: CanvasTextAlign) {
+  const context = getBaseContext(canvas);
+
+  let fontsize = font;
+  let y2 = y;
+
+  // lower the font size until the text fits the canvas
+  do {
+    fontsize -= 1;
+    y2 += 1;
+    context.font = `${fontsize}px '${monoFontFamily}' medium`;
+    console.log(context.font);
+    console.log(context.measureText(text).width);
+  } while (context.measureText(text).width > textWidth);
+
+  // draw the text
+  context.fillStyle = fillStyle;
+  context.textAlign = textAlign;
+  context.fillText(text, x, y2);
 }
 
 function addText(canvas: Canvas, text: string, font: string, fillStyle: string, xPos: number, yPos: number, textAlign: CanvasTextAlign) {
@@ -92,10 +112,10 @@ export async function populateCert(canvas: Canvas, details: any) {
   context.drawImage(image, 0, 0, width, height);
 
   addText(canvas, CERTIFICATE_OF_ACHIEVEMENT, titleFont, blue, X_CENTER, 170, 'center');
-  addText(canvas, accountName, accountFont, black, X_CENTER, 304, 'center'); // TODO: https://github.com/NEAR-Edu/near-certification-tools/issues/14
   wrapText(canvas, programDescription, X_POSITION_OF_DESCRIPTION, 450, BODY_WIDTH, 50, descriptionFont, gray);
+  fitTextOnCanvas(canvas, accountName, 61, black, X_CENTER, 304, BODY_WIDTH, 'center');
   addText(canvas, programName, programFont, black, X_CENTER, 680, 'center');
-  addText(canvas, instructor, dateFont, black, X_POSITION_OF_INSTRUCTOR, 807, 'left'); // TODO: https://github.com/NEAR-Edu/near-certification-tools/issues/14
+  fitTextOnCanvas(canvas, instructor, 31, black, X_POSITION_OF_INSTRUCTOR, 807, BODY_WIDTH / 2, 'left');
   addText(canvas, date, dateFont, black, X_POSITION_OF_DATE, 807, 'right');
   addText(canvas, expiration, dateFont, black, X_POSITION_OF_DATE, 864, 'right');
   addText(canvas, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
