@@ -25,7 +25,7 @@ function buildTwitterUrl(certificateUrl: string) {
 
 function buildLinkedInUrl(certificateUrl: string) {
   // https://stackoverflow.com/a/61583006/470749
-  const url = encodeURI(`https://www.linkedin.com/sharing/share-offsite/?url=${certificateUrl}&title=${title}&summary=${description}&source=LinkedIn`);
+  const url = encodeURI(`https://www.linkedin.com/sharing/share-offsite/?url=${certificateUrl}&title=${title}&summary=${description}`);
   console.log({ url });
   return url;
 }
@@ -52,7 +52,7 @@ function OpenGraphMetaData({ pngUrl, certificateUrl }: { pngUrl: string; certifi
       <meta property="og:description" content={description} />
       <meta property="og:image" content={pngUrl} />
       <meta property="twitter:site" content="@NEARProtocol" />
-      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:card" content="summary" />
       <meta property="twitter:domain" content="/" />
       <meta property="twitter:url" content={pngUrl} />
       <meta name="twitter:title" content={title} />
