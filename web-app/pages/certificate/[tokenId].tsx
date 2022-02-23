@@ -75,7 +75,7 @@ const CertificatePage: NextPage<CertificatePageProps> = ({ tokenId }: Certificat
     <>
       <OpenGraphMetaData pngUrl={pngUrl} certificateUrl={certificateUrl} />
       <Layout>
-        <a href={`/api/cert/${tokenId}.svg`} className="md:max-w-lg">
+        <a href={`/api/cert/${tokenId}.svg`} className="md:max-w-lg lg:max-w-2xl">
           <img src={pngUrl} alt={`certificate ${tokenId}`} />
         </a>
         <div className="text-sm mt-2 ml-2">
