@@ -81,7 +81,7 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
       SELECT 
       moment,
       diff_to_previous,
-      123456 AS diff_from_last_activity_to_render_date
+      1234567890 AS diff_from_last_activity_to_render_date
       FROM (
         SELECT *,
           /* 1 day = 60sec * 60min * 24h = 86400 sec*/
@@ -100,7 +100,7 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
       LIMIT 1
       ), most_recent_activity AS (
         SELECT TO_TIMESTAMP(receipt."included_in_block_timestamp"/1000000000) as moment, 
-        123456, 
+        1234567890, 
         ((EXTRACT(epoch FROM CURRENT_TIMESTAMP) - EXTRACT(epoch FROM TO_TIMESTAMP(receipt."included_in_block_timestamp"/1000000000))) / 86400)::int 
 		    AS diff_from_last_activity_to_render_date 
         FROM (
