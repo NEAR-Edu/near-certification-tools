@@ -51,27 +51,34 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
 
 // eslint-disable-next-line max-lines-per-function
 async function getExpiration(accountName: string, issuedAt: string): Promise<string> {
+  // TODO: Shorten comments
   // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
 
-  // This query uses Common Table Expressions(CTE) to execute two separate queries;
-  // the second query being executed if first query doesn't return any result.
-  // https://www.postgresql.org/docs/9.1/queries-with.html
-  // https://stackoverflow.com/a/68684814/10684149
-
-  // First query checks If the account has a period where it hasn't been active for 180 days straight after the issue date (exluding the render date)
-  // Second query is run if if no 180-day-inactivity period is found and returns most recent activity date
-  // AND amount of days between account's last activity date and render date of certificate
-
-  // Both queries produce the same temporary table, therefore all cell data types must match.
-  // Both queries show a date in the moment column, but differ in diff_from_last_activity_to_render_date and diff_to_previous columns
-  // To make a distinction between results, a 'password' is used which is 1234567890
-
-  // If first query returns a result, diff_from_last_activity_to_render_date is set to show 1234567890
-  // If second query returns a result, diff_to_previous is set to show 1234567890
-
-  // Both diff_from_last_activity_to_render_date and diff_to_previous show days as integers
-  // The 'password' used as 1234567890 days equals to 3382377.780822 years
-  // Using this value should be fine for 3382378 years.
+  /**
+   * This query uses Common Table Expressions(CTE) to execute two separate queries;
+   * the second query being executed if first query doesn't return any result.
+   * https://www.postgresql.org/docs/9.1/queries-with.html
+   * https://stackoverflow.com/a/68684814/10684149
+   */
+  /**
+   * First query checks If the account has a period where it hasn't been active for 180 days straight after the issue date (exluding the render date)
+   * Second query is run if if no 180-day-inactivity period is found and returns most recent activity date
+   * AND amount of days between account's last activity date and render date of certificate
+   */
+  /**
+   * Both queries produce the same temporary table, therefore all cell data types must match.
+   * Both queries show a date in the moment column, but differ in diff_from_last_activity_to_render_date and diff_to_previous columns
+   * To make a distinction between results, a 'password' is used which is 1234567890
+   */
+  /**
+   * If first query returns a result, diff_from_last_activity_to_render_date is set to show 1234567890
+   * If second query returns a result, diff_to_previous is set to show 1234567890
+   */
+  /**
+   * Both diff_from_last_activity_to_render_date and diff_to_previous show days as integers
+   * The 'password' used as 1234567890 days equals to 3382377.780822 years
+   * Using this value should be fine for 3382378 years.
+   */
 
   const issuedAtUnixNano = dayjs(issuedAt).unix() * 1_000_000_000;
   console.log({ issuedAt, issuedAtUnixNano, accountName });
@@ -133,7 +140,7 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
   if (result[0].diff_to_previous === QUERY_DEFAULT_CELL_VALUE) {
     expirationDate =
       result[0].diff_from_last_activity_to_render_date > expirationDays
-        ? `Expired at ${formatDate(moment.add(expirationDays, 'days'))}`
+        ? `Expired on ${formatDate(moment.add(expirationDays, 'days'))}`
         : formatDate(moment.add(expirationDays, 'days'));
   } else {
     /**
@@ -147,7 +154,7 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
      * Subtract daysToMomentOfExpiration from moment to get the specific date of expiration.
      * This subtraction equals to (start of inactivity period + 180 days)
      */
-    expirationDate = `Expired at ${formatDate(moment.subtract(daysToMomentOfExpiration, 'days'))}`;
+    expirationDate = `Expired on ${formatDate(moment.subtract(daysToMomentOfExpiration, 'days'))}`;
   }
 
   return expirationDate;
