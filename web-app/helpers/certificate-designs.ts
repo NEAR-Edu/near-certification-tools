@@ -47,36 +47,18 @@ function addText(canvas: Canvas, text: string, font: string, fillStyle: string, 
 
 /**
  * Split long text into shorter lines.
- * // TODO: This looks for 6 words, which have unpredictable length, so instead we should replace with a better function. https://github.com/NEAR-Edu/near-certification-tools/issues/22
+ * Static Width (Plain Regex) https://stackoverflow.com/a/51506718
  */
-function wrapText(canvas: Canvas, text: string, x: number, y: number, maxWidth: number, lineHeight: number, font: string, fillStyle: string) {
+function wrapText(canvas: Canvas, text: string, x: number, y: number, font: string, fillStyle: string) {
   const context = getBaseContext(canvas);
   context.textAlign = 'left';
-  const words = text.split(' ');
-  let line = '';
-  let y2 = y;
-  const NUMBER_OF_WORDS = 6;
-  for (let n = 0; n < words.length; n += 1) {
-    const testLine = `${line} ${words[n]}`;
-    const metrics = context.measureText(testLine); // Check the width of the text, before writing it on the canvas
-    const testWidth = metrics.width;
 
-    if (testWidth > maxWidth && n > NUMBER_OF_WORDS) {
-      context.fillStyle = fillStyle;
-      context.font = font;
-      // The x-axis coordinate of the point at which to begin drawing the text, in pixels.
-      // The y-axis coordinate of the baseline on which to begin drawing the text, in pixels.
-      context.fillText(line, x, y2);
-      line = `${words[n]}`;
+  //  60 is the max charecter length of the text in one line
+  const replacedText = text.replace(/(?![^\n]{1,60}$)([^\n]{1,60})\s/g, '$1\n');
 
-      y2 += lineHeight;
-    } else {
-      line = testLine.trim();
-    }
-  }
   context.fillStyle = fillStyle;
   context.font = font;
-  context.fillText(line, x, y2);
+  context.fillText(replacedText, x, y);
 }
 
 export async function populateCert(canvas: Canvas, details: any) {
@@ -93,7 +75,7 @@ export async function populateCert(canvas: Canvas, details: any) {
 
   addText(canvas, CERTIFICATE_OF_ACHIEVEMENT, titleFont, blue, X_CENTER, 170, 'center');
   addText(canvas, accountName, accountFont, black, X_CENTER, 304, 'center'); // TODO: https://github.com/NEAR-Edu/near-certification-tools/issues/14
-  wrapText(canvas, programDescription, X_POSITION_OF_DESCRIPTION, 450, BODY_WIDTH, 50, descriptionFont, gray);
+  wrapText(canvas, programDescription, X_POSITION_OF_DESCRIPTION, 450, descriptionFont, gray);
   addText(canvas, programName, programFont, black, X_CENTER, 680, 'center');
   addText(canvas, instructor, dateFont, black, X_POSITION_OF_INSTRUCTOR, 807, 'left'); // TODO: https://github.com/NEAR-Edu/near-certification-tools/issues/14
   addText(canvas, date, dateFont, black, X_POSITION_OF_DATE, 807, 'right');
