@@ -50,23 +50,8 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
 }
 
 // eslint-disable-next-line max-lines-per-function
-async function getExpiration(accountName: string, issuedAt: string): Promise<unknown> {
-  // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
-  /**
-   * This query uses Common Table Expressions(CTE) to execute two separate queries conditionally;
-   * the second query being executed if first query doesn't return any result.
-   * https://www.postgresql.org/docs/9.1/queries-with.html
-   * https://stackoverflow.com/a/68684814/10684149
-   */
-  /**
-   * First query checks If the account has a period where it hasn't been active for 180 days straight after the issue date (exluding the render date)
-   * Second query is run if no 180-day-inactivity period is found and returns most recent activity date
-   * AND amount of days between account's last activity date - render date of certificate
-   */
-  const issuedAtUnixNano = dayjs(issuedAt).unix() * 1_000_000_000;
-  console.log({ issuedAt, issuedAtUnixNano, accountName });
-  // https://www.prisma.io/docs/concepts/components/prisma-client/raw-database-access#queryraw
-  const result: RawQueryResult = await prisma.$queryRaw<RawQueryResult>`
+function getRawQuery(accountName: string, issuedAtUnixNano: number) {
+  return `
     WITH long_period_of_inactivity AS (
       SELECT 
       moment,
@@ -109,6 +94,26 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<unk
     TABLE long_period_of_inactivity
     UNION ALL
     TABLE most_recent_activity`;
+}
+
+async function getExpiration(accountName: string, issuedAt: string): Promise<unknown> {
+  // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
+  /**
+   * This query uses Common Table Expressions(CTE) to execute two separate queries conditionally;
+   * the second query being executed if first query doesn't return any result.
+   * https://www.postgresql.org/docs/9.1/queries-with.html
+   * https://stackoverflow.com/a/68684814/10684149
+   */
+  /**
+   * First query checks If the account has a period where it hasn't been active for 180 days straight after the issue date (exluding the render date)
+   * Second query is run if no 180-day-inactivity period is found and returns most recent activity date
+   * AND amount of days between account's last activity date - render date of certificate
+   */
+  const issuedAtUnixNano = dayjs(issuedAt).unix() * 1_000_000_000; // TODO: See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER and add a comment here and in JSDoc for functions that have a `number` argument for dates. Explain why it's safe to use floating point `number` type (if it is), or switch to a better approach and explain it.
+  console.log({ issuedAt, issuedAtUnixNano, accountName });
+  const rawQuery = getRawQuery(accountName, issuedAtUnixNano);
+  // https://www.prisma.io/docs/concepts/components/prisma-client/raw-database-access#queryraw
+  const result: RawQueryResult = await prisma.$queryRaw<RawQueryResult>`${rawQuery}`;
 
   console.log('getExpiration query result', { result });
 
@@ -204,7 +209,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const imageBuffer = await generateImage(canvasType, bufferType, details);
     res.setHeader('Content-Type', contentType);
     addCacheHeader(res, CACHE_SECONDS);
-    // Caching is important especially because of getMostRecentActivityDateTime, which pulls from the public indexer database.
+    // Caching is important especially because of getExpiration, which pulls from the public indexer database.
     res.send(imageBuffer);
   } else {
     res.status(HTTP_ERROR_CODE_MISSING).json({ error: `No certificate exists with this Token ID (${tokenId}).` });
