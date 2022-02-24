@@ -51,9 +51,8 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
 
 // eslint-disable-next-line max-lines-per-function
 async function getExpiration(accountName: string, issuedAt: string): Promise<string> {
-  // TODO: Shorten comments
   // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
-
+  // TODO: Make comments clearer for someone who reads the code for the first time
   /**
    * This query uses Common Table Expressions(CTE) to execute two separate queries;
    * the second query being executed if first query doesn't return any result.
@@ -62,8 +61,8 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
    */
   /**
    * First query checks If the account has a period where it hasn't been active for 180 days straight after the issue date (exluding the render date)
-   * Second query is run if if no 180-day-inactivity period is found and returns most recent activity date
-   * AND amount of days between account's last activity date and render date of certificate
+   * Second query is run if no 180-day-inactivity period is found and returns most recent activity date
+   * AND amount of days between account's last activity date - render date of certificate
    */
   /**
    * Both queries produce the same temporary table, therefore all cell data types must match.
@@ -128,7 +127,7 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
    * Otherwise, if >180-day period of inactivity exist after issueDate, expiration = the beginning of the *first* such period + 180 days.
    */
   const moment = dayjs(result[0].moment);
-  let expirationDate;
+  let expirationDate; // string with calculated expiration date
 
   if (result[0].has_long_period_of_inactivity) {
     /**
@@ -142,7 +141,7 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
      * Subtract daysToMomentOfExpiration from moment to get the specific date of expiration.
      * This subtraction equals to (start of inactivity period + 180 days)
      */
-    expirationDate = `EXPIRED lala\n${formatDate(moment.subtract(daysToMomentOfExpiration, 'days'))}`;
+    expirationDate = `EXPIRED \n${formatDate(moment.subtract(daysToMomentOfExpiration, 'days'))}`;
   } else {
     expirationDate =
       result[0].diff_from_last_activity_to_render_date > expirationDays
