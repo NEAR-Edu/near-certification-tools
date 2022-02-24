@@ -3,6 +3,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createCanvas } from 'canvas';
 import dayjs from 'dayjs';
+import { Prisma } from '@prisma/client';
 import { getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
@@ -15,7 +16,7 @@ export const HTTP_ERROR_CODE_MISSING = 404;
 const svg = 'svg';
 const dot = '.';
 const imagePng = 'image/png';
-const expirationDays = 180;
+const expirationDays = 180; // Certificates expire after the first period of this many consecutive days of inactivity after issueDate.
 const CACHE_SECONDS: number = Number(process.env.DYNAMIC_CERT_IMAGE_GENERATION_CACHE_SECONDS) || 60 * 60 * 6;
 
 type CanvasTypeDef = 'pdf' | 'svg' | undefined;
@@ -51,7 +52,7 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
 
 // eslint-disable-next-line max-lines-per-function
 function getRawQuery(accountName: string, issuedAtUnixNano: number) {
-  return `
+  return Prisma.sql`
     WITH long_period_of_inactivity AS (
       SELECT 
       moment,
@@ -96,7 +97,7 @@ function getRawQuery(accountName: string, issuedAtUnixNano: number) {
     TABLE most_recent_activity`;
 }
 
-async function getExpiration(accountName: string, issuedAt: string): Promise<unknown> {
+async function getExpiration(accountName: string, issuedAt: string): Promise<string> {
   // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
   /**
    * This query uses Common Table Expressions(CTE) to execute two separate queries conditionally;
@@ -128,8 +129,6 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<unk
    * -- Expiration date = the beginning of the *first* such period + 180 days.
    */
   const moment = dayjs(result[0].moment);
-  let expirationDate;
-  let isExpired;
 
   if (result[0].has_long_period_of_inactivity) {
     /**
@@ -143,17 +142,10 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<unk
      * Subtract daysToMomentOfExpiration from moment to get the specific date of expiration.
      * This subtraction equals to (start of inactivity period + 180 days)
      */
-    expirationDate = formatDate(moment.subtract(daysToMomentOfExpiration, 'days'));
-    isExpired = true;
+    return formatDate(moment.subtract(daysToMomentOfExpiration, 'days'));
   } else {
-    expirationDate = formatDate(moment.add(expirationDays, 'days'));
-    isExpired = result[0].diff_from_last_activity_to_render_date > expirationDays;
+    return formatDate(moment.add(expirationDays, 'days'));
   }
-
-  return {
-    expirationDate,
-    isExpired,
-  };
 }
 
 // eslint-disable-next-line max-lines-per-function
