@@ -16,7 +16,6 @@ const svg = 'svg';
 const dot = '.';
 const imagePng = 'image/png';
 const expirationDays = 180;
-const QUERY_DEFAULT_CELL_VALUE = 1234567890;
 const CACHE_SECONDS: number = Number(process.env.DYNAMIC_CERT_IMAGE_GENERATION_CACHE_SECONDS) || 60 * 60 * 6;
 
 type CanvasTypeDef = 'pdf' | 'svg' | undefined;
@@ -26,6 +25,7 @@ type RawQueryResult = [
     moment: string;
     diff_to_previous: number;
     diff_from_last_activity_to_render_date: number;
+    has_long_period_of_inactivity: boolean;
   },
 ];
 
@@ -67,17 +67,7 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
    */
   /**
    * Both queries produce the same temporary table, therefore all cell data types must match.
-   * Both queries show a date in the moment column, but differ in diff_from_last_activity_to_render_date and diff_to_previous columns
-   * To make a distinction between results, a 'password' is used which is 1234567890
-   */
-  /**
-   * If first query returns a result, diff_from_last_activity_to_render_date is set to show 1234567890
-   * If second query returns a result, diff_to_previous is set to show 1234567890
-   */
-  /**
-   * Both diff_from_last_activity_to_render_date and diff_to_previous show days as integers
-   * The 'password' used as 1234567890 days equals to 3382377.780822 years
-   * Using this value should be fine for 3382378 years.
+   * To make a distinction between results, has_long_period_of_inactivity is checked
    */
 
   const issuedAtUnixNano = dayjs(issuedAt).unix() * 1_000_000_000;
@@ -88,7 +78,8 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
       SELECT 
       moment,
       diff_to_previous,
-      1234567890 AS diff_from_last_activity_to_render_date
+      CAST(NULL AS int) AS diff_from_last_activity_to_render_date,
+      true AS has_long_period_of_inactivity
       FROM (
         SELECT *,
           /* 1 day = 60sec * 60min * 24h = 86400 sec*/
@@ -106,12 +97,14 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
       ORDER BY moment ASC
       LIMIT 1
       ), most_recent_activity AS (
-        SELECT TO_TIMESTAMP(receipt."included_in_block_timestamp"/1000000000) as moment, 
-        1234567890, 
-        ((EXTRACT(epoch FROM CURRENT_TIMESTAMP) - EXTRACT(epoch FROM TO_TIMESTAMP(receipt."included_in_block_timestamp"/1000000000))) / 86400)::int 
-		    AS diff_from_last_activity_to_render_date 
+        SELECT
+        moment, 
+        CAST(NULL AS int) AS diff_to_previous,
+        ((EXTRACT(epoch FROM CURRENT_TIMESTAMP) - EXTRACT(epoch FROM moment)) / 86400)::int 
+		  AS diff_from_last_activity_to_render_date,
+      false AS has_long_period_of_inactivity
         FROM (
-          SELECT *
+          SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment
           FROM PUBLIC.receipts R
           LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
           WHERE SIGNER_ACCOUNT_ID = ${accountName}
@@ -125,7 +118,7 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
     UNION ALL
     TABLE most_recent_activity`;
 
-  console.log('getStartOfFirstLongPeriodOfInactivity', { result });
+  console.log('getExpiration query result', { result });
 
   /**
    * If the account doesn't have a period where it hasn't been active for 180 days straight after the issue date:
@@ -137,24 +130,24 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
   const moment = dayjs(result[0].moment);
   let expirationDate;
 
-  if (result[0].diff_to_previous === QUERY_DEFAULT_CELL_VALUE) {
-    expirationDate =
-      result[0].diff_from_last_activity_to_render_date > expirationDays
-        ? `Expired on ${formatDate(moment.add(expirationDays, 'days'))}`
-        : formatDate(moment.add(expirationDays, 'days'));
-  } else {
+  if (result[0].has_long_period_of_inactivity) {
     /**
      * >180-day period of inactivity exists.
      * moment is the end date of such period.
      * Extract 180 from moment to get the exact days between inactivity period in days and 180
      */
-    const daysToMomentOfExpiration = result[0].diff_to_previous - 180;
+    const daysToMomentOfExpiration = result[0].diff_to_previous - expirationDays;
 
     /**
      * Subtract daysToMomentOfExpiration from moment to get the specific date of expiration.
      * This subtraction equals to (start of inactivity period + 180 days)
      */
-    expirationDate = `Expired on ${formatDate(moment.subtract(daysToMomentOfExpiration, 'days'))}`;
+    expirationDate = `EXPIRED lala\n${formatDate(moment.subtract(daysToMomentOfExpiration, 'days'))}`;
+  } else {
+    expirationDate =
+      result[0].diff_from_last_activity_to_render_date > expirationDays
+        ? `EXPIRED \n${formatDate(moment.add(expirationDays, 'days'))}`
+        : formatDate(moment.add(expirationDays, 'days'));
   }
 
   return expirationDate;
