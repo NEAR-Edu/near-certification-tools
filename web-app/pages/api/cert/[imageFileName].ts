@@ -50,7 +50,7 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
 }
 
 // eslint-disable-next-line max-lines-per-function
-async function getExpiration(accountName: string, issuedAt: string): Promise<string> {
+async function getExpiration(accountName: string, issuedAt: string): Promise<unknown> {
   // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
   /**
    * This query uses Common Table Expressions(CTE) to execute two separate queries conditionally;
@@ -123,19 +123,32 @@ async function getExpiration(accountName: string, issuedAt: string): Promise<str
    * -- Expiration date = the beginning of the *first* such period + 180 days.
    */
   const moment = dayjs(result[0].moment);
+  let expirationDate;
+  let isExpired;
 
-  /**
-   * If result[0].has_long_period_of_inactivity is true, >180-day period of inactivity exists. Can be anything over 180.
-   * moment is the end date of such period.
-   * Extract 180 from inactivity period (diff_to_previous_activity) to get the exact amount of days betwen moment and actual expiration date.
-   * Subtract this amount of days from moment to get the specific date of expiration.
-   * This subtraction equals to (start of inactivity period + 180 days)
-   */
-  const expiration = result[0].has_long_period_of_inactivity
-    ? formatDate(moment.subtract(result[0].diff_to_previous_activity - expirationDays, 'days'))
-    : formatDate(moment.add(expirationDays, 'days'));
+  if (result[0].has_long_period_of_inactivity) {
+    /**
+     * >180-day period of inactivity exists. Can be anything over 180.
+     * moment is the end date of such period.
+     * Extract 180 from inactivity period to get the exact days betwen moment and actual expiration date.
+     */
+    const daysToMomentOfExpiration = result[0].diff_to_previous_activity - expirationDays;
 
-  return expiration;
+    /**
+     * Subtract daysToMomentOfExpiration from moment to get the specific date of expiration.
+     * This subtraction equals to (start of inactivity period + 180 days)
+     */
+    expirationDate = formatDate(moment.subtract(daysToMomentOfExpiration, 'days'));
+    isExpired = true;
+  } else {
+    expirationDate = formatDate(moment.add(expirationDays, 'days'));
+    isExpired = result[0].diff_from_last_activity_to_render_date > expirationDays;
+  }
+
+  return {
+    expirationDate,
+    isExpired,
+  };
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -155,8 +168,7 @@ async function fetchCertificateDetails(tokenId: string) {
       let expiration = null; // The UI (see `generateImage`) will need to gracefully handle this case when indexer service is unavailable.
       try {
         expiration = await getExpiration(accountName, metadata.issued_at);
-        const now = formatDate(dayjs()); // current date
-        expiration = expiration < now ? `Expired: ${expiration}` : `Expires: ${expiration}`;
+        // E.g.: expiration: { expirationDate: '2022-08-16', isExpired: false }
       } catch (error) {
         console.error('Perhaps a certificate for the original_recipient_id could not be found or the public indexer query timed out.', error);
       }
