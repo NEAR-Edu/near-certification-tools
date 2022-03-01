@@ -2,24 +2,33 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createCanvas } from 'canvas';
-import { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
+import { Prisma } from '@prisma/client';
 import { getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
 import { height, populateCert, width } from '../../../helpers/certificate-designs';
 import prisma from '../../../helpers/prisma';
 import { addCacheHeader } from '../../../helpers/caching';
-import { convertTimestampDecimalToDayjsMoment, formatDate } from '../../../helpers/time';
+import { formatDate } from '../../../helpers/time';
 
 export const HTTP_ERROR_CODE_MISSING = 404;
 const svg = 'svg';
 const dot = '.';
 const imagePng = 'image/png';
-const expirationMonths = 6;
+const expirationDays = 180; // Certificates expire after the first period of this many consecutive days of inactivity after issueDate.
 const CACHE_SECONDS: number = Number(process.env.DYNAMIC_CERT_IMAGE_GENERATION_CACHE_SECONDS) || 60 * 60 * 6;
 
 type CanvasTypeDef = 'pdf' | 'svg' | undefined;
 type BufferTypeDef = 'image/png' | undefined;
+type RawQueryResult = [
+  {
+    moment: string;
+    diff_to_previous_activity: number;
+    diff_from_last_activity_to_render_date: number;
+    has_long_period_of_inactivity: boolean;
+  },
+];
 
 function parseFileName(imageFileNameString: string) {
   const extension = imageFileNameString.split(dot).pop(); // https://stackoverflow.com/a/1203361/470749
@@ -41,46 +50,102 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   return buffer;
 }
 
-async function getMostRecentActivityDateTime(accountName: string): Promise<Dayjs> {
-  // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
-  /* This function includes an ugly temporary workaround. `findFirst` (instead of findMany with `take: 2`) should have worked but was causing a timeout.
-     Apparently it's not Prisma's fault though.Even running a LIMIT 1 query in pgAdmin causes a timeout, surprisingly, even though a LIMIT 2 query does not.
-     https://stackoverflow.com/questions/71026316/why-would-limit-2-queries-work-but-limit-1-always-times-out
-     This is suspicious but seems unrelated to this repo. */
-  try {
-    const rows = await prisma.receipts.findMany({
-      where: {
-        action_receipts: {
-          // https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting#filter-on-relations
-          signer_account_id: {
-            equals: accountName,
-          },
-        },
-      },
-      orderBy: {
-        included_in_block_timestamp: 'desc',
-      },
-      take: 2, // see comment above about workaround
-    });
-    if (rows) {
-      const result = rows[0]; // see comment above about workaround
-      console.log({ accountName, result });
-      const moment = convertTimestampDecimalToDayjsMoment(result.included_in_block_timestamp);
-      console.log({ accountName, result, moment }, moment.format());
-      return moment;
-    }
-  } catch (error) {
-    console.error({ error });
-  }
-
-  throw new Error(
-    'getMostRecentActivityDateTime did not produce a result. Perhaps a certificate for the original_recipient_id could not be found or the public indexer query timed out.',
-  );
+// eslint-disable-next-line max-lines-per-function
+function getRawQuery(accountName: string, issuedAtUnixNano: number) {
+  return Prisma.sql`
+    WITH long_period_of_inactivity AS (
+      SELECT 
+      moment,
+      diff_to_previous_activity,
+      CAST(NULL AS int) AS diff_from_last_activity_to_render_date, /*  to match column numbers in both queries  */
+      true AS has_long_period_of_inactivity
+      FROM (
+        SELECT *,
+          ((EXTRACT(epoch FROM moment) - EXTRACT(epoch FROM lag(moment) over (ORDER BY moment))) / 86400)::int /* 1 day = 60sec * 60min * 24h = 86400 sec*/
+          AS diff_to_previous_activity
+        FROM (
+          SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment
+          FROM PUBLIC.RECEIPTS R
+          LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
+          WHERE SIGNER_ACCOUNT_ID = ${accountName}
+          AND R."included_in_block_timestamp" > ${issuedAtUnixNano}
+        ) as account_activity_dates
+      ) as account_activity_periods
+      WHERE (diff_to_previous_activity > ${expirationDays})
+      ORDER BY moment ASC
+      LIMIT 1
+      ), most_recent_activity AS (
+      SELECT
+      moment, 
+      CAST(NULL AS int) AS diff_to_previous_activity, /*  to match column numbers in both queries  */
+      ((EXTRACT(epoch FROM CURRENT_TIMESTAMP) - EXTRACT(epoch FROM moment)) / 86400)::int 
+		  AS diff_from_last_activity_to_render_date,
+      false AS has_long_period_of_inactivity
+      FROM (
+        SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment
+        FROM PUBLIC.receipts R
+        LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
+        WHERE SIGNER_ACCOUNT_ID = ${accountName}
+        AND R."included_in_block_timestamp" > ${issuedAtUnixNano}
+      ) as receipt
+      WHERE NOT EXISTS (TABLE long_period_of_inactivity)
+      ORDER BY moment DESC
+      LIMIT 1
+    )
+    TABLE long_period_of_inactivity
+    UNION ALL
+    TABLE most_recent_activity`;
 }
 
-async function getExpiration(accountName: string): Promise<string> {
-  const recent = await getMostRecentActivityDateTime(accountName);
-  return formatDate(recent.add(expirationMonths, 'months'));
+async function getExpiration(accountName: string, issuedAt: string): Promise<string> {
+  // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
+  /**
+   * This query uses Common Table Expressions(CTE) to execute two separate queries conditionally;
+   * the second query being executed if first query doesn't return any result.
+   * https://www.postgresql.org/docs/9.1/queries-with.html
+   * https://stackoverflow.com/a/68684814/10684149
+   */
+  /**
+   * First query checks If the account has a period where it hasn't been active for 180 days straight after the issue date (exluding the render date)
+   * Second query is run if no 180-day-inactivity period is found and returns most recent activity date
+   * AND amount of days between account's last activity date - render date of certificate
+   */
+  const issuedAtUnixNano = dayjs(issuedAt).unix() * 1_000_000_000; // TODO: See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER and add a comment here and in JSDoc for functions that have a `number` argument for dates. Explain why it's safe to use floating point `number` type (if it is), or switch to a better approach and explain it.
+  console.log({ issuedAt, issuedAtUnixNano, accountName });
+  const rawQuery = getRawQuery(accountName, issuedAtUnixNano);
+  // https://www.prisma.io/docs/concepts/components/prisma-client/raw-database-access#queryraw
+  const result: RawQueryResult = await prisma.$queryRaw<RawQueryResult>`${rawQuery}`;
+
+  console.log('getExpiration query result', { result });
+
+  /**
+   * If the account doesn't have a period where it hasn't been active for 180 days straight after the issue date:
+   * Days between last activity and render date is checked:
+   * If this value (diff_from_last_activity_to_render_date) is  >180;
+   * -- Certificate is expired. Expiration date = last activity + 180 days
+   * If this value (diff_from_last_activity_to_render_date) is <180;
+   * -- Certificate hasn't expired yet. Expiration date = last activity + 180 days
+   * Otherwise, if >180-day period of inactivity exist (has_long_period_of_inactivity === true) after issueDate,
+   * -- Expiration date = the beginning of the *first* such period + 180 days.
+   */
+  const moment = dayjs(result[0].moment);
+
+  if (result[0].has_long_period_of_inactivity) {
+    /**
+     * >180-day period of inactivity exists. Can be anything over 180.
+     * moment is the end date of such period.
+     * Extract 180 from inactivity period to get the exact days betwen moment and actual expiration date.
+     */
+    const daysToMomentOfExpiration = result[0].diff_to_previous_activity - expirationDays;
+
+    /**
+     * Subtract daysToMomentOfExpiration from moment to get the specific date of expiration.
+     * This subtraction equals to (start of inactivity period + 180 days)
+     */
+    return formatDate(moment.subtract(daysToMomentOfExpiration, 'days'));
+  } else {
+    return formatDate(moment.add(expirationDays, 'days'));
+  }
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -97,7 +162,13 @@ async function fetchCertificateDetails(tokenId: string) {
     if (certificateMetadata.valid) {
       const accountName = certificateMetadata.original_recipient_id;
       const programCode = certificateMetadata.program;
-      const expiration = await getExpiration(accountName); // TODO: Wrap in try/catch blocks to handle when indexer service is unavailable.
+      let expiration = null; // The UI (see `generateImage`) will need to gracefully handle this case when indexer service is unavailable.
+      try {
+        expiration = await getExpiration(accountName, metadata.issued_at);
+        // E.g.: expiration: { expirationDate: '2022-08-16', isExpired: false }
+      } catch (error) {
+        console.error('Perhaps a certificate for the original_recipient_id could not be found or the public indexer query timed out.', error);
+      }
       const date = formatDate(metadata.issued_at);
       const programName = metadata.title;
       const programDescription = metadata.description;
@@ -130,7 +201,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const imageBuffer = await generateImage(canvasType, bufferType, details);
     res.setHeader('Content-Type', contentType);
     addCacheHeader(res, CACHE_SECONDS);
-    // Caching is important especially because of getMostRecentActivityDateTime, which pulls from the public indexer database.
+    // Caching is important especially because of getExpiration, which pulls from the public indexer database.
     res.send(imageBuffer);
   } else {
     res.status(HTTP_ERROR_CODE_MISSING).json({ error: `No certificate exists with this Token ID (${tokenId}).` });
