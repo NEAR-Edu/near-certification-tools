@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "dotenv -e .env.test jest -i",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "test": "yarn docker:up && yarn migrate:postgres deploy && dotenv -e .env.test jest -i",
     "migrate:postgres": "dotenv -e .env.test -- npx prisma migrate dev --name postgres-init"
   },
   "dependencies": {
