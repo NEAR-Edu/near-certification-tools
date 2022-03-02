@@ -2,9 +2,9 @@ import { PrismaClient } from '@prisma/client';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { mockDeep, mockReset, DeepMockProxy } from 'jest-mock-extended';
 
-const prisma = new PrismaClient();
+import prisma from './client';
 
-jest.mock('prisma', () => ({
+jest.mock('./client', () => ({
   __esModule: true,
   default: mockDeep<PrismaClient>(),
 }));

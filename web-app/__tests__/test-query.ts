@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { log } from 'console';
-import { getRawQuery, getExpiration } from '../prisma/cert-functions';
+import getRawQuery from '../prisma/cert-query-functions';
 
 const prisma = new PrismaClient();
 // eslint-disable-next-line max-lines-per-function
@@ -37,13 +36,13 @@ beforeAll(async () => {
   await prisma.action_receipts.createMany({
     data: [
       {
-        receipt_id: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+        receipt_id: 'receiptidofJaneDoewith45charsxxxxxxxxxxxxxxx',
         signer_account_id: 'janedoe.testnet',
         signer_public_key: '',
         gas_price: 0,
       },
       {
-        receipt_id: 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy',
+        receipt_id: 'receiptidofJohnDoewith45charsyyyyyyyyyyyyyyy',
         signer_account_id: 'johndoe.testnet',
         signer_public_key: '',
         gas_price: 0,
@@ -66,16 +65,7 @@ afterAll(async () => {
 });
 
 it('should run query', async () => {
-  // accountName: string, issuedAtUnixNano: number
-  const test = await getRawQuery('janedoe.testnet', 1646224546000000000);
+  const queryResult = await getRawQuery('janedoe.testnet', 1614632400000000000);
 
-  log('test', test);
-});
-
-// accountName: string, issuedAt: string
-it('should run getExpiriation', async () => {
-  // accountName: string, issuedAtUnixNano: number
-  const test2 = await getExpiration('janedoe.testnet', '2021-03-02');
-
-  log('test2', test2);
+  console.log({ queryResult });
 });
