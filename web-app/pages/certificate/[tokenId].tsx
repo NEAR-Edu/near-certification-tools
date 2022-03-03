@@ -10,6 +10,7 @@ import type { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
 import Layout from '../../components/Layout';
 import { baseUrl } from '../../helpers/strings';
+import { fetchCertificateDetails } from '../api/cert/[imageFileName]';
 
 const title = 'I got certified on the NEAR blockchain!';
 const description = 'View NEAR University certificates of any .near account';
@@ -31,10 +32,15 @@ function buildLinkedInUrl(certificateUrl: string) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  // https://nextjs.org/docs/api-reference/data-fetching/get-server-side-props
   const { tokenId } = context.query; // https://nextjs.org/docs/routing/dynamic-routes
-  console.log({ tokenId });
-  // TODO: In getServerSideProps, check for existence of cert of this tokenId, and ensure that it's valid. If does not exist or is invalid, return HTTP_ERROR_CODE_MISSING error.
+  const castingTokenId: string = tokenId as string;
+  const details = await fetchCertificateDetails(castingTokenId);
+
+  if (!details) {
+    return {
+      notFound: true,
+    };
+  }
 
   return {
     props: {
