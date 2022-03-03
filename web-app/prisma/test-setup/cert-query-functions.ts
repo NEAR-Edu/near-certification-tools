@@ -1,34 +1,21 @@
 import { PrismaClient } from '@prisma/client';
-// import dayjs from 'dayjs';
-// import { formatDate } from '../helpers/time';
+import dayjs from 'dayjs';
+import { formatDate } from '../../helpers/time';
 
 const prisma = new PrismaClient();
 const expirationDays = 180;
 
-// type RawQueryResult = [
-//   {
-//     moment: string;
-//     diff_to_previous_activity: number;
-//     diff_from_last_activity_to_render_date: number;
-//     has_long_period_of_inactivity: boolean;
-//   },
-// ];
+type RawQueryResult = [
+  {
+    moment: string;
+    diff_to_previous_activity: number;
+    diff_from_last_activity_to_render_date: number;
+    has_long_period_of_inactivity: boolean;
+  },
+];
 
-// export interface Receipt {
-//   receipt_id?: string;
-//   included_in_block_timestamp: number;
-// }
-
-// export interface ActionReceipts {
-//   receipt_id?: string;
-//   signer_account_id?: string;
-// }
-/**
- * Creates an order with customer.
- * @param input The order parameters
- */
 // eslint-disable-next-line max-lines-per-function
-export default async function getRawQuery(accountName: string, issuedAtUnixNano: number) {
+export async function getRawQuery(accountName: string, issuedAtUnixNano: number): Promise<RawQueryResult> {
   return prisma.$queryRaw`
     WITH long_period_of_inactivity AS (
       SELECT
@@ -72,4 +59,22 @@ export default async function getRawQuery(accountName: string, issuedAtUnixNano:
     TABLE long_period_of_inactivity
     UNION ALL
     TABLE most_recent_activity`;
+}
+
+// TODO: Figure out why the original function at [imageFileName].ts doesn't work here
+export async function getExpiration(accountName: string, issuedAt: string): Promise<string> {
+  console.log({ issuedAt });
+  // TODO: Figure out why this calculates a different value
+  // const issuedAtUnixNano = dayjs(issuedAt).unix() * 1_000_000_000;
+  const issuedAtUnixNano = 1614632400000000000;
+  const result = await getRawQuery(accountName, issuedAtUnixNano);
+
+  console.log('getExpiration query result', { result });
+
+  const moment = dayjs(result[0].moment);
+  const expiration = result[0].has_long_period_of_inactivity
+    ? formatDate(moment.subtract(result[0].diff_to_previous_activity - expirationDays, 'days'))
+    : formatDate(moment.add(expirationDays, 'days'));
+
+  return expiration;
 }

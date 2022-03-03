@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import getRawQuery from '../prisma/test-setup/cert-query-functions';
+import { getRawQuery, getExpiration } from '../prisma/test-setup/cert-query-functions';
 
 const prisma = new PrismaClient();
 beforeAll(async () => {
@@ -49,4 +49,10 @@ it('should run query', async () => {
   const queryResult = await getRawQuery('janedoe.testnet', 1614632400000000000);
 
   console.log({ queryResult });
+});
+
+it('should return expiration date', async () => {
+  const expirationDate = await getExpiration('janedoe.testnet', '2022-03-02T12:35:46+00:00');
+
+  console.log({ expirationDate });
 });
