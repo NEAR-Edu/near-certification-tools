@@ -84,7 +84,7 @@ async function getExpiration(accountName: string): Promise<string> {
 }
 
 // eslint-disable-next-line max-lines-per-function
-async function fetchCertificateDetails(tokenId: string) {
+export async function fetchCertificateDetails(tokenId: string) {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForBackend();
   const contract = getNftContract(account);
   const response = await (contract as NFT).nft_token({ token_id: tokenId });
