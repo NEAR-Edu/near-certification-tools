@@ -10,7 +10,7 @@
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "test": "yarn docker:up && yarn migrate:postgres deploy && dotenv -e .env.test jest -i",
-    "migrate:postgres": "dotenv -e .env.test -- npx prisma migrate dev --name postgres-init"
+    "migrate:postgres": "dotenv -e .env.test -- npx prisma migrate dev --schema ./prisma/test-schema.prisma --name postgres-init"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.3.0",
