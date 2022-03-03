@@ -1,14 +1,14 @@
 {
   "type": "array",
-  "length": 4,
+  "length": 10,
   "content": {
     "type": "object",
     "included_in_block_timestamp": {
       "type": "number",
-      "categorical": {
-        "1614632400000000000": 1,
-        "1634632400000000000": 1,
-        "1734632400000000000": 1
+      "range": {
+        "low": 1600000000000000000,
+        "high": 1646320641000000000,
+        "step": 100
       }
     },
     "receipt_id": {

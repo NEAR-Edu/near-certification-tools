@@ -1,22 +1,9 @@
 {
   "type": "array",
-  "length": 10,
+  "length": 4,
   "content": {
     "type": "object",
-    "signer_account_id": {
-      "type": "string",
-      "format": {
-        "format": "{account_name}.testnet",
-        "arguments": {
-          "account_name": {
-            "type": "string",
-            "faker": {
-              "generator": "username"
-            }
-          }
-        }
-      }
-    },
+    "signer_account_id": "janedoe.testnet",
     "receipt_id": "@receipts.content.receipt_id"
   }
 }
