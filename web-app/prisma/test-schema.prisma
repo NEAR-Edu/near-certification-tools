@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://prisma:prisma@localhost:5433/tests"
 }
 
 model action_receipts {
