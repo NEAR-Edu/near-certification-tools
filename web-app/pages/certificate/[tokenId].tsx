@@ -38,7 +38,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   if (!details) {
     return {
-      notFound: true,
+      notFound: true, // https://nextjs.org/docs/api-reference/data-fetching/get-server-side-props#notfound
     };
   }
 
