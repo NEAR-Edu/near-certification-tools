@@ -17,7 +17,7 @@ model action_receipts {
 
 model receipts {
   receipt_id                                              String                              @id
-  included_in_block_timestamp                             Decimal                             @db.Decimal(20, 0)
+  included_in_block_timestamp                             BigInt                             
   action_receipts                                         action_receipts?
                                         
   @@index([included_in_block_timestamp], map: "receipts_timestamp_idx")

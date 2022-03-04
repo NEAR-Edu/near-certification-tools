@@ -1,16 +1,8 @@
 {
   "type": "array",
-  "length": 4,
+  "length": 3,
   "content": {
     "type": "object",
-    "included_in_block_timestamp": {
-      "type": "number",
-      "categorical": {
-        "1614632400000000000": 1,
-        "1634632400000000000": 1,
-        "1734632400000000000": 1
-      }
-    },
     "receipt_id": {
       "type": "string",
       "truncated": {
@@ -19,6 +11,14 @@
           "pattern": "[a-zA-Z0-9]{0, 255}"
         },
         "length": 45
+      }
+    },
+    "included_in_block_timestamp": {
+      "type": "number",
+      "categorical": {
+        "1646224546000000000": 1,
+        "1745788799000000000": 1,
+        "1671788799000000000": 1
       }
     }
   }
