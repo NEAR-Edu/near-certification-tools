@@ -9,7 +9,7 @@
     "lint": "next lint",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
-    "test": "yarn docker:up && yarn migrate:postgres deploy && dotenv -e .env.test jest -i",
+    "test": "yarn docker:up && yarn migrate:postgres deploy && synth generate synth/test_db --to postgresql://prisma:prisma@localhost:5433/tests | jq . && dotenv -e .env.test jest -i",
     "migrate:postgres": "dotenv -e .env.test -- npx prisma migrate dev --schema ./prisma/test-schema.prisma --name postgres-init"
   },
   "dependencies": {

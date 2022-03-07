@@ -1,9 +1,0 @@
-{
-  "type": "array",
-  "length": 3,
-  "content": {
-    "type": "object",
-    "receipt_id": "@receipts.content.receipt_id",
-    "signer_account_id": "janedoe.testnet"
-  }
-}

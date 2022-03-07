@@ -1,10 +1,9 @@
 import dayjs from 'dayjs';
-import prisma from '../../helpers/prisma';
-import { getRawQuery } from './query';
-import { formatDate } from '../../helpers/time';
+import { Prisma } from '@prisma/client';
+import prisma from './prisma';
+import { formatDate } from './time';
 
-const expirationDays = 180;
-
+const expirationDays = 180; // Certificates expire after the first period of this many consecutive days of inactivity after issueDate.
 type RawQueryResult = [
   {
     moment: string;
@@ -13,6 +12,53 @@ type RawQueryResult = [
     has_long_period_of_inactivity: boolean;
   },
 ];
+
+// eslint-disable-next-line max-lines-per-function
+function getRawQuery(accountName: string, issuedAtUnixNano: number) {
+  return Prisma.sql`
+    WITH long_period_of_inactivity AS (
+      SELECT 
+      moment,
+      diff_to_previous_activity,
+      CAST(NULL AS int) AS diff_from_last_activity_to_render_date, /*  to match column numbers in both queries  */
+      true AS has_long_period_of_inactivity
+      FROM (
+        SELECT *,
+          ((EXTRACT(epoch FROM moment) - EXTRACT(epoch FROM lag(moment) over (ORDER BY moment))) / 86400)::int /* 1 day = 60sec * 60min * 24h = 86400 sec*/
+          AS diff_to_previous_activity
+        FROM (
+          SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment
+          FROM PUBLIC.RECEIPTS R
+          LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
+          WHERE SIGNER_ACCOUNT_ID = ${accountName}
+          AND R."included_in_block_timestamp" > ${issuedAtUnixNano}
+        ) as account_activity_dates
+      ) as account_activity_periods
+      WHERE (diff_to_previous_activity > ${expirationDays})
+      ORDER BY moment ASC
+      LIMIT 1
+      ), most_recent_activity AS (
+      SELECT
+      moment, 
+      CAST(NULL AS int) AS diff_to_previous_activity, /*  to match column numbers in both queries  */
+      ((EXTRACT(epoch FROM CURRENT_TIMESTAMP) - EXTRACT(epoch FROM moment)) / 86400)::int 
+		  AS diff_from_last_activity_to_render_date,
+      false AS has_long_period_of_inactivity
+      FROM (
+        SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment
+        FROM PUBLIC.receipts R
+        LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
+        WHERE SIGNER_ACCOUNT_ID = ${accountName}
+        AND R."included_in_block_timestamp" > ${issuedAtUnixNano}
+      ) as receipt
+      WHERE NOT EXISTS (TABLE long_period_of_inactivity)
+      ORDER BY moment DESC
+      LIMIT 1
+    )
+    TABLE long_period_of_inactivity
+    UNION ALL
+    TABLE most_recent_activity`;
+}
 
 export default async function getExpiration(accountName: string, issuedAt: string): Promise<string> {
   // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
