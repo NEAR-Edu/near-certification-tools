@@ -20,7 +20,6 @@ function getRawQuery(accountName: string, issuedAtUnixNano: number) {
       SELECT 
       moment,
       diff_to_previous_activity,
-      CAST(NULL AS int) AS diff_from_last_activity_to_render_date, /*  to match column numbers in both queries  */
       true AS has_long_period_of_inactivity
       FROM (
         SELECT *,
@@ -41,8 +40,6 @@ function getRawQuery(accountName: string, issuedAtUnixNano: number) {
       SELECT
       moment, 
       CAST(NULL AS int) AS diff_to_previous_activity, /*  to match column numbers in both queries  */
-      ((EXTRACT(epoch FROM CURRENT_TIMESTAMP) - EXTRACT(epoch FROM moment)) / 86400)::int 
-		  AS diff_from_last_activity_to_render_date,
       false AS has_long_period_of_inactivity
       FROM (
         SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment

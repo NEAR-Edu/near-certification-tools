@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import getExpiration from '../helpers/expiration-query';
-import { getQueryResult } from '../prisma/test-helpers/query';
+import getQueryResult from '../prisma/test-helpers/query';
 
 const prisma = new PrismaClient();
 
@@ -31,7 +31,6 @@ it('should return query result for jane doe', async () => {
       {
         moment: expect.any(String),
         diff_to_previous_activity: expect.any(Number),
-        diff_from_last_activity_to_render_date: null,
         has_long_period_of_inactivity: true,
       },
     ]),
@@ -48,7 +47,6 @@ it('should return query result for john doe', async () => {
       {
         moment: expect.any(String),
         diff_to_previous_activity: null,
-        diff_from_last_activity_to_render_date: expect.any(Number),
         has_long_period_of_inactivity: false,
       },
     ]),
