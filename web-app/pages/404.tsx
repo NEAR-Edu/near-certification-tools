@@ -1,4 +1,4 @@
-export default function handle404() {
+export default function ErrorPage404() {
   return (
     <div className="bg-white px-4 py-16 sm:px-6 sm:py-24 sm:h-screen md:grid md:place-content-center lg:px-8">
       <div className="max-w-max mx-auto">
