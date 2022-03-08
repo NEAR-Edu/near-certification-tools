@@ -3,6 +3,9 @@ import '../styles/globals.scss';
 import type { AppProps } from 'next/app';
 import Script from 'next/script';
 
+// Set Up Google Analytics With Next.JS (Using Next.JS Script Component)
+// https://youtu.be/QAdtc7VWuNE
+// https://github.com/jarrodwatts/portfolio/blob/master/src/pages/_app.tsx#L23-L37
 const googleAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -24,7 +27,3 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 }
 export default MyApp;
-
-// Set Up Google Analytics With Next.JS (Using Next.JS Script Component)
-// https://youtu.be/QAdtc7VWuNE
-// https://github.com/jarrodwatts/portfolio/blob/master/src/pages/_app.tsx#L23-L37
