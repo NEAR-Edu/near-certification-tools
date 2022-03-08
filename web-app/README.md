@@ -39,22 +39,6 @@ The app is at [http://localhost:3000/api/cert/103216412112497cb6c193152a27c49a.s
 - This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 - Solving a TypeScript issue that happens when Render tries to build the project: https://community.render.com/t/deploy-a-github-sub-directory/1156/12
 
-# TODO
-
-## Ryan:
-
-1. Integrate Airtable with Integromat
-1. Ask Sherif to map his desired subdomain in the Custom Domains section of https://dashboard.render.com/web/srv-c821j246fj315u4tlj90/settings
-1. Figure out correct var values for the `.env` file. E.g. replace NEXT_PUBLIC_ISSUING_AUTHORITY_ACCOUNT_ID and ISSUING_AUTHORITY_PRIVATE_KEY in https://dashboard.render.com/env-group/evg-c822des6fj315u4tmckg
-1. Deploy the production contract.
-1. Upgrade our Render plan for this project.
-1. Lower priority improvements:
-   1. Add documentation at deployment_notes.md about Integromat, etc
-   1. Ensure that HTTP is blocked (because HTTPS is enforced via `web-app/pages/_middleware.ts`). (We wouldn't want `web-app/pages/api/mint-cert.ts` exposed via HTTP because our secret `API_KEY` would be leaked, and anyone could issue any certificate.)
-      1. 2022-02-02 13:00 ET http://near-certification-tools.onrender.com/ does seem to successfully redirect to https://near-certification-tools.onrender.com/ but we'll want to test the minting later.
-   1. Add validation to minting
-   1. Add cert text details to `web-app/pages/certificate/[tokenId].tsx` but consider efficiency; it should fetch certificate data just once, and then pass that to the image generator. fetchCertificateDetails should not be inside `web-app/pages/api/cert/[imageFileName].ts`
-   1. `web-app/pages/certificate/[tokenId].tsx` getServerSideProps 404 error for missing or invalid token
 
 # Helpful tools
 
