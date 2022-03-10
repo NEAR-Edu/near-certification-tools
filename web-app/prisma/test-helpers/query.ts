@@ -13,11 +13,19 @@ type RawQueryResult = [
 
 const expirationDays = 180;
 
+/**
+ * issuedAtUnixNano is double casted in query because of Prisma template literal throwing 22P03 Error in DB
+ * https://github.com/prisma/prisma/issues/10424
+ * https://github.com/prisma/prisma/issues/5083
+ * Double casting : https://github.com/prisma/prisma/issues/4647#issuecomment-939555602
+ */
 // eslint-disable-next-line max-lines-per-function
 export default async function getQueryResult(accountName: string, issuedAt: string): Promise<unknown> {
   /**
    * Calculates Unix Timestamp in nanoseconds.
    * Calculation is exceeding JS's MAX_SAFE_INTEGER value, making it unsafe to use Number type(floating point `number` type).
+   * The Number type in JavaScript can only safely represent integers below the MAX_SAFE_INTEGER value.
+   * Integer values outside of MAX_SAFE_INTEGER value might cause lost of precision.
    * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER.
    * Therefore, we're using the bn.js library to solve this issue
    * (BigInt type could be used as well).

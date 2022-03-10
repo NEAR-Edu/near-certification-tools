@@ -14,6 +14,12 @@ type RawQueryResult = [
   },
 ];
 
+/**
+ * issuedAtUnixNano is double casted in query because of Prisma template literal throwing 22P03 Error in DB
+ * https://github.com/prisma/prisma/issues/10424
+ * https://github.com/prisma/prisma/issues/5083
+ * Double casting : https://github.com/prisma/prisma/issues/4647#issuecomment-939555602
+ */
 // eslint-disable-next-line max-lines-per-function
 function getRawQuery(accountName: string, issuedAtUnixNano: string) {
   return Prisma.sql`
@@ -31,7 +37,7 @@ function getRawQuery(accountName: string, issuedAtUnixNano: string) {
           FROM PUBLIC.RECEIPTS R
           LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
           WHERE SIGNER_ACCOUNT_ID = ${accountName}
-          AND R."included_in_block_timestamp" > (${issuedAtUnixNano}::text)::numeric /*  double casting because of prisma string template throwing 22P03 Error in DB */
+          AND R."included_in_block_timestamp" > (${issuedAtUnixNano}::text)::numeric /*  double casting because of prisma template literal throwing 22P03 Error in DB */
         ) as account_activity_dates
       ) as account_activity_periods
       WHERE (diff_to_previous_activity > ${expirationDays})
@@ -47,7 +53,7 @@ function getRawQuery(accountName: string, issuedAtUnixNano: string) {
         FROM PUBLIC.receipts R
         LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
         WHERE SIGNER_ACCOUNT_ID = ${accountName}
-        AND R."included_in_block_timestamp" > (${issuedAtUnixNano}::text)::numeric /*  double casting because of prisma string template throwing 22P03 Error in DB */
+        AND R."included_in_block_timestamp" > (${issuedAtUnixNano}::text)::numeric /*  double casting because of prisma template literal throwing 22P03 Error in DB */
       ) as receipt
       WHERE NOT EXISTS (TABLE long_period_of_inactivity)
       ORDER BY moment DESC
@@ -75,6 +81,8 @@ export default async function getExpiration(accountName: string, issuedAt: strin
   /**
    * Calculates Unix Timestamp in nanoseconds.
    * Calculation is exceeding JS's MAX_SAFE_INTEGER value, making it unsafe to use Number type(floating point `number` type).
+   * The Number type in JavaScript can only safely represent integers below the MAX_SAFE_INTEGER value.
+   * Integer values outside of MAX_SAFE_INTEGER value might cause lost of precision.
    * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER.
    * Therefore, we're using the bn.js library to solve this issue
    * (BigInt type could be used as well).
