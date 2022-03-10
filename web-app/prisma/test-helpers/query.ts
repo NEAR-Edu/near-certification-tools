@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import BN from 'bn.js';
 import prisma from '../../helpers/prisma';
 
 type RawQueryResult = [
@@ -14,7 +15,14 @@ const expirationDays = 180;
 
 // eslint-disable-next-line max-lines-per-function
 export default async function getQueryResult(accountName: string, issuedAt: string): Promise<unknown> {
-  const issuedAtUnixNano = dayjs(issuedAt).unix() * 1_000_000_000;
+  /**
+   * Calculates Unix Timestamp in nanoseconds.
+   * Calculation is exceeding JS's MAX_SAFE_INTEGER value, making it unsafe to use Number type(floating point `number` type).
+   * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER.
+   * Therefore, we're using the bn.js library to solve this issue
+   * (BigInt type could be used as well).
+   */
+  const issuedAtUnixNano = new BN(dayjs(issuedAt).unix()).mul(new BN(1_000_000_000)).toString(); // Converts Unix Timestamp in seconds to nanoseconds, finally from BN instance to string type. Result can't be saved as numeric type because it is exceeding 53 bits.
 
   const result: RawQueryResult = await prisma.$queryRaw<RawQueryResult>`
     WITH long_period_of_inactivity AS (
@@ -31,7 +39,7 @@ export default async function getQueryResult(accountName: string, issuedAt: stri
           FROM PUBLIC.RECEIPTS R
           LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
           WHERE SIGNER_ACCOUNT_ID = ${accountName}
-          AND R."included_in_block_timestamp" > ${issuedAtUnixNano}
+          AND R."included_in_block_timestamp" > (${issuedAtUnixNano}::text)::numeric /*  double casting because of prisma string template throwing 22P03 Error in DB */
         ) as account_activity_dates
       ) as account_activity_periods
       WHERE (diff_to_previous_activity > ${expirationDays})
@@ -47,7 +55,7 @@ export default async function getQueryResult(accountName: string, issuedAt: stri
         FROM PUBLIC.receipts R
         LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
         WHERE SIGNER_ACCOUNT_ID = ${accountName}
-        AND R."included_in_block_timestamp" > ${issuedAtUnixNano}
+        AND R."included_in_block_timestamp" > (${issuedAtUnixNano}::text)::numeric /*  double casting because of prisma string template throwing 22P03 Error in DB */
       ) as receipt
       WHERE NOT EXISTS (TABLE long_period_of_inactivity)
       ORDER BY moment DESC

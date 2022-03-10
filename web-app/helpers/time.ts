@@ -1,6 +1,7 @@
 import { Decimal } from '@prisma/client/runtime';
 import dayjs, { Dayjs } from 'dayjs';
 
+// TODO: Are we using this function?
 export function convertTimestampDecimalToDayjsMoment(timestampDecimal: Decimal): Dayjs {
   // https://stackoverflow.com/questions/71024496/why-do-i-need-to-divide-the-timestamp-by-1-billion
   // https://discord.com/channels/828768337978195969/830348856561500167/940337682121359391
