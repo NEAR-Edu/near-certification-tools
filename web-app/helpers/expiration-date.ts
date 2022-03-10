@@ -81,7 +81,7 @@ export default async function getExpiration(accountName: string, issuedAt: strin
   /**
    * Calculates Unix Timestamp in nanoseconds.
    * Calculation is exceeding JS's MAX_SAFE_INTEGER value, making it unsafe to use Number type(floating point `number` type).
-   * The Number type in JavaScript can only safely represent integers below the MAX_SAFE_INTEGER value.
+   * The Number type in JavaScript can only safely represent Number types below the MAX_SAFE_INTEGER value.
    * Integer values outside of MAX_SAFE_INTEGER value might cause lost of precision.
    * See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER.
    * Therefore, we're using the bn.js library to solve this issue
