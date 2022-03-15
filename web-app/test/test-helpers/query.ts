@@ -73,5 +73,6 @@ export default async function getQueryResult(accountName: string, issuedAt: stri
     UNION ALL
     TABLE most_recent_activity`;
 
+  console.table(result);
   return result;
 }

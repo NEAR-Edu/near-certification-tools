@@ -1,4 +1,4 @@
-import prisma from './test-helpers/client';
+import prisma from '../test/test-helpers/client';
 
 // eslint-disable-next-line max-lines-per-function
 async function main() {
@@ -28,6 +28,87 @@ async function main() {
       {
         included_in_block_timestamp: 1648224546000000000,
         receipt_id: 'OkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      // years of activity
+      {
+        included_in_block_timestamp: 1426339237000000000,
+        receipt_id: 'AkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1463577637000000000,
+        receipt_id: 'BkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1469107237000000000,
+        receipt_id: 'CkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1496496037000000000,
+        receipt_id: 'DkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1538400037000000000,
+        receipt_id: 'EkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1569936037000000000,
+        receipt_id: 'FkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1572960037000000000,
+        receipt_id: 'GkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1576243237000000000,
+        receipt_id: 'HkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1581427237000000000,
+        receipt_id: 'IkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1581859237000000000,
+        receipt_id: 'JkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1596979237000000000,
+        receipt_id: 'KkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1606224037000000000,
+        receipt_id: 'LkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1611494437000000000,
+        receipt_id: 'MkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1618579237000000000,
+        receipt_id: 'NkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1618924837000000000,
+        receipt_id: 'PkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1620393637000000000,
+        receipt_id: 'QkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1636291237000000000,
+        receipt_id: 'RkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1641388837000000000,
+        receipt_id: 'SkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1643894437000000000,
+        receipt_id: 'TkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: 1646400037000000000,
+        receipt_id: 'UkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
       },
     ],
   });
@@ -59,12 +140,93 @@ async function main() {
         receipt_id: 'OkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
         signer_account_id: 'johndoe.testnet',
       },
+      // years of activity
+      {
+        receipt_id: 'AkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'BkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'CkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'DkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'EkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'FkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'GkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'HkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'IkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'JkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'KkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'LkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'MkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'NkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'PkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'QkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'RkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'SkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'TkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
+      {
+        receipt_id: 'UkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+        signer_account_id: 'jimdoe.testnet',
+      },
     ],
   });
 
-  console.log('✨ 6 action_receipts successfully created!');
+  console.log('✨ 26 action_receipts successfully created!');
 
-  console.log('✨ 6 receipts successfully created!');
+  console.log('✨ 26 receipts successfully created!');
 }
 
 main()
