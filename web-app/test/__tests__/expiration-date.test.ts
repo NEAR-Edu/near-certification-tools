@@ -88,7 +88,6 @@ describe('test expiration date functions', () => {
        */
       it('should return query result for jim doe while no when no 180-days inactivity is present after issue date', async () => {
         const queryResult = await getQueryResult('jimdoe.testnet', '2021-11-05');
-        console.table({ queryResult });
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
