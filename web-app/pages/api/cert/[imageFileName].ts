@@ -9,7 +9,7 @@ import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../hel
 import { height, populateCert, width } from '../../../helpers/certificate-designs';
 import prisma from '../../../helpers/prisma';
 import { addCacheHeader } from '../../../helpers/caching';
-import { convertTimestampDecimalToDayjsMoment, formatDate } from '../../../helpers/time';
+import { convertNanoTimestampDecimalToDayjsMoment, formatDate, convertMillisecondsTimestampToFormattedDate } from '../../../helpers/time';
 
 export const HTTP_ERROR_CODE_MISSING = 404;
 const svg = 'svg';
@@ -65,8 +65,8 @@ async function getMostRecentActivityDateTime(accountName: string): Promise<Dayjs
     if (rows) {
       const result = rows[0]; // see comment above about workaround
       console.log({ accountName, result });
-      const moment = convertTimestampDecimalToDayjsMoment(result.included_in_block_timestamp);
-      console.log({ accountName, result, moment }, moment.format());
+      const moment = convertNanoTimestampDecimalToDayjsMoment(result.included_in_block_timestamp);
+      console.log('getMostRecentActivityDateTime', { accountName, result, moment }, moment.format());
       return moment;
     }
   } catch (error) {
@@ -98,7 +98,7 @@ export async function fetchCertificateDetails(tokenId: string) {
       const accountName = certificateMetadata.original_recipient_id;
       const programCode = certificateMetadata.program;
       const expiration = await getExpiration(accountName); // TODO: Wrap in try/catch blocks to handle when indexer service is unavailable.
-      const date = formatDate(metadata.issued_at);
+      const date = convertMillisecondsTimestampToFormattedDate(metadata.issued_at);
       const programName = metadata.title;
       const programDescription = metadata.description;
       const instructor = certificateMetadata.authority_id;

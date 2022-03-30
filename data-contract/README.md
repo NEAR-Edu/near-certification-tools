@@ -61,7 +61,7 @@ This contract implements the following standards:
 
 - [NEP171 v1.0.0 - NFT Core](https://github.com/near/NEPs/blob/master/specs/Standards/NonFungibleToken/Core.md) (Only
   completely compliant if the `can_transfer` option is `true` during initialization.)
-- [NEP177 v2.0.0 - NFT Metadata](https://github.com/near/NEPs/blob/master/specs/Standards/NonFungibleToken/Metadata.md)
+- [NEP177 v2.0.0 - NFT Metadata](https://github.com/near/NEPs/blob/cde5f56688bb74bfd01b38b9c8492c0e37c404be/specs/Standards/NonFungibleToken/Metadata.md)
 - [NEP178 v1.0.0 - NFT Approval Managemenet](https://github.com/near/NEPs/blob/master/specs/Standards/NonFungibleToken/ApprovalManagement.md)
 - [NEP181 v1.0.0 - NFT Enumeration](https://github.com/near/NEPs/blob/master/specs/Standards/NonFungibleToken/Enumeration.md)
 
@@ -132,7 +132,7 @@ NEAR_ENV=testnet near view dev-1643292007908-55838431863482 nft_metadata
 You can now issue a certificate by running something like `NEAR_ENV=testnet near call <the contract ID> nft_mint '<a JSON payload similar to as shown in sample_mint.json>' --account-id <whichever account you logged in as>.testnet --deposit 0.2 --gas 300000000000000`. Example:
 
 ```bash
-NEAR_ENV=testnet near call dev-1643292007908-55838431863482 nft_mint '{  "token_id": "103216412112497cb6c193152a27c49a",  "receiver_account_id": "hatchet.testnet",  "token_metadata": {    "title": "Certified White Hat Hacker",    "description": "This certifies that the recipient has fulfilled Organization, Inc.s requirements as a white hat hacker.",    "media": null,    "media_hash": null,    "copies": 1,    "issued_at": "2021-11-28 13:00",    "expires_at": null,    "starts_at": null,    "updated_at": null,    "extra": null,    "reference": null,    "reference_hash": null  },  "certification_metadata": {    "authority_id": "john_instructor.near",    "authority_name": "John Instructor",    "program": "Developer",    "program_name": "White hat hacking with transferable certification",    "program_link": "https://near.university",    "program_start_date": null,    "program_end_date": null,    "original_recipient_id": "hatchet.testnet",    "original_recipient_name": "Original Recipient",    "valid": true,    "memo": null  },  "memo": null}' --account-id ryancwalsh.testnet --deposit 0.2 --gas 300000000000000
+NEAR_ENV=testnet near call dev-1643292007908-55838431863482 nft_mint "$(<./data-contract/sample_mint.json)" --account-id ryancwalsh.testnet --deposit 0.2 --gas 300000000000000
 ```
 
 ### View Certificate
