@@ -7,7 +7,7 @@ import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
 import { height, populateCert, width } from '../../../helpers/certificate-designs';
 import { addCacheHeader } from '../../../helpers/caching';
-import { formatDate } from '../../../helpers/time';
+import { convertMillisecondsTimestampToFormattedDate } from '../../../helpers/time';
 
 export const HTTP_ERROR_CODE_MISSING = 404;
 const svg = 'svg';
@@ -38,7 +38,7 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   return buffer;
 }
 
-async function fetchCertificateDetails(tokenId: string) {
+export async function fetchCertificateDetails(tokenId: string) {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForBackend();
   const contract = getNftContract(account);
   const response = await (contract as NFT).nft_token({ token_id: tokenId });
@@ -51,7 +51,7 @@ async function fetchCertificateDetails(tokenId: string) {
     if (certificateMetadata.valid) {
       const accountName = certificateMetadata.original_recipient_id;
       const programCode = certificateMetadata.program;
-      const date = formatDate(metadata.issued_at);
+      const date = convertMillisecondsTimestampToFormattedDate(metadata.issued_at);
       const programName = metadata.title;
       const programDescription = metadata.description;
       const instructor = certificateMetadata.authority_id;
