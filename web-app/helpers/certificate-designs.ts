@@ -86,7 +86,7 @@ function wrapText(context: CanvasRenderingContext2D, text: string, x: number, y:
 
 export async function populateCert(canvas: Canvas, details: any) {
   console.log('populateCert', { details });
-  const { tokenId, date, programName, accountName, expiration, programDescription, instructor, programCode } = details;
+  const { tokenId, date, programName, accountName, programDescription, instructor, programCode } = details;
 
   // Load and draw the background image first
   const certificateBackgroundImage = `./public/certificate-backgrounds/${programCode}_certificate.svg`; // Background images must be in SVG format
@@ -102,6 +102,5 @@ export async function populateCert(canvas: Canvas, details: any) {
   addText(context, programName, programFont, black, X_CENTER, 680, 'center');
   fitText(context, instructor, 30, black, X_POSITION_OF_INSTRUCTOR, 807, 550, 'left');
   addText(context, date, dateFont, black, X_POSITION_OF_DATE, 807, 'right');
-  addText(context, expiration, dateFont, black, X_POSITION_OF_DATE, 864, 'right');
   addText(context, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
 }
