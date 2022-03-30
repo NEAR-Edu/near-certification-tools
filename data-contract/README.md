@@ -30,6 +30,10 @@ rustup target add wasm32-unknown-unknown
 
 Modify `init_args.json` file to fit your needs, particularly `owner_id`.
 
+It might be worth reviewing the Metadata standard: https://nomicon.io/Standards/NonFungibleToken/Metadata#interface but many fields are probably fine as `null`.
+
+You might want something in the `icon` field so that it looks nice in a wallet. See the note in the above Nomicon page about using an optimized SVG in the data URL. https://npm.runkit.com/mini-svg-data-uri looks useful.
+
 ## Testnet
 
 ```bash
