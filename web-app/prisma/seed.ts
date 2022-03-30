@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+// Disabling TypeScript checking for this file since it's only seeding. https://stackoverflow.com/a/51774725/470749
 import prisma from '../test/test-helpers/client';
 
 // eslint-disable-next-line max-lines-per-function
