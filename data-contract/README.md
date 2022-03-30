@@ -52,7 +52,7 @@ For example, to deploy to a new dev address (ignoring a previously generated add
 ## Mainnet
 
 ```bash
-./deploy.sh ACCOUNT_ID
+NEAR_ENV=mainnet ./deploy.sh ACCOUNT_ID
 ```
 
 # Interactions
