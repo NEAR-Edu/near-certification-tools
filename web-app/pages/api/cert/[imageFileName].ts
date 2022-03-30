@@ -2,20 +2,17 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createCanvas } from 'canvas';
-import { Dayjs } from 'dayjs';
 import { getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNftContract, NFT } from '../mint-cert';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
 import { height, populateCert, width } from '../../../helpers/certificate-designs';
-import prisma from '../../../helpers/prisma';
 import { addCacheHeader } from '../../../helpers/caching';
-import { convertNanoTimestampDecimalToDayjsMoment, formatDate, convertMillisecondsTimestampToFormattedDate } from '../../../helpers/time';
+import { convertMillisecondsTimestampToFormattedDate } from '../../../helpers/time';
 
 export const HTTP_ERROR_CODE_MISSING = 404;
 const svg = 'svg';
 const dot = '.';
 const imagePng = 'image/png';
-const expirationMonths = 6;
 const CACHE_SECONDS: number = Number(process.env.DYNAMIC_CERT_IMAGE_GENERATION_CACHE_SECONDS) || 60 * 60 * 6;
 
 type CanvasTypeDef = 'pdf' | 'svg' | undefined;
@@ -41,49 +38,6 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   return buffer;
 }
 
-async function getMostRecentActivityDateTime(accountName: string): Promise<Dayjs> {
-  // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
-  /* This function includes an ugly temporary workaround. `findFirst` (instead of findMany with `take: 2`) should have worked but was causing a timeout.
-     Apparently it's not Prisma's fault though.Even running a LIMIT 1 query in pgAdmin causes a timeout, surprisingly, even though a LIMIT 2 query does not.
-     https://stackoverflow.com/questions/71026316/why-would-limit-2-queries-work-but-limit-1-always-times-out
-     This is suspicious but seems unrelated to this repo. */
-  try {
-    const rows = await prisma.receipts.findMany({
-      where: {
-        action_receipts: {
-          // https://www.prisma.io/docs/concepts/components/prisma-client/filtering-and-sorting#filter-on-relations
-          signer_account_id: {
-            equals: accountName,
-          },
-        },
-      },
-      orderBy: {
-        included_in_block_timestamp: 'desc',
-      },
-      take: 2, // see comment above about workaround
-    });
-    if (rows) {
-      const result = rows[0]; // see comment above about workaround
-      console.log({ accountName, result });
-      const moment = convertNanoTimestampDecimalToDayjsMoment(result.included_in_block_timestamp);
-      console.log('getMostRecentActivityDateTime', { accountName, result, moment }, moment.format());
-      return moment;
-    }
-  } catch (error) {
-    console.error({ error });
-  }
-
-  throw new Error(
-    'getMostRecentActivityDateTime did not produce a result. Perhaps a certificate for the original_recipient_id could not be found or the public indexer query timed out.',
-  );
-}
-
-async function getExpiration(accountName: string): Promise<string> {
-  const recent = await getMostRecentActivityDateTime(accountName);
-  return formatDate(recent.add(expirationMonths, 'months'));
-}
-
-// eslint-disable-next-line max-lines-per-function
 export async function fetchCertificateDetails(tokenId: string) {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForBackend();
   const contract = getNftContract(account);
@@ -97,7 +51,6 @@ export async function fetchCertificateDetails(tokenId: string) {
     if (certificateMetadata.valid) {
       const accountName = certificateMetadata.original_recipient_id;
       const programCode = certificateMetadata.program;
-      const expiration = await getExpiration(accountName); // TODO: Wrap in try/catch blocks to handle when indexer service is unavailable.
       const date = convertMillisecondsTimestampToFormattedDate(metadata.issued_at);
       const programName = metadata.title;
       const programDescription = metadata.description;
@@ -108,7 +61,6 @@ export async function fetchCertificateDetails(tokenId: string) {
         programCode, // This will determine which background image gets used.
         programName,
         accountName,
-        expiration,
         programDescription,
         instructor,
       };
@@ -130,7 +82,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const imageBuffer = await generateImage(canvasType, bufferType, details);
     res.setHeader('Content-Type', contentType);
     addCacheHeader(res, CACHE_SECONDS);
-    // Caching is important especially because of getMostRecentActivityDateTime, which pulls from the public indexer database.
+    // Caching is important (especially if we have a getExpiration function that pulls from the public indexer database).
     res.send(imageBuffer);
   } else {
     res.status(HTTP_ERROR_CODE_MISSING).json({ error: `No certificate exists with this Token ID (${tokenId}).` });
