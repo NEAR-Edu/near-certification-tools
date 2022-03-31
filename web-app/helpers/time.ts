@@ -26,3 +26,10 @@ export function convertMillisecondsTimestampToFormattedDate(milliseconds: string
   const moment = convertTimestampToDayjsMoment(milliseconds, 1_000);
   return formatDate(moment);
 }
+
+export function convertStringDateToNanoseconds(iso8601DateTime: string): string {
+  const moment = dayjs(iso8601DateTime); // https://day.js.org/docs/en/parse/string
+  const unixSeconds = moment.unix();
+  const nano = new BN(unixSeconds).mul(new BN(1_000_000_000));
+  return nano.toString();
+}

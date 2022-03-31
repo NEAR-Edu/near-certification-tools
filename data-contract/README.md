@@ -103,17 +103,9 @@ Additional metadata is stored in the `extra` field of the standard-compliant NFT
 See [`src/metadata.rs`](src/metadata.rs).
 The 'memo' field at the root (outer) level of [sample_mint.json](sample_mint.json) can be null because its value currently does not get used.
 
-In token_metadata, 'title', 'description', and 'issued_at' are the only fields we will use.
+In `token_metadata`, 'title', 'description', and 'issued_at' are the only fields we will use.
 
-Please change the `program` under the `certification_metada` in the `sample_mint.json` or change it while minting a certificate, with one of the followings:
-
-- Analyst
-- Architect
-- Designer
-- Developer
-- Entrepreneur
-- Instructor
-- Security
+Please ensure that the value for `program` in `certification_metadata` matches the prefix of one of the SVG files in `web-app/public/certificate-backgrounds/`.
 
 ---
 
@@ -160,3 +152,18 @@ NEAR_ENV=testnet near call dev-1643292007908-55838431863482 cert_invalidate '{ "
 ```
 
 ---
+
+# Notes about versions, standards, datetime types and formats, etc
+
+There are 3 levels of metadata in this smart contract: the NFT contract level, the NFT token itself, and the CertificationExtraMetadata (which is specific to this project).
+
+`data-contract/Cargo.toml` currently says `near-contract-standards = "4.0.0-pre.4"`.
+
+`.cargo/registry/src/github.com-1ecc6299db9ec823/near-contract-standards-4.0.0-pre.4/src/non_fungible_token/metadata.rs` (or whichever file gets pulled in based on Cargo.toml) then defines NFT_METADATA_SPEC; take note of this version value. 
+
+The "metadata" part of `data-contract/init_args.json` complies with the standard the defines NFTs: NEP171 (TODO: specify which version here).
+We must manually set its "spec" field value to match the value of NFT_METADATA_SPEC.
+
+The token_metadata part of `data-contract/sample_mint.json` complies with standard NEP177 (TODO: specify which version here). Jacob and Ryan are not sure which version we're using (probably 1.0.0). We think its date fields (issued_at, expires_at, starts_at, updated_at) expect strings of milliseconds. https://discord.com/channels/490367152054992913/542945453533036544/958832442121277440 (https://github.com/near/NEPs/blob/ca5f5a70e7ca2214d38723c756f9b5ae5c3b5e9d/specs/Standards/NonFungibleToken/Metadata.md had contradicting instructions.)
+
+`web-app/pages/api/sample_api_payload.json` expects null or a string of format ISO 8601 (see https://day.js.org/docs/en/parse/string) for program_start_date and program_end_date. Our API endpoint then converts them to a string of nanoseconds.

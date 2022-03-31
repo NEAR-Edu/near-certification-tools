@@ -4,6 +4,7 @@ import { randomUUID } from 'crypto'; // Added in: node v14.17.0
 import { Account, Contract, utils } from 'near-api-js'; // https://github.com/near/near-api-js/blob/master/examples/quick-reference.md
 import { AccountId, getNearAccount } from '../../helpers/near';
 import { getImageUrl } from '../../helpers/strings';
+import { convertStringDateToNanoseconds } from '../../helpers/time';
 
 const privateKey = process.env.ISSUING_AUTHORITY_PRIVATE_KEY || '';
 const apiKey = process.env.API_KEY || '';
@@ -61,10 +62,9 @@ function generateUUIDForTokenId(): string {
 }
 
 function buildMetadata(certificateRequiredFields: CertificateRequiredFields) {
-  const issuedAt = new Date().toJSON();
-
   /* eslint-disable camelcase */
-  const tokenMetadata = (({ title, description }) => ({ title, description, issued_at: issuedAt }))(certificateRequiredFields); // https://stackoverflow.com/a/67591318/470749
+  const issued_at = Date.now().toString(); // issued_at expects milliseconds since epoch as string
+  const tokenMetadata = (({ title, description }) => ({ title, description, issued_at }))(certificateRequiredFields); // https://stackoverflow.com/a/67591318/470749
   const certificationMetadata = (({
     authority_id,
     authority_name,
@@ -82,8 +82,8 @@ function buildMetadata(certificateRequiredFields: CertificateRequiredFields) {
     program,
     program_name,
     program_link,
-    program_start_date,
-    program_end_date,
+    program_start_date: convertStringDateToNanoseconds(program_start_date),
+    program_end_date: convertStringDateToNanoseconds(program_end_date),
     original_recipient_id,
     original_recipient_name,
     valid: true,

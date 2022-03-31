@@ -2,14 +2,13 @@
   "details": {
     "title": "NEAR Certified Developer",
     "description": "has successfully completed the NEAR Certified Developer program by demonstrating proficiency in working with smart contracts on NEAR Protocol",
-    "issued_at": "TODO: TBD whether this is a string or milliseconds/nanoseconds since epoch",
     "authority_id": "sherif.near",
     "authority_name": "Sherif Abushadi",
     "program": "Developer",
     "program_name": "NEAR Certified Developer",
     "program_link": "https://www.near.university/courses/near-certified-developer",
     "program_start_date": null,
-    "program_end_date": "TODO: TBD whether this is a string or milliseconds/nanoseconds since epoch",
+    "program_end_date": "2022-04-01T13:00:00+00:00",
     "original_recipient_id": "hatchet.near",
     "original_recipient_name": "Hatchet",
     "memo": ""
