@@ -7,6 +7,8 @@ import { getImageUrl, getSimpleStringFromParam } from '../../helpers/strings';
 import { AccountId, getNearAccountWithoutAccountIdOrKeyStoreForFrontend } from '../../helpers/near';
 import { getNftContract, NFT } from '../api/mint-cert';
 import { Certificate, isValid } from '../../helpers/certificate';
+import ExplorerAccountLink from '../../components/ExplorerAccountLink';
+import ExpirationWarning from '../../components/ExpirationWarning';
 
 function Tile({ tokenId }: { tokenId: string }): JSX.Element {
   const svgUrl = getImageUrl(tokenId);
@@ -48,6 +50,12 @@ const Account: NextPage<AccountPageProps> = ({ accountId, certificates }: Accoun
 
       <div className={styles.grid}>
         {certificates.length > 0 ? certificates.map((tokenId: string) => <Tile tokenId={tokenId} key={tokenId} />) : <span>No certificates yet!</span>}
+      </div>
+      <div className="mt-5">
+        <ExpirationWarning />
+      </div>
+      <div className="mt-5">
+        <ExplorerAccountLink accountId={accountId} />
       </div>
     </Layout>
   );
