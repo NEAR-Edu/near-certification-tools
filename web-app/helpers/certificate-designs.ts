@@ -35,7 +35,7 @@ registerFont(manropeFontFile, { family: manropeFontFamily });
 registerFont(monoFontFile, { family: monoFontFamily });
 
 function getExpiratonExplanation(expirationDateString: string) {
-  return `* Expires after the first 6-month period of inactivity of this mainnet account (${expirationDateString} if no future activity)`;
+  return `* Will expire after the first 6-month period of inactivity of this mainnet account (which currently would be ${expirationDateString} if no future activity)`;
 }
 
 function getBaseContext(canvas: Canvas) {
@@ -117,7 +117,7 @@ export async function populateCert(canvas: Canvas, details: any) {
     addText(context, 'Expired:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, 850, 'right');
   } else {
     addText(context, 'Expiration*:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, 850, 'right');
-    addText(context, getExpiratonExplanation(expiration), expirationExplanationFont, gray, LEFT_PADDING, 910, 'left');
+    wrapText(context, getExpiratonExplanation(expiration), X_POSITION_OF_DESCRIPTION, 910, 110, expirationExplanationFont, gray);
   }
   addText(context, expiration, dateFont, black, X_POSITION_OF_DATE, 850, 'right');
   addText(context, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
