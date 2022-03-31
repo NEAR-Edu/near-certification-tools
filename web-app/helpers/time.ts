@@ -1,5 +1,5 @@
 import { Decimal } from '@prisma/client/runtime';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs'; // https://day.js.org/en
 import BN from 'bn.js'; // https://github.com/indutny/bn.js
 
 const defaultDateFormat = 'YYYY-MM-DD';
@@ -25,4 +25,8 @@ export function formatDate(dateTime: Dayjs) {
 export function convertMillisecondsTimestampToFormattedDate(milliseconds: string) {
   const moment = convertTimestampToDayjsMoment(milliseconds, 1_000);
   return formatDate(moment);
+}
+
+export function isBeforeNow(dateTimeString: string): boolean {
+  return dayjs(dateTimeString).isBefore(dayjs()); // https://day.js.org/docs/en/query/is-before
 }

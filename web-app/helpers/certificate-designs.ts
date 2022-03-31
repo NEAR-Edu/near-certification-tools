@@ -1,5 +1,6 @@
 // https://dev.to/sudo_overflow/diy-generating-dynamic-images-on-the-fly-for-email-marketing-h51
 import { Canvas, registerFont, loadImage } from 'canvas';
+import { isBeforeNow } from './time';
 
 export const width = 1080; // width of the image
 export const height = 1080; // height of the image
@@ -112,12 +113,11 @@ export async function populateCert(canvas: Canvas, details: any) {
   fitText(context, instructor, 30, black, X_POSITION_OF_INSTRUCTOR, Y_POSITION_ISSUED_DATE, 550, 'left');
   addText(context, 'Issued:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, Y_POSITION_ISSUED_DATE, 'right');
   addText(context, date, dateFont, black, X_POSITION_OF_DATE, Y_POSITION_ISSUED_DATE, 'right');
-  if (true) {
-    // TODO Fix conditional to be "if expiration >= today"
+  if (isBeforeNow(expiration)) {
+    addText(context, 'Expired:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, 850, 'right');
+  } else {
     addText(context, 'Expiration*:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, 850, 'right');
     addText(context, getExpiratonExplanation(expiration), expirationExplanationFont, gray, LEFT_PADDING, 910, 'left');
-  } else {
-    addText(context, 'Expired:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, 850, 'right');
   }
   addText(context, expiration, dateFont, black, X_POSITION_OF_DATE, 850, 'right');
   addText(context, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
