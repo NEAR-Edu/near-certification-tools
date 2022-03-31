@@ -8,7 +8,7 @@ import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../hel
 import { height, populateCert, width } from '../../../helpers/certificate-designs';
 import { addCacheHeader } from '../../../helpers/caching';
 import { convertMillisecondsTimestampToFormattedDate } from '../../../helpers/time';
-import getExpiration from '../../../helpers/expiration-date';
+import { getExpiration } from '../../../helpers/expiration-date';
 
 export const HTTP_ERROR_CODE_MISSING = 404;
 const svg = 'svg';

@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 // import { prismaMock } from '../prisma/test-helpers/mock-client';
-import getExpiration from '../../helpers/expiration-date';
-import getQueryResult from '../test-helpers/query';
+import { getExpiration, getRawQueryResult } from '../../helpers/expiration-date';
 
 const prisma = new PrismaClient();
 
@@ -25,7 +24,7 @@ describe('test expiration date functions', () => {
    */
   describe('account with 180 day inactivity after issue date', () => {
     it('should return query result for jane doe with first occurence of 180-day inactivity period', async () => {
-      const queryResult = await getQueryResult('janedoe.testnet', '2022-03-02');
+      const queryResult = await getRawQueryResult('janedoe.testnet', '2022-03-02');
       expect(queryResult).toEqual(
         expect.arrayContaining([
           {
@@ -52,7 +51,7 @@ describe('test expiration date functions', () => {
    */
   describe('active account', () => {
     it('should return query result for john doe', async () => {
-      const queryResult = await getQueryResult('johndoe.testnet', '2022-03-02');
+      const queryResult = await getRawQueryResult('johndoe.testnet', '2022-03-02');
       expect(queryResult).toEqual(
         expect.arrayContaining([
           {
@@ -87,7 +86,7 @@ describe('test expiration date functions', () => {
        * expiration date: last activity + 180 = 2022-03-04 + 180 = 2022-09-05
        */
       it('should return query result for jim doe while no when no 180-days inactivity is present after issue date', async () => {
-        const queryResult = await getQueryResult('jimdoe.testnet', '2021-11-05');
+        const queryResult = await getRawQueryResult('jimdoe.testnet', '2021-11-05');
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
@@ -117,7 +116,7 @@ describe('test expiration date functions', () => {
        * expiration date = 2019-10-01 - 185 days = 2019-03-30
        */
       it('should return query result for jim doe when 180-days inactivity is present and moment should be the most recent date of such period', async () => {
-        const queryResult = await getQueryResult('jimdoe.testnet', '2018-10-01');
+        const queryResult = await getRawQueryResult('jimdoe.testnet', '2018-10-01');
 
         expect(queryResult).toEqual(
           expect.arrayContaining([

@@ -21,7 +21,7 @@ type RawQueryResult = [
  * Double casting : https://github.com/prisma/prisma/issues/4647#issuecomment-939555602
  */
 // eslint-disable-next-line max-lines-per-function
-function getRawQuery(accountName: string, issuedAtUnixNano: string) {
+export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
   return Prisma.sql`
     WITH long_period_of_inactivity AS (
       SELECT 
@@ -64,20 +64,7 @@ function getRawQuery(accountName: string, issuedAtUnixNano: string) {
     TABLE most_recent_activity`;
 }
 
-export default async function getExpiration(accountName: string, issuedAt: string): Promise<string> {
-  // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
-  /**
-   * This query uses Common Table Expressions(CTE) to execute two separate queries conditionally;
-   * the second query being executed if first query doesn't return any result.
-   * https://www.postgresql.org/docs/9.1/queries-with.html
-   * https://stackoverflow.com/a/68684814/10684149
-   */
-  /**
-   * First query checks If the account has a period where it hasn't been active for 180 days straight after the issue date (exluding the render date)
-   * Second query is run if no 180-day-inactivity period is found and returns most recent activity date
-   * AND amount of days between account's last activity date - render date of certificate
-   */
-
+export async function getRawQueryResult(accountName: string, issuedAt: string) {
   /**
    * Calculates Unix Timestamp in nanoseconds.
    * Calculation is exceeding JS's MAX_SAFE_INTEGER value, making it unsafe to use Number type(floating point `number` type).
@@ -95,6 +82,23 @@ export default async function getExpiration(accountName: string, issuedAt: strin
   const result: RawQueryResult = await prisma.$queryRaw<RawQueryResult>`${rawQuery}`;
 
   console.log('getExpiration query result', { result });
+  return result;
+}
+
+export async function getExpiration(accountName: string, issuedAt: string): Promise<string> {
+  // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
+  /**
+   * This query uses Common Table Expressions(CTE) to execute two separate queries conditionally;
+   * the second query being executed if first query doesn't return any result.
+   * https://www.postgresql.org/docs/9.1/queries-with.html
+   * https://stackoverflow.com/a/68684814/10684149
+   */
+  /**
+   * First query checks If the account has a period where it hasn't been active for 180 days straight after the issue date (exluding the render date)
+   * Second query is run if no 180-day-inactivity period is found and returns most recent activity date
+   * AND amount of days between account's last activity date - render date of certificate
+   */
+  const result = await getRawQueryResult(accountName, issuedAt);
 
   /**
    * If the account doesn't have a period where it hasn't been active for 180 days straight after the issue date:
