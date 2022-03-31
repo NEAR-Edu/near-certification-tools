@@ -227,9 +227,7 @@ async function main() {
     ],
   });
 
-  console.log('✨ 26 action_receipts successfully created!');
-
-  console.log('✨ 26 receipts successfully created!');
+  console.log('✨ Seeding finished!');
 }
 
 main()
