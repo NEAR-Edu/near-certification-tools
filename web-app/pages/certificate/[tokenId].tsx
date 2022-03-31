@@ -8,6 +8,7 @@ https://cards-dev.twitter.com/validator
 
 import type { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
+import ExplorerAccountLink from '../../components/ExplorerAccountLink';
 import Layout from '../../components/Layout';
 import { baseUrl } from '../../helpers/strings';
 import { fetchCertificateDetails } from '../api/cert/[imageFileName]';
@@ -44,7 +45,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return {
     props: {
-      tokenId,
+      details,
     },
   };
 };
@@ -70,10 +71,11 @@ function OpenGraphMetaData({ pngUrl, certificateUrl }: { pngUrl: string; certifi
   );
 }
 
-type CertificatePageProps = { tokenId: string };
+type CertificatePageProps = { details: any };
 
-const CertificatePage: NextPage<CertificatePageProps> = ({ tokenId }: CertificatePageProps) => {
+const CertificatePage: NextPage<CertificatePageProps> = ({ details }: CertificatePageProps) => {
   // https://nextjs.org/docs/routing/dynamic-routes
+  const { tokenId, accountName } = details;
   const pngUrl = `${baseUrl}/api/cert/${tokenId}.png`;
   const certificateUrl = `${baseUrl}/certificate/${tokenId}`;
 
@@ -92,6 +94,9 @@ const CertificatePage: NextPage<CertificatePageProps> = ({ tokenId }: Certificat
           <a href={buildLinkedInUrl(certificateUrl)} target="_blank" rel="noreferrer">
             <i className="fab fa-linkedin-in not-italic text-sky-700 p-1" />
           </a>
+        </div>
+        <div className="mt-5">
+          <ExplorerAccountLink accountId={accountName} />
         </div>
       </Layout>
     </>
