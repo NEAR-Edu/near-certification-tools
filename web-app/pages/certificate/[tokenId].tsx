@@ -8,6 +8,7 @@ https://cards-dev.twitter.com/validator
 
 import type { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
+import ExpirationWarning from '../../components/ExpirationWarning';
 import ExplorerAccountLink from '../../components/ExplorerAccountLink';
 import Layout from '../../components/Layout';
 import { baseUrl } from '../../helpers/strings';
@@ -94,6 +95,9 @@ const CertificatePage: NextPage<CertificatePageProps> = ({ details }: Certificat
           <a href={buildLinkedInUrl(certificateUrl)} target="_blank" rel="noreferrer">
             <i className="fab fa-linkedin-in not-italic text-sky-700 p-1" />
           </a>
+        </div>
+        <div className="mt-5">
+          <ExpirationWarning />
         </div>
         <div className="mt-5">
           <ExplorerAccountLink accountId={accountName} />
