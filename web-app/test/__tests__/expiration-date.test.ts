@@ -24,11 +24,11 @@ describe('test expiration date functions', () => {
    */
   describe('account with 180 day inactivity after issue date', () => {
     it('should return query result for sallysmith with first occurence of 180-day inactivity period', async () => {
-      const queryResult = await getRawQueryResult('sallysmith.testnet', '2022-03-02');
+      const queryResult = await getRawQueryResult('sallysmith.testnet', '2021-03-02');
       expect(queryResult).toEqual(
         expect.arrayContaining([
           {
-            moment: '2022-12-23T09:46:39+00:00',
+            moment: '2021-12-23T09:46:39+00:00',
             diff_to_previous_activity: 296,
             has_long_period_of_inactivity: true,
           },
@@ -38,7 +38,7 @@ describe('test expiration date functions', () => {
 
     it('should return expiration date for sallysmith as last activity date - (diff_to_previous_activity - 180)', async () => {
       // expiration date = 2022-12-23 - 116 days = 2022-08-29
-      await expect(getExpiration('sallysmith.testnet', '2022-03-02')).resolves.toEqual('2022-08-29');
+      await expect(getExpiration('sallysmith.testnet', '2021-03-02')).resolves.toEqual('2021-08-29');
     });
   });
 
