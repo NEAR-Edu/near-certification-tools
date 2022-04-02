@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 // import { prismaMock } from '../prisma/test-helpers/mock-client';
 import { getExpiration, getRawQueryResult } from '../../helpers/expiration-date';
+import convertStringDateToMilliseconds from '../test-helpers/time';
 
 const prisma = new PrismaClient();
 
@@ -24,7 +25,7 @@ describe('test expiration date functions', () => {
    */
   describe('account with 180 day inactivity after issue date', () => {
     it('should return query result for sallysmith with first occurence of 180-day inactivity period', async () => {
-      const queryResult = await getRawQueryResult('sallysmith.testnet', '2021-03-02');
+      const queryResult = await getRawQueryResult('sallysmith.testnet', convertStringDateToMilliseconds('2021-03-02T00:00:00+00:00'));
       expect(queryResult).toEqual(
         expect.arrayContaining([
           {
@@ -38,7 +39,7 @@ describe('test expiration date functions', () => {
 
     it('should return expiration date for sallysmith as last activity date - (diff_to_previous_activity - 180)', async () => {
       // expiration date = 2022-12-23 - 116 days = 2022-08-29
-      await expect(getExpiration('sallysmith.testnet', '2021-03-02')).resolves.toEqual('2021-08-29');
+      await expect(getExpiration('sallysmith.testnet', convertStringDateToMilliseconds('2021-03-02T00:00:00+00:00'))).resolves.toEqual('2021-08-29');
     });
   });
 
@@ -51,7 +52,7 @@ describe('test expiration date functions', () => {
    */
   describe('active account', () => {
     it('should return query result for johndoe', async () => {
-      const queryResult = await getRawQueryResult('johndoe.testnet', '2022-03-02');
+      const queryResult = await getRawQueryResult('johndoe.testnet', convertStringDateToMilliseconds('2022-03-02T00:00:00+00:00'));
       expect(queryResult).toEqual(
         expect.arrayContaining([
           {
@@ -68,7 +69,7 @@ describe('test expiration date functions', () => {
        * last Activity: 2022-03-25
        * expiration date = 2022-03-25 + 180 days = 2022-09-21
        */
-      await expect(getExpiration('johndoe.testnet', '2022-03-02')).resolves.toEqual('2022-09-21');
+      await expect(getExpiration('johndoe.testnet', convertStringDateToMilliseconds('2022-03-02T00:00:00+00:00'))).resolves.toEqual('2022-09-21');
     });
   });
 
@@ -86,7 +87,7 @@ describe('test expiration date functions', () => {
        * expiration date: last activity + 180 = 2022-03-04 + 180 = 2022-09-05
        */
       it('should return query result for bobwilson while no when no 180-days inactivity is present after issue date', async () => {
-        const queryResult = await getRawQueryResult('bobwilson.testnet', '2021-11-05');
+        const queryResult = await getRawQueryResult('bobwilson.testnet', convertStringDateToMilliseconds('2021-11-05T00:00:00+00:00'));
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
@@ -104,7 +105,7 @@ describe('test expiration date functions', () => {
          * last activity: 2022-03-25
          * expiration date = 2022-03-25 + 180 days = 2022-09-21
          */
-        await expect(getExpiration('bobwilson.testnet', '2021-11-05')).resolves.toEqual('2022-08-31');
+        await expect(getExpiration('bobwilson.testnet', convertStringDateToMilliseconds('2021-11-05T00:00:00+00:00'))).resolves.toEqual('2022-08-31');
       });
     });
     describe('multiple periods of >180-day inactivity', () => {
@@ -116,7 +117,7 @@ describe('test expiration date functions', () => {
        * expiration date = 2019-10-01 - 185 days = 2019-03-30
        */
       it('should return query result for bobwilson when 180-days inactivity is present and moment should be the most recent date of such period', async () => {
-        const queryResult = await getRawQueryResult('bobwilson.testnet', '2018-10-01');
+        const queryResult = await getRawQueryResult('bobwilson.testnet', convertStringDateToMilliseconds('2018-10-01T00:00:00+00:00'));
 
         expect(queryResult).toEqual(
           expect.arrayContaining([
@@ -131,7 +132,7 @@ describe('test expiration date functions', () => {
 
       it('should return expiration date as Last Activity Date + 180 for account with no 180-day inactivity period', async () => {
         // expiration date = last activity + 180 = 2022-03-04 + 180 = 2022-09-05
-        await expect(getExpiration('bobwilson.testnet', '2018-10-01')).resolves.toEqual('2019-03-30');
+        await expect(getExpiration('bobwilson.testnet', convertStringDateToMilliseconds('2018-10-01T00:00:00+00:00'))).resolves.toEqual('2019-03-30');
       });
     });
   });

@@ -74,7 +74,7 @@ export async function getRawQueryResult(accountName: string, issuedAt: string) {
    * Therefore, we're using the bn.js library to solve this issue
    * (BigInt type could be used as well).
    */
-  const issuedAtUnixNano = new BN(dayjs(issuedAt).unix()).mul(new BN(1_000_000_000)).toString(); // Converts Unix Timestamp in seconds to nanoseconds, finally from BN instance to string type. Result can't be saved as numeric type because it is exceeding 53 bits.
+  const issuedAtUnixNano = new BN(issuedAt).mul(new BN(1_000_000)).toString(); // Converts issued_at which is in seconds to nanoseconds, finally from BN instance to string type. Result can't be saved as numeric type because it is exceeding 53 bits.
 
   console.log({ issuedAt, issuedAtUnixNano, accountName });
   const rawQuery = getRawQuery(accountName, issuedAtUnixNano);
