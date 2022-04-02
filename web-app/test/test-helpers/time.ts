@@ -5,6 +5,6 @@ import BN from 'bn.js'; // https://github.com/indutny/bn.js
 export default function convertStringDateToMilliseconds(iso8601DateTime: string): string {
   const moment = dayjs(iso8601DateTime); // https://day.js.org/docs/en/parse/string
   const unixSeconds = moment.unix();
-  const nano = new BN(unixSeconds).mul(new BN(1_000));
+  const nano = new BN(unixSeconds).mul(new BN(1000));
   return nano.toString();
 }
