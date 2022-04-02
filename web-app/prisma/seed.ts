@@ -14,7 +14,7 @@ async function main() {
   // seed db with sallysmith.testnet data
   const dataSallySmith = {
     signer_account_id: 'sallysmith.testnet',
-    account_actions: [
+    account_activities: [
       {
         included_in_block_timestamp: convertStringDateToNanoseconds('2021-12-23T09:46:39+00:00'), // This is the end date of FIRST OCCURENCE of a 180-day inactivity period. Difference to previous activty(diff_to_previous_activity) is 296. The query should return 296 days as diff_to_previous and has_long_period_of_inactivity as true. The expiration date should be calculated as (previous_actiivity + 180 ), or in other words :  last activity date - (diff_to_previous_activity - 180)
         receipt_id: 'Wt4a5NwKgihcWiKlU6NHDWhfoeE9b7HsYUIjTQAfCUoic',
@@ -31,7 +31,7 @@ async function main() {
   };
 
   // create receipts and action_receipts for sallysmith.testnet
-  dataSallySmith.account_actions.forEach(async (action) => {
+  dataSallySmith.account_activities.forEach(async (action) => {
     await prisma.receipts.create({
       data: {
         receipt_id: action.receipt_id,
@@ -56,7 +56,7 @@ async function main() {
   // seed db with johndoe.testnet data
   const dataJohnDoe = {
     signer_account_id: 'johndoe.testnet',
-    account_actions: [
+    account_activities: [
       {
         included_in_block_timestamp: convertStringDateToNanoseconds('2022-03-25T16:09:06+00:00'), // Last activity date. Difference to previous activity is <180. The query should return diff_to_previous as null and has_long_period_of_inactivity as false. Expiration date should be: last activity date + 180 days
         receipt_id: 'OkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
@@ -72,7 +72,7 @@ async function main() {
     ],
   };
 
-  dataJohnDoe.account_actions.forEach(async (action) => {
+  dataJohnDoe.account_activities.forEach(async (action) => {
     await prisma.receipts.create({
       data: {
         receipt_id: action.receipt_id,
@@ -103,7 +103,7 @@ async function main() {
   // seed db with bobwilson.testnet data
   const dataBobWilson = {
     signer_account_id: 'bobwilson.testnet',
-    account_actions: [
+    account_activities: [
       {
         included_in_block_timestamp: convertStringDateToNanoseconds('2022-03-04T13:20:37+00:00'), // For Scenario 1 where issue date is 2021-11-05, this is the last activity date. Difference to previous activity date is <180 days. The query should return diff_to_previous as null and has_long_period_of_inactivity as false. Expiration date should be: last activity date + 180 days
         receipt_id: 'UkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
@@ -187,7 +187,7 @@ async function main() {
     ],
   };
 
-  dataBobWilson.account_actions.forEach(async (action) => {
+  dataBobWilson.account_activities.forEach(async (action) => {
     await prisma.receipts.create({
       data: {
         receipt_id: action.receipt_id,
