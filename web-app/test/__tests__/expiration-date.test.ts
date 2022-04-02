@@ -16,14 +16,15 @@ afterAll(async () => {
 
 // eslint-disable-next-line max-lines-per-function
 describe('test expiration date functions', () => {
-  /**
-   * Sally has 296 days of inactivity after issue date (2022-03-02).
-   * moment column in query result should show end date of this period.
-   * Certificate expired 296 - 180 = 116 days prior to moment.
-   * moment: 2022-12-23T09:46:39+00:00
-   * expiration date = 2022-12-23 - 116 days = 2022-08-29
-   */
+  // eslint-disable-next-line max-lines-per-function
   describe('account with 180 day inactivity after issue date', () => {
+    /**
+     * Sally has 296 days of inactivity after issue date (2021-03-02T00:00:00+00:00).
+     * moment column in query result should show end date of this period.
+     * Certificate expired 296 - 180 = 116 days prior to moment.
+     * moment: 2022-12-23T09:46:39+00:00
+     * expiration date = 2022-12-23 - 116 days = 2022-08-29
+     */
     it('should return query result for sallysmith with first occurence of 180-day inactivity period', async () => {
       const queryResult = await getRawQueryResult('sallysmith.testnet', convertStringDateToMilliseconds('2021-03-02T00:00:00+00:00'));
       expect(queryResult).toEqual(
@@ -40,6 +41,33 @@ describe('test expiration date functions', () => {
     it('should return expiration date for sallysmith as last activity date - (diff_to_previous_activity - 180)', async () => {
       // expiration date = 2022-12-23 - 116 days = 2022-08-29
       await expect(getExpiration('sallysmith.testnet', convertStringDateToMilliseconds('2021-03-02T00:00:00+00:00'))).resolves.toEqual('2021-08-29');
+    });
+
+    /**
+     * Sally has only one activity('2021-03-02T12:35:46+00:00') after issue date ('2021-03-02T12:36:46+00:00') which is 1 minute prior to issue date
+     * query should only return activities after issue date that match conditions and if existent.
+     */
+    it('should return query result for sallysmith not counting in same date activity which is 1 minute prior to issue date', async () => {
+      const queryResult = await getRawQueryResult('sallysmith.testnet', convertStringDateToMilliseconds('2021-03-02T12:36:46+00:00'));
+      expect(queryResult).toEqual(
+        expect.arrayContaining([
+          {
+            moment: '2021-12-23T09:46:39+00:00',
+            diff_to_previous_activity: null,
+            has_long_period_of_inactivity: false,
+          },
+        ]),
+      );
+    });
+
+    /**
+     * Expiration date should return 2022-06-21 which is in the past even though has_long_period_of_inactivity returned false
+     * The check for expired certifications is made on rendering certificate image, comparing expiration date to now.
+     * Check isBeforeNow function in web-app/helpers/time.ts
+     */
+    it('should return expiration date for sallysmith as last activity date + 180', async () => {
+      // expiration date =  last activity date + 180 = 2021-12-23 + 180 days = 2022-06-21
+      await expect(getExpiration('sallysmith.testnet', convertStringDateToMilliseconds('2021-03-02T12:36:46+00:00'))).resolves.toEqual('2022-06-21');
     });
   });
 
