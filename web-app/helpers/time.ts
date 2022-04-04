@@ -31,9 +31,17 @@ export function isBeforeNow(dateTimeString: string): boolean {
   return dayjs(dateTimeString).isBefore(dayjs()); // https://day.js.org/docs/en/query/is-before
 }
 
-export function convertStringDateToNanoseconds(iso8601DateTime: string): string {
+export function convertStringDateToOtherPrecision(iso8601DateTime: string, multiplier: BN): string {
   const moment = dayjs(iso8601DateTime); // https://day.js.org/docs/en/parse/string
   const unixSeconds = moment.unix();
-  const nano = new BN(unixSeconds).mul(new BN(1_000_000_000));
-  return nano.toString();
+  const result = new BN(unixSeconds).mul(new BN(multiplier));
+  return result.toString();
+}
+
+export function convertStringDateToNanoseconds(iso8601DateTime: string): string {
+  return convertStringDateToOtherPrecision(iso8601DateTime, new BN(1_000_000_000));
+}
+
+export function convertStringDateToMilliseconds(iso8601DateTime: string): string {
+  return convertStringDateToOtherPrecision(iso8601DateTime, new BN(1000));
 }

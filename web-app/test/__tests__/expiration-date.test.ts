@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 // import { prismaMock } from '../prisma/test-helpers/mock-client';
 import { getExpiration, getRawQueryResult } from '../../helpers/expiration-date';
-import convertStringDateToMilliseconds from '../test-helpers/time';
+import { convertStringDateToMilliseconds } from '../../helpers/time';
 
 const prisma = new PrismaClient();
 
