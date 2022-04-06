@@ -6,21 +6,21 @@ import { convertStringDateToNanoseconds } from '../helpers/time';
 
 // eslint-disable-next-line max-lines-per-function
 async function main() {
-  // ########### START OF SEEDING DATA FOR sallysmith.testnet ###########
+  // ########### START OF SEEDING DATA FOR sally.testnet ###########
   // ----------------------------------------------------------------
   // ------- account with 180-day inactivity after issue date -------
   // ----------------------------------------------------------------
 
-  // seed db with sallysmith.testnet data
-  const dataSallySmith = {
-    signer_account_id: 'sallysmith.testnet',
+  // seed db with sally.testnet data
+  const dataSally = {
+    signer_account_id: 'sally.testnet',
     account_activities: [
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2021-12-23T09:46:39+00:00'), // This is the end date of FIRST OCCURENCE of a 180-day inactivity period. Difference to previous activty(diff_to_previous_activity) is 296. The query should return 296 days as diff_to_previous and has_long_period_of_inactivity as true. The expiration date should be calculated as (previous_actiivity + 180 ), or in other words :  last activity date - (diff_to_previous_activity - 180)
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-12-23T09:46:39+00:00'),
         receipt_id: 'Wt4a5NwKgihcWiKlU6NHDWhfoeE9b7HsYUIjTQAfCUoic',
       },
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2021-03-02T12:35:46+00:00'), // previous activity. The issue date in tests for this account is 2021-03-02, the same day as this date, query is expected to NOT ignore this entry.
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-03-02T12:35:46+00:00'),
         receipt_id: 'r74mcWqH2zCQeBzOgiS4skLnjvARIONorhfKroxrFAEts',
       },
       {
@@ -30,23 +30,101 @@ async function main() {
     ],
   };
 
-  // create receipts and action_receipts for sallysmith.testnet
-  dataSallySmith.account_activities.forEach(async (action) => {
-    await prisma.receipts.create({
-      data: {
+  // create receipts and action_receipts for sally.testnet
+  dataSally.account_activities.forEach(async (action) => {
+    await prisma.receipts.upsert({
+      where: { receipt_id: action.receipt_id },
+      update: {
+        included_in_block_timestamp: action.included_in_block_timestamp,
+      },
+      create: {
         receipt_id: action.receipt_id,
         included_in_block_timestamp: action.included_in_block_timestamp,
       },
     });
 
-    await prisma.action_receipts.create({
-      data: {
+    await prisma.action_receipts.upsert({
+      where: { receipt_id: action.receipt_id },
+      update: {},
+      create: {
         receipt_id: action.receipt_id,
-        signer_account_id: dataSallySmith.signer_account_id,
+        signer_account_id: dataSally.signer_account_id,
       },
     });
   });
-  // ########### END OF SEEDING DATA FOR sallysmith.testnet ###########
+  // ########### END OF SEEDING DATA FOR sally.testnet ###########
+
+  // ########### START OF SEEDING DATA FOR sally.testnet ###########
+  // ----------------------------------------------------------------
+  // ------- account with 180-day inactivity after issue date -------
+  // ----------------------------------------------------------------
+
+  // seed db with sally.testnet data
+  const dataSteve = {
+    signer_account_id: 'steve.testnet',
+    account_activities: [
+      {
+        included_in_block_timestamp: convertStringDateToNanoseconds('2022-03-05T09:46:39+00:00'),
+        receipt_id: 'st4a5NwKgihcWiKlU6NHDWhfoeE9b7HsYUIjTQAfCUost',
+      },
+      {
+        included_in_block_timestamp: convertStringDateToNanoseconds('2022-02-27T11:40:46+00:00'),
+        receipt_id: 'st4ncWqH2zCQeBzOgiS4skLnjvARIONorhfKroxrFAEst',
+      },
+      {
+        included_in_block_timestamp: convertStringDateToNanoseconds('2022-02-02T12:35:46+00:00'),
+        receipt_id: 'st4mcWqH2zCQeBzOgiS4skLnjvARIONorhfKroxrFAEst',
+      },
+      {
+        included_in_block_timestamp: convertStringDateToNanoseconds('2022-01-15T12:10:46+00:00'),
+        receipt_id: 'st4mcWqH2zCQeBzOgiS4skLnjvARIONorhfKroxrFAEts',
+      },
+      {
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-10-06T22:10:05+00:00'),
+        receipt_id: 'st02R6f58evLaZ3h306k9vs9PpAifXytsRABt4ngpHast',
+      }, // moment
+      {
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-03-16T20:08:59+00:00'),
+        receipt_id: 'st02R6f58evLaZ3h306k9vs9PpAifXytsRABt4ngpHa6V',
+      },
+      {
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-02-14T20:08:59+00:00'),
+        receipt_id: 'st03R6f58evLaZ3h306k9vs9PpAifXytsRABt4ngpHa6V',
+      },
+      {
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-02-08T07:19:59+00:00'),
+        receipt_id: 'st04R6f58evLaZ3h306k9vs9PpAifXytsRABt4ngpHa6V',
+      },
+      {
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-01-10T16:25:59+00:00'),
+        receipt_id: 'st05R6f58evLaZ3h306k9vs9PpAifXytsRABt4ngpHa6V',
+      },
+    ],
+  };
+
+  // create receipts and action_receipts for steve.testnet
+  dataSteve.account_activities.forEach(async (action) => {
+    await prisma.receipts.upsert({
+      where: { receipt_id: action.receipt_id },
+      update: {
+        included_in_block_timestamp: action.included_in_block_timestamp,
+      },
+      create: {
+        receipt_id: action.receipt_id,
+        included_in_block_timestamp: action.included_in_block_timestamp,
+      },
+    });
+
+    await prisma.action_receipts.upsert({
+      where: { receipt_id: action.receipt_id },
+      update: {},
+      create: {
+        receipt_id: action.receipt_id,
+        signer_account_id: dataSteve.signer_account_id,
+      },
+    });
+  });
+  // ########### END OF SEEDING DATA FOR sally.testnet ###########
 
   // ########### START OF SEEDING DATA FOR johndoe.testnet ###########
   // ------------------------------------------------------------------------------------
@@ -73,15 +151,21 @@ async function main() {
   };
 
   dataJohnDoe.account_activities.forEach(async (action) => {
-    await prisma.receipts.create({
-      data: {
+    await prisma.receipts.upsert({
+      where: { receipt_id: action.receipt_id },
+      update: {
+        included_in_block_timestamp: action.included_in_block_timestamp,
+      },
+      create: {
         receipt_id: action.receipt_id,
         included_in_block_timestamp: action.included_in_block_timestamp,
       },
     });
 
-    await prisma.action_receipts.create({
-      data: {
+    await prisma.action_receipts.upsert({
+      where: { receipt_id: action.receipt_id },
+      update: {},
+      create: {
         receipt_id: action.receipt_id,
         signer_account_id: dataJohnDoe.signer_account_id,
       },
@@ -188,15 +272,21 @@ async function main() {
   };
 
   dataBobWilson.account_activities.forEach(async (action) => {
-    await prisma.receipts.create({
-      data: {
+    await prisma.receipts.upsert({
+      where: { receipt_id: action.receipt_id },
+      update: {
+        included_in_block_timestamp: action.included_in_block_timestamp,
+      },
+      create: {
         receipt_id: action.receipt_id,
         included_in_block_timestamp: action.included_in_block_timestamp,
       },
     });
 
-    await prisma.action_receipts.create({
-      data: {
+    await prisma.action_receipts.upsert({
+      where: { receipt_id: action.receipt_id },
+      update: {},
+      create: {
         receipt_id: action.receipt_id,
         signer_account_id: dataBobWilson.signer_account_id,
       },
