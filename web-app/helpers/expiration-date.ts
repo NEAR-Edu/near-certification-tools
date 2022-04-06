@@ -22,6 +22,8 @@ type RawQueryResult = [
  */
 // eslint-disable-next-line max-lines-per-function
 export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
+  // TODO: Add explanation of query
+  // *issue_date* <-----------Query - 1-----------> *last_activtiy*  <-----------Query - 2 -----------> *now*
   return Prisma.sql`
     WITH long_period_of_inactivity AS (
       SELECT 

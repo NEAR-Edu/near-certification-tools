@@ -4,6 +4,9 @@
 import prisma from '../test/test-helpers/client';
 import { convertStringDateToNanoseconds } from '../helpers/time';
 
+// TODO: Add missing data
+// refactor comments
+
 // eslint-disable-next-line max-lines-per-function
 async function main() {
   // ########### START OF SEEDING DATA FOR sally.testnet ###########
@@ -131,12 +134,16 @@ async function main() {
   // ---- active account, that does not have any 180-day inactivity after issue date ----
   // ------------------------------------------------------------------------------------
 
-  // seed db with johndoe.testnet data
-  const dataJohnDoe = {
-    signer_account_id: 'johndoe.testnet',
+  // seed db with john.testnet data
+  const dataJohn = {
+    signer_account_id: 'john.testnet',
     account_activities: [
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2022-03-25T16:09:06+00:00'), // Last activity date. Difference to previous activity is <180. The query should return diff_to_previous as null and has_long_period_of_inactivity as false. Expiration date should be: last activity date + 180 days
+        included_in_block_timestamp: convertStringDateToNanoseconds('2022-04-05T17:24:06+00:00'),
+        receipt_id: 'jdcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
+      },
+      {
+        included_in_block_timestamp: convertStringDateToNanoseconds('2022-03-25T16:09:06+00:00'),
         receipt_id: 'OkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
       },
       {
@@ -150,7 +157,7 @@ async function main() {
     ],
   };
 
-  dataJohnDoe.account_activities.forEach(async (action) => {
+  dataJohn.account_activities.forEach(async (action) => {
     await prisma.receipts.upsert({
       where: { receipt_id: action.receipt_id },
       update: {
@@ -167,29 +174,23 @@ async function main() {
       update: {},
       create: {
         receipt_id: action.receipt_id,
-        signer_account_id: dataJohnDoe.signer_account_id,
+        signer_account_id: dataJohn.signer_account_id,
       },
     });
   });
-  // ########### END OF SEEDING DATA FOR johndoe.testnet ###########
+  // ########### END OF SEEDING DATA FOR john.testnet ###########
 
   // ######### START OF SEEDING DATA FOR bobwilson.testnet #########
   // -------------------------------------------
   // ------ accountwith years of activity ------
   // -------------------------------------------
 
-  /**
-   * tests check two scenarios for this account
-   * Scenario 1: Where issue date is 2021-11-05
-   * Scenario 2: Where issue date is 2018-10-01
-   */
-
   // seed db with bobwilson.testnet data
   const dataBobWilson = {
     signer_account_id: 'bobwilson.testnet',
     account_activities: [
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2022-03-04T13:20:37+00:00'), // For Scenario 1 where issue date is 2021-11-05, this is the last activity date. Difference to previous activity date is <180 days. The query should return diff_to_previous as null and has_long_period_of_inactivity as false. Expiration date should be: last activity date + 180 days
+        included_in_block_timestamp: convertStringDateToNanoseconds('2022-03-04T13:20:37+00:00'),
         receipt_id: 'UkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
       },
       {
@@ -201,7 +202,7 @@ async function main() {
         receipt_id: 'SkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
       },
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2021-11-07T13:20:37+00:00'), // 184 days to previous activity. For Scenario 1, where issue date is 2018-10-01, query matches this date as well but since we want to get the FIRST OCCURENCE of inactivity period, query result should not return this.
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-11-07T13:20:37+00:00'), // 184 days to previous activity.
         receipt_id: 'RkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
       },
       {
@@ -245,7 +246,7 @@ async function main() {
         receipt_id: 'GkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
       },
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2019-10-01T13:20:37+00:00'), // For Scenario 2 where issue date is 2018-10-01, this is the end date of FIRST OCCURENCE of 180-day inactivity period. The second occurence is 2021-11-07 where diffeerence to previous activity is 184 days. Here, difference to previous activty(diff_to_previous_activity) is 365. The query should return this date, 365 days as diff_to_previous and has_long_period_of_inactivity as true. The expiration date should be calculated as (previous_actiivity + 180 ), or in other words :  last activity date - (diff_to_previous_activity - 180)
+        included_in_block_timestamp: convertStringDateToNanoseconds('2019-10-01T13:20:37+00:00'), // 365 days to previous activity
         receipt_id: 'FkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
       },
       {
