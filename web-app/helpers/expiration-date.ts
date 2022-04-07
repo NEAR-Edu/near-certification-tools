@@ -39,7 +39,7 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
           FROM PUBLIC.RECEIPTS R
           LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
           WHERE SIGNER_ACCOUNT_ID = ${accountName}
-          AND R."included_in_block_timestamp" > (${issuedAtUnixNano}::text)::numeric /*  double casting because of prisma template literal throwing 22P03 Error in DB */
+          AND R."included_in_block_timestamp" >= (${issuedAtUnixNano}::text)::numeric /*  double casting because of prisma template literal throwing 22P03 Error in DB */
         ) as account_activity_dates
       ) as account_activity_periods
       WHERE (diff_to_previous_activity > ${expirationDays})
@@ -55,7 +55,7 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
         FROM PUBLIC.receipts R
         LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
         WHERE SIGNER_ACCOUNT_ID = ${accountName}
-        AND R."included_in_block_timestamp" > (${issuedAtUnixNano}::text)::numeric /*  double casting because of prisma template literal throwing 22P03 Error in DB */
+        AND R."included_in_block_timestamp" >= (${issuedAtUnixNano}::text)::numeric /*  double casting because of prisma template literal throwing 22P03 Error in DB */
       ) as receipt
       WHERE NOT EXISTS (TABLE long_period_of_inactivity)
       ORDER BY moment DESC

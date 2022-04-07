@@ -1,18 +1,15 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 // Disabling TypeScript checking for this file since it's only seeding. https://stackoverflow.com/a/51774725/470749
+import dayjs from 'dayjs';
 import prisma from '../test/test-helpers/client';
 import { convertStringDateToNanoseconds } from '../helpers/time';
-
 // TODO: Add missing data
-// refactor comments
+// TODO: refactor comments
 
 // eslint-disable-next-line max-lines-per-function
 async function main() {
   // ########### START OF SEEDING DATA FOR sally.testnet ###########
-  // ----------------------------------------------------------------
-  // ------- account with 180-day inactivity after issue date -------
-  // ----------------------------------------------------------------
 
   // seed db with sally.testnet data
   const dataSally = {
@@ -57,12 +54,9 @@ async function main() {
   });
   // ########### END OF SEEDING DATA FOR sally.testnet ###########
 
-  // ########### START OF SEEDING DATA FOR sally.testnet ###########
-  // ----------------------------------------------------------------
-  // ------- account with 180-day inactivity after issue date -------
-  // ----------------------------------------------------------------
+  // ########### START OF SEEDING DATA FOR steve.testnet ###########
 
-  // seed db with sally.testnet data
+  // seed db with steve.testnet data
   const dataSteve = {
     signer_account_id: 'steve.testnet',
     account_activities: [
@@ -127,12 +121,9 @@ async function main() {
       },
     });
   });
-  // ########### END OF SEEDING DATA FOR sally.testnet ###########
+  // ########### END OF SEEDING DATA FOR steve.testnet ###########
 
-  // ########### START OF SEEDING DATA FOR johndoe.testnet ###########
-  // ------------------------------------------------------------------------------------
-  // ---- active account, that does not have any 180-day inactivity after issue date ----
-  // ------------------------------------------------------------------------------------
+  // ########### START OF SEEDING DATA FOR john.testnet ###########
 
   // seed db with john.testnet data
   const dataJohn = {
@@ -180,14 +171,11 @@ async function main() {
   });
   // ########### END OF SEEDING DATA FOR john.testnet ###########
 
-  // ######### START OF SEEDING DATA FOR bobwilson.testnet #########
-  // -------------------------------------------
-  // ------ accountwith years of activity ------
-  // -------------------------------------------
+  // ######### START OF SEEDING DATA FOR bob.testnet #########
 
-  // seed db with bobwilson.testnet data
-  const dataBobWilson = {
-    signer_account_id: 'bobwilson.testnet',
+  // seed db with bob.testnet data
+  const dataBob = {
+    signer_account_id: 'bob.testnet',
     account_activities: [
       {
         included_in_block_timestamp: convertStringDateToNanoseconds('2022-03-04T13:20:37+00:00'),
@@ -272,7 +260,7 @@ async function main() {
     ],
   };
 
-  dataBobWilson.account_activities.forEach(async (action) => {
+  dataBob.account_activities.forEach(async (action) => {
     await prisma.receipts.upsert({
       where: { receipt_id: action.receipt_id },
       update: {
@@ -289,11 +277,110 @@ async function main() {
       update: {},
       create: {
         receipt_id: action.receipt_id,
-        signer_account_id: dataBobWilson.signer_account_id,
+        signer_account_id: dataBob.signer_account_id,
       },
     });
   });
-  // ######### END OF SEEDING DATA FOR bobwilson.testnet #########
+  // ######### END OF SEEDING DATA FOR bob.testnet #########
+
+  // ########### START OF SEEDING DATA FOR steven.testnet ###########
+
+  // seed db with steven.testnet data
+  const dataSteven = {
+    signer_account_id: 'steven.testnet',
+    account_activities: [],
+  };
+
+  dataSteven.account_activities.push({
+    included_in_block_timestamp: convertStringDateToNanoseconds('2022-04-07T16:25:59+00:00'),
+    receipt_id: `steveYfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tstoday`,
+  });
+
+  // Get duration between issu date and date before account's last activity date in days, to create activity data every few days in between these dates.
+  const issueDateSteven = dayjs('2021-08-03');
+  const endDate = dayjs('2022-04-05');
+  const duration = endDate.diff(issueDateSteven, 'days');
+
+  // create activity every 5 days after issue date until '2022-04-05' and push to dataSteven
+  for (let i = 0; i < duration; i += 5) {
+    dataSteven.account_activities.push({
+      included_in_block_timestamp: convertStringDateToNanoseconds(issueDateSteven.add(i, 'day').toISOString()),
+      receipt_id: `steveYfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tsteve${i}`,
+    });
+  }
+
+  // Seed db with steven.testnet activity data
+  dataSteven.account_activities.forEach(async (action) => {
+    await prisma.receipts.upsert({
+      where: { receipt_id: action.receipt_id },
+      update: {
+        included_in_block_timestamp: action.included_in_block_timestamp,
+      },
+      create: {
+        receipt_id: action.receipt_id,
+        included_in_block_timestamp: action.included_in_block_timestamp,
+      },
+    });
+
+    await prisma.action_receipts.upsert({
+      where: { receipt_id: action.receipt_id },
+      update: {},
+      create: {
+        receipt_id: action.receipt_id,
+        signer_account_id: dataSteven.signer_account_id,
+      },
+    });
+  });
+  // ########### END OF SEEDING DATA FOR steven.testnet ###########
+
+  // ########### START OF SEEDING DATA FOR alice.testnet ###########
+
+  const dataAlice = {
+    signer_account_id: 'alice.testnet',
+    account_activities: [
+      {
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-03-11T19:05:12+00:00'),
+        receipt_id: `al04R6f58evLaZ3h306k9vs9PpAifXytsRABt4ngpHa6b`,
+      },
+      {
+        included_in_block_timestamp: convertStringDateToNanoseconds('2020-09-10T18:30:06+00:00'),
+        receipt_id: `al376vbsREdvLakfmcVkieiJhdshjfgbIewj73hncytsRb`,
+      },
+      {
+        included_in_block_timestamp: convertStringDateToNanoseconds('2020-03-04T08:25:59+00:00'),
+        receipt_id: `al98R6f58evkjlvmewopOFOKDjfdkKdjfksdfcmkskldew`,
+      },
+      // eslint-disable-next-line max-lines
+      {
+        included_in_block_timestamp: convertStringDateToNanoseconds('2019-08-03T00:00:00+00:00'),
+        receipt_id: `al14R6f58evkjlcmkMcmdWA89dsfkfuewiUIDbcdsacDs2`,
+      },
+    ],
+  };
+
+  // Seed db with alice.testnet activity data
+  dataAlice.account_activities.forEach(async (action) => {
+    await prisma.receipts.upsert({
+      where: { receipt_id: action.receipt_id },
+      update: {
+        included_in_block_timestamp: action.included_in_block_timestamp,
+      },
+      create: {
+        receipt_id: action.receipt_id,
+        included_in_block_timestamp: action.included_in_block_timestamp,
+      },
+    });
+
+    await prisma.action_receipts.upsert({
+      where: { receipt_id: action.receipt_id },
+      update: {},
+      create: {
+        receipt_id: action.receipt_id,
+        signer_account_id: dataAlice.signer_account_id,
+      },
+    });
+  });
+  // ########### END OF SEEDING DATA FOR alice.testnet ###########
 
   console.log('✨ Seeding finished!');
 }
