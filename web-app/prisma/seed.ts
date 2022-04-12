@@ -283,34 +283,34 @@ async function main() {
   });
   // ######### END OF SEEDING DATA FOR bob.testnet #########
 
-  // ########### START OF SEEDING DATA FOR steven.testnet ###########
+  // ########### START OF SEEDING DATA FOR rebecca.testnet ###########
 
-  // seed DB with steven.testnet data
-  const dataSteven = {
-    signer_account_id: 'steven.testnet',
+  // seed DB with rebecca.testnet data
+  const dataRebecca = {
+    signer_account_id: 'rebecca.testnet',
     account_activities: [],
   };
 
-  dataSteven.account_activities.push({
+  dataRebecca.account_activities.push({
     included_in_block_timestamp: convertStringDateToNanoseconds('2022-04-07T16:25:59+00:00'),
     receipt_id: `steveYfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tstoday`,
   });
 
   // Get duration between issu date and date before account's last activity date in days, to create activity data every few days in between these dates.
-  const issueDateSteven = dayjs('2021-08-03');
+  const issueDateRebecca = dayjs('2021-08-03');
   const endDate = dayjs('2022-04-05');
-  const duration = endDate.diff(issueDateSteven, 'days');
+  const duration = endDate.diff(issueDateRebecca, 'days');
 
-  // create activity every 5 days after issue date until '2022-04-05' and push to dataSteven
+  // create activity every 5 days after issue date until '2022-04-05' and push to dataRebecca
   for (let i = 0; i < duration; i += 5) {
-    dataSteven.account_activities.push({
-      included_in_block_timestamp: convertStringDateToNanoseconds(issueDateSteven.add(i, 'day').toISOString()),
+    dataRebecca.account_activities.push({
+      included_in_block_timestamp: convertStringDateToNanoseconds(issueDateRebecca.add(i, 'day').toISOString()),
       receipt_id: `steveYfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tsteve${i}`,
     });
   }
 
-  // Seed DB with steven.testnet activity data
-  dataSteven.account_activities.forEach(async (action) => {
+  // Seed DB with rebecca.testnet activity data
+  dataRebecca.account_activities.forEach(async (action) => {
     await prisma.receipts.upsert({
       where: { receipt_id: action.receipt_id },
       update: {
@@ -327,11 +327,11 @@ async function main() {
       update: {},
       create: {
         receipt_id: action.receipt_id,
-        signer_account_id: dataSteven.signer_account_id,
+        signer_account_id: dataRebecca.signer_account_id,
       },
     });
   });
-  // ########### END OF SEEDING DATA FOR steven.testnet ###########
+  // ########### END OF SEEDING DATA FOR rebecca.testnet ###########
 
   // ########### START OF SEEDING DATA FOR alice.testnet ###########
 

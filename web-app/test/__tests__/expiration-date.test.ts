@@ -135,15 +135,15 @@ describe('test expiration date functions', () => {
 
     describe('account with frequent activity after issue date', () => {
       // -- Test Case - 4 --
-      // NOTE: STEVEN
+      // NOTE: REBECCA
       /**
-       * Steven's cert was issued 2021-08-03
+       * Rebecca's cert was issued 2021-08-03
        * he has continued to have mainnet activity every couple of days through 05-04-2022
        * --
        * His cert is tentatively scheduled to expire  05-04-2022  + 180.
        */
-      it('should return query result for Steven', async () => {
-        const queryResult = await getRawQueryResult('steven.testnet', convertStringDateToMilliseconds('2021-08-03T00:00:00+00:00'));
+      it('should return query result for Rebecca', async () => {
+        const queryResult = await getRawQueryResult('rebecca.testnet', convertStringDateToMilliseconds('2021-08-03T00:00:00+00:00'));
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
@@ -160,7 +160,7 @@ describe('test expiration date functions', () => {
          * last Activity: 2022-04-07
          * expiration date = 2022-04-07 + 180 days = 2022-10-04
          */
-        await expect(getExpiration('steven.testnet', convertStringDateToMilliseconds('2021-08-03T00:00:00+00:00'))).resolves.toEqual('2022-10-04');
+        await expect(getExpiration('rebecca.testnet', convertStringDateToMilliseconds('2021-08-03T00:00:00+00:00'))).resolves.toEqual('2022-10-04');
       });
     });
 
