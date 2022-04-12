@@ -34,6 +34,8 @@ It might be worth reviewing the Metadata standard: https://nomicon.io/Standards/
 
 You might want something in the `icon` field so that it looks nice in a wallet. See the note in the above Nomicon page about using an optimized SVG in the data URL. https://npm.runkit.com/mini-svg-data-uri looks useful.
 
+The metadata.name field is what will be the section header of the [Collectibles tab of Wallet](https://wallet.testnet.near.org/?tab=collectibles). It seems reasonable for this to say "NEAR University".
+
 ## Testnet
 
 ```bash
