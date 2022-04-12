@@ -167,3 +167,7 @@ We must manually set its "spec" field value to match the value of NFT_METADATA_S
 The token_metadata part of `data-contract/sample_mint.json` complies with standard NEP177 (TODO: specify which version here). Jacob and Ryan are not sure which version we're using (probably 1.0.0). We think its date fields (issued_at, expires_at, starts_at, updated_at) expect strings of milliseconds. https://discord.com/channels/490367152054992913/542945453533036544/958832442121277440 (https://github.com/near/NEPs/blob/ca5f5a70e7ca2214d38723c756f9b5ae5c3b5e9d/specs/Standards/NonFungibleToken/Metadata.md had contradicting instructions.)
 
 `web-app/pages/api/sample_api_payload.json` expects null or a string of format ISO 8601 (see https://day.js.org/docs/en/parse/string) for program_start_date and program_end_date. Our API endpoint then converts them to a string of nanoseconds.
+
+# Errors
+
+If you get `Smart contract panicked: Unauthorized` when trying to mint an NFT, check what you used for `owner_id` in `init_args.json` and whether you used that in the `--account-id` argument of the CLI call.
