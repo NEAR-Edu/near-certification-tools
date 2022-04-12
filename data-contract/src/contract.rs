@@ -41,4 +41,10 @@ impl CertificationContract {
     pub fn cert_can_invalidate(&self) -> bool {
         self.can_invalidate
     }
+
+    pub fn set_metadata(&mut self, metadata: NFTContractMetadata) {
+        self.assert_owner();
+
+        self.metadata.set(&metadata);
+    }
 }
