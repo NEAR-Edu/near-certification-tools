@@ -296,7 +296,7 @@ async function main() {
     receipt_id: `steveYfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tstoday`,
   });
 
-  // Get duration between issu date and date before account's last activity date in days, to create activity data every few days in between these dates.
+  // Get duration between issue date and date before account's last activity date in days, to create activity data every few days in between these dates.
   const issueDateRebecca = dayjs('2021-08-03');
   const endDate = dayjs('2022-04-05');
   const duration = endDate.diff(issueDateRebecca, 'days');
