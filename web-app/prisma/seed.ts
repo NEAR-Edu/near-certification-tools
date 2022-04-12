@@ -11,7 +11,7 @@ import { convertStringDateToNanoseconds } from '../helpers/time';
 async function main() {
   // ########### START OF SEEDING DATA FOR sally.testnet ###########
 
-  // seed db with sally.testnet data
+  // seed DB with sally.testnet data
   const dataSally = {
     signer_account_id: 'sally.testnet',
     account_activities: [
@@ -56,7 +56,7 @@ async function main() {
 
   // ########### START OF SEEDING DATA FOR steve.testnet ###########
 
-  // seed db with steve.testnet data
+  // seed DB with steve.testnet data
   const dataSteve = {
     signer_account_id: 'steve.testnet',
     account_activities: [
@@ -125,7 +125,7 @@ async function main() {
 
   // ########### START OF SEEDING DATA FOR john.testnet ###########
 
-  // seed db with john.testnet data
+  // seed DB with john.testnet data
   const dataJohn = {
     signer_account_id: 'john.testnet',
     account_activities: [
@@ -173,7 +173,7 @@ async function main() {
 
   // ######### START OF SEEDING DATA FOR bob.testnet #########
 
-  // seed db with bob.testnet data
+  // seed DB with bob.testnet data
   const dataBob = {
     signer_account_id: 'bob.testnet',
     account_activities: [
@@ -285,7 +285,7 @@ async function main() {
 
   // ########### START OF SEEDING DATA FOR steven.testnet ###########
 
-  // seed db with steven.testnet data
+  // seed DB with steven.testnet data
   const dataSteven = {
     signer_account_id: 'steven.testnet',
     account_activities: [],
@@ -309,7 +309,7 @@ async function main() {
     });
   }
 
-  // Seed db with steven.testnet activity data
+  // Seed DB with steven.testnet activity data
   dataSteven.account_activities.forEach(async (action) => {
     await prisma.receipts.upsert({
       where: { receipt_id: action.receipt_id },
@@ -358,7 +358,7 @@ async function main() {
     ],
   };
 
-  // Seed db with alice.testnet activity data
+  // Seed DB with alice.testnet activity data
   dataAlice.account_activities.forEach(async (action) => {
     await prisma.receipts.upsert({
       where: { receipt_id: action.receipt_id },
