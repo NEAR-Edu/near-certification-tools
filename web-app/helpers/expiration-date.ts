@@ -7,10 +7,10 @@ import { formatDate } from './time';
 const expirationDays = 180; // Certificates expire after the first period of this many consecutive days of inactivity after issueDate.
 type RawQueryResult = [
   {
-    moment: string;
-    diff_to_previous_activity: number;
-    diff_from_last_activity_to_render_date: number;
-    has_long_period_of_inactivity: boolean;
+    moment: string; // TODO: We need to describe here in a comment what 'moment' actually means. Is it always "end date of long inactivity period (>180 days)"?
+    diff_to_previous_activity: number; // TODO: We need to describe here in a comment what this actually means.
+    diff_from_last_activity_to_render_date: number; // TODO: Is this actually used?
+    has_long_period_of_inactivity: boolean; // TODO: We need to describe here in a comment what this actually means.
   },
 ];
 
@@ -66,7 +66,7 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
     TABLE most_recent_activity`;
 }
 
-export async function getRawQueryResult(accountName: string, issuedAt: string) {
+export async function getRawQueryResult(accountName: string, issuedAt: string): Promise<RawQueryResult> {
   /**
    * Calculates Unix Timestamp in nanoseconds.
    * Calculation is exceeding JS's MAX_SAFE_INTEGER value, making it unsafe to use Number type(floating point `number` type).
@@ -87,6 +87,9 @@ export async function getRawQueryResult(accountName: string, issuedAt: string) {
   return result;
 }
 
+/**
+ * @returns {string} result of formatDate (i.e. uses 'YYYY-MM-DD') of the expiration date
+ */
 export async function getExpiration(accountName: string, issuedAt: string): Promise<string> {
   // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
   /**
@@ -96,7 +99,7 @@ export async function getExpiration(accountName: string, issuedAt: string): Prom
    * https://stackoverflow.com/a/68684814/10684149
    */
   /**
-   * First query checks If the account has a period where it hasn't been active for 180 days straight after the issue date (exluding the render date)
+   * First query checks if the account has a period where it hasn't been active for 180 days straight after the issue date (excluding the render date)
    * Second query is run if no 180-day-inactivity period is found and returns most recent activity date
    * AND amount of days between account's last activity date - render date of certificate
    */

@@ -65,18 +65,23 @@ describe('test expiration date functions', () => {
     // -- Test Case - 2 --
     // NOTE: STEVE
     /**
-     * Steve's cert was issued_at 2021-01-05 — issueDate
-     * he had frequent mainnet activity for a couple of months (2021-03-16T20:08:59+00:00)
-     * but then no mainnet activity for 204 days — >180-days of inactivity
+     * Steve's cert was issued_at 2021-01-05
+     * He had frequent mainnet activity for a couple of months (2021-03-16T20:08:59+00:00)
+     * but then no mainnet activity for 204 days (i.e. >180-days of inactivity)
      * and then had some more mainnet activity.
-     * His last mainnet activity was on 2022—03—0509:46:39+00:00
+     * His last mainnet activity was on 2022-03-05T09:46:39+00:00
+     * But none of that activity after his 180+ days of inactivity matters because his certificate should have expired 180 days after the
+     * beginning of the first long period of inactivity (>=180 days).
      * --
-     * His cert has expired on
-     * = 2021-03-15 + 180 ( = 2021-10-06 - (204 - 180) days)
+     * His cert should have an expiration of: 2021-03-16 + 180 = 2021-09-12
+     * Double-check from another angle: Certificate expired 204 - 180 = 24 days prior to moment.
+     * So, expiration date = 2021-10-06 - 24 days = 2021-09-12 = 2021-03-16 + 180 days
      */
     describe('account with 180 day inactivity and frequent activity after issue date of certificate', () => {
+      const issueDate = convertStringDateToMilliseconds('2021-01-05T11:15:09+00:00');
+
       it('should return query result for Steve', async () => {
-        const queryResult = await getRawQueryResult('steve.testnet', convertStringDateToMilliseconds('2021-01-05T11:15:09+00:00'));
+        const queryResult = await getRawQueryResult('steve.testnet', issueDate);
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
@@ -88,12 +93,8 @@ describe('test expiration date functions', () => {
         );
       });
 
-      it('should return expiration date for Steve as last activity date - (diff_to_previous_activity - 180)', async () => {
-        /**
-         * Certificate expired 204 - 180 = 24 days prior to moment.
-         * expiration date = 2021-10-06 - 24 days = 2021-03-16 + 180 days = 2021-09-13
-         */
-        await expect(getExpiration('steve.testnet', convertStringDateToMilliseconds('2021-03-15T11:15:09+00:00'))).resolves.toEqual('2021-09-13');
+      it('should return correct expiration date for Steve', async () => {
+        await expect(getExpiration('steve.testnet', issueDate)).resolves.toEqual('2021-09-12');
       });
     });
   });
