@@ -9,7 +9,6 @@ type RawQueryResult = [
   {
     moment: string; // TODO: We need to describe here in a comment what 'moment' actually means. Is it always "end date of long inactivity period (>180 days)"?
     diff_to_previous_activity: number; // TODO: We need to describe here in a comment what this actually means.
-    diff_from_last_activity_to_render_date: number; // TODO: Is this actually used?
     has_long_period_of_inactivity: boolean; // TODO: We need to describe here in a comment what this actually means.
   },
 ];
@@ -108,12 +107,9 @@ export async function getExpiration(accountName: string, issuedAt: string): Prom
   /**
    * If the account doesn't have a period where it hasn't been active for 180 days straight after the issue date:
    * Days between last activity and render date is checked:
-   * If this value (diff_from_last_activity_to_render_date) is  >180;
-   * -- Certificate is expired. Expiration date = last activity + 180 days
-   * If this value (diff_from_last_activity_to_render_date) is <180;
-   * -- Certificate hasn't expired yet. Expiration date = last activity + 180 days
+   * -- Expiration date = last activity + 180 days
    * Otherwise, if >180-day period of inactivity exist (has_long_period_of_inactivity === true) after issueDate,
-   * -- Expiration date = the beginning of the *first* such period + 180 days.
+   * -- Expiration date = the beginning of the *first* such period + 180 days
    */
   const moment = dayjs(result[0].moment);
 
