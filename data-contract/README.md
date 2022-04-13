@@ -30,11 +30,13 @@ rustup target add wasm32-unknown-unknown
 
 Modify `init_args.json` file to fit your needs, particularly `owner_id`.
 
+The `metadata.name` field is what will be the section header of the [Collectibles tab of Wallet](https://wallet.testnet.near.org/?tab=collectibles). It seems reasonable for this to say "NEAR University".
+
 It might be worth reviewing the Metadata standard: https://nomicon.io/Standards/NonFungibleToken/Metadata#interface but many fields are probably fine as `null`.
 
-You might want something in the `icon` field so that it looks nice in a wallet. See the note in the above Nomicon page about using an optimized SVG in the data URL. https://npm.runkit.com/mini-svg-data-uri looks useful.
+You might want something in the `icon` field so that it looks nice in a wallet. The `icon` field controls which image is used at the contract level. See the note in the above Nomicon page about using an optimized SVG in the data URL. https://npm.runkit.com/mini-svg-data-uri looks useful.  
 
-The metadata.name field is what will be the section header of the [Collectibles tab of Wallet](https://wallet.testnet.near.org/?tab=collectibles). It seems reasonable for this to say "NEAR University".
+The Collectibles tab of Wallet lists out NFTs nested within groups, where each group is a contract (and displays its name and icon as mentioned above). Then each NFT within the group has its own name and icon, but its icon is defined in `token_metadata.media`. See [sample_mint.json](sample_mint.json).
 
 ## Testnet
 
@@ -51,11 +53,17 @@ For example, to deploy to a new dev address (ignoring a previously generated add
 ./dev_deploy.sh --force
 ```
 
-## Mainnet
+## Mainnet (initial deployment)
 
 ```bash
 NEAR_ENV=mainnet ./deploy.sh ACCOUNT_ID
 ```
+
+## Mainnet (if you need to redeploy, overwriting the original contract)
+
+Temporarily delete the `--initFunction new \` line from `deploy.sh` and then run the command as mentioned above.
+
+There is also a `set_metadata` function available if we want to edit contract metadata without redeploying. See [this commit](https://github.com/NEAR-Edu/near-certification-tools/commit/a60e2f339c8e17b72af1d74d0b844c85348abf1a).
 
 # Interactions
 
