@@ -1,8 +1,11 @@
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc'; // https://day.js.org/docs/en/plugin/utc
 import BN from 'bn.js';
 import { Prisma } from '@prisma/client';
 import prisma from './prisma';
 import { formatDate } from './time';
+
+dayjs.extend(utc); // use dayjs utc plugin to avoid parsing different dates depending on local timezone. https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
 
 const expirationDays = 180; // Certificates expire after the first period of this many consecutive days of inactivity after issueDate.
 type RawQueryResult = [
@@ -111,7 +114,7 @@ export async function getExpiration(accountName: string, issuedAt: string): Prom
    * Otherwise, if >180-day period of inactivity exist (has_long_period_of_inactivity === true) after issueDate,
    * -- Expiration date = the beginning of the *first* such period + 180 days
    */
-  const moment = dayjs(result[0].moment);
+  const moment = dayjs.utc(result[0].moment); // https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
 
   if (result[0].has_long_period_of_inactivity) {
     /**
