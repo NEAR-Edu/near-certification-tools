@@ -79,7 +79,7 @@ describe('test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2021-10-06T12:10:05+00:00',
+              moment: '2021-10-06T22:10:05+00:00',
               diff_to_previous_activity: 204,
               has_long_period_of_inactivity: true,
             },
@@ -93,7 +93,6 @@ describe('test expiration date functions', () => {
     });
   });
 
-  // eslint-disable-next-line max-lines-per-function
   describe('accounts with frequent activity after issue date', () => {
     describe('account with frequent activity after issue date', () => {
       // -- Test Case 3 --

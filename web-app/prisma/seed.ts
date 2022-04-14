@@ -78,11 +78,11 @@ async function main() {
         receipt_id: 'st4a5NwKgihcWiKlU6NHDWhfoeE9b7HsYUIjTQAfCUost',
       },
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2021-10-06T12:10:05+00:00'), // 204 days have passed since previous activity which was on 2021-03-16T20:08:59+00:00
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-10-06T22:10:05+00:00'), // 204 days have passed since previous activity which was on 2021-03-16T20:08:59+00:00
         receipt_id: 'st02R6f58evLaZ3h306k9vs9PpAifXytsRABt4ngpHast',
       }, // moment
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2021-03-16T12:08:59+00:00'),
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-03-16T20:08:59+00:00'),
         receipt_id: 'st02R6f58evLaZ3h306k9vs9PpAifXytsRABt4ngpHa6V',
       },
       {
