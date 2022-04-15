@@ -51,7 +51,7 @@ describe('test expiration date functions', () => {
          * Certificate expired 296 - 180 = 116 days prior to moment.
          * expiration date = 2021-12-23 - 116 = 2021-03-02 + 180 days = 2022-08-29
          */
-        await expect(getExpiration('sally.testnet', issueDate)).resolves.toEqual('2021-08-29');
+        await expect(getExpiration('sally.testnet', issueDate)).resolves.toEqual('2021-08-29T09:46:39+00:00');
       });
     });
 
@@ -88,7 +88,7 @@ describe('test expiration date functions', () => {
       });
 
       it('should return correct expiration date for Steve', async () => {
-        await expect(getExpiration('steve.testnet', issueDate)).resolves.toEqual('2021-09-12');
+        await expect(getExpiration('steve.testnet', issueDate)).resolves.toEqual('2021-09-12T22:10:05+00:00');
       });
     });
   });
@@ -124,7 +124,7 @@ describe('test expiration date functions', () => {
          * last Activity: 2022-04-07T16:25:59+00:00
          * expiration date = 2022-04-07T16:25:59+00:00 + 180 days = 2022-10-04
          */
-        await expect(getExpiration('rebecca.testnet', issueDate)).resolves.toEqual('2022-10-04');
+        await expect(getExpiration('rebecca.testnet', issueDate)).resolves.toEqual('2022-10-04T16:25:59+00:00');
       });
     });
   });
@@ -164,7 +164,7 @@ describe('test expiration date functions', () => {
       });
 
       it('should return expiration date for Bob as last activity date - (diff_to_previous_activity - 180)', async () => {
-        await expect(getExpiration('bob.testnet', issueDate)).resolves.toEqual('2019-03-30');
+        await expect(getExpiration('bob.testnet', issueDate)).resolves.toEqual('2019-03-30T00:00:00+00:00');
       });
     });
 
@@ -199,7 +199,7 @@ describe('test expiration date functions', () => {
 
       it('should return expiration date for Alice as last activity date - (diff_to_previous_activity - 180)', async () => {
         // expiration date = 2020-03-04 - 34 = 2019-08-03 + 180 days = 2020-01-30
-        await expect(getExpiration('alice.testnet', issueDate)).resolves.toEqual('2020-01-30');
+        await expect(getExpiration('alice.testnet', issueDate)).resolves.toEqual('2020-01-30T08:25:59+00:00');
       });
     });
   });

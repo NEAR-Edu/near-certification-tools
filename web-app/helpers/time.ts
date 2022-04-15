@@ -1,8 +1,10 @@
 import { Decimal } from '@prisma/client/runtime';
 import dayjs, { Dayjs } from 'dayjs'; // https://day.js.org/en
+import utc from 'dayjs/plugin/utc'; // https://day.js.org/docs/en/plugin/utc
 import BN from 'bn.js'; // https://github.com/indutny/bn.js
 
 const defaultDateFormat = 'YYYY-MM-DD';
+dayjs.extend(utc); // using dayjs utc plugin to avoid parsing different dates depending on local timezone when formatting. https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
 
 export function convertTimestampToDayjsMoment(timestamp: Decimal | number | string, denominator: number): Dayjs {
   // https://stackoverflow.com/questions/71024496/why-do-i-need-to-divide-the-timestamp-by-1-billion
@@ -19,7 +21,8 @@ export function convertNanoTimestampDecimalToDayjsMoment(timestampDecimal: Decim
 
 export function formatDate(dateTime: Dayjs) {
   // https://day.js.org/docs/en/display/format
-  return dayjs(dateTime).format(defaultDateFormat); // TODO Check what time zone
+  // https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
+  return dayjs.utc(dateTime).format(defaultDateFormat); // UTC (Coordinated Universal Time) to date string in defaultDateFormat (YYYY-MM-DD)
 }
 
 export function convertMillisecondsTimestampToFormattedDate(milliseconds: string) {

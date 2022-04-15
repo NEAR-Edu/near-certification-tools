@@ -13,6 +13,7 @@ type ActivityData = {
   }[];
 };
 
+// TODO: change startDate and endDate format to YYYY-MM-DDTHH:mm:ss+00:00
 export default async function generateActivityData(data: ActivityData, startDate: string, endDate: string) {
   const startDateDayJs = dayjs.utc(startDate);
   const endDateDayJs = dayjs.utc(endDate);

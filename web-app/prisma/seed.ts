@@ -7,6 +7,7 @@ import generateActivityData from '../test/test-helpers/generate-account-activiti
 
 // TODO: Add missing data
 // TODO: refactor comments
+// TODO: change startDate and endDate format to YYYY-MM-DDTHH:mm:ss+00:00
 
 // eslint-disable-next-line max-lines-per-function
 async function main() {

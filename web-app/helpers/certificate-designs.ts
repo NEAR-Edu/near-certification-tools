@@ -1,6 +1,6 @@
 // https://dev.to/sudo_overflow/diy-generating-dynamic-images-on-the-fly-for-email-marketing-h51
 import { Canvas, registerFont, loadImage } from 'canvas';
-import { isBeforeNow } from './time';
+import { isBeforeNow, formatDate } from './time';
 
 export const width = 1080; // width of the image
 export const height = 1080; // height of the image
@@ -119,6 +119,6 @@ export async function populateCert(canvas: Canvas, details: any) {
     addText(context, 'Expiration*:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, 850, 'right');
     wrapText(context, getExpiratonExplanation(expiration), X_POSITION_OF_DESCRIPTION, 910, 110, expirationExplanationFont, gray);
   }
-  addText(context, expiration, dateFont, black, X_POSITION_OF_DATE, 850, 'right');
+  addText(context, formatDate(expiration), dateFont, black, X_POSITION_OF_DATE, 850, 'right');
   addText(context, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
 }
