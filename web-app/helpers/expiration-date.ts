@@ -4,7 +4,7 @@ import BN from 'bn.js';
 import { Prisma } from '@prisma/client';
 import prisma from './prisma';
 
-dayjs.extend(utc); // // using dayjs utc plugin to avoid parsing different dates depending on local timezone when formatting. https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
+dayjs.extend(utc); // use dayjs utc plugin to avoid parsing different dates depending on local timezone. https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
 
 const expirationDays = 180; // Certificates expire after the first period of this many consecutive days of inactivity after issueDate.
 type RawQueryResult = [

@@ -3,7 +3,7 @@ import crypto from 'crypto'; // https://stackoverflow.com/a/27747377
 import utc from 'dayjs/plugin/utc'; // https://day.js.org/docs/en/plugin/utc
 import { convertStringDateToNanoseconds } from '../../helpers/time';
 
-dayjs.extend(utc);
+dayjs.extend(utc); // use dayjs utc plugin to avoid parsing different dates depending on local timezone.
 
 type ActivityData = {
   signer_account_id: string;
