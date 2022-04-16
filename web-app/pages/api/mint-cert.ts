@@ -25,6 +25,7 @@ const apiKeyHeaderName = 'x-api-key'; // Although the user interface of Integrom
 type CertificateRequiredFields = {
   title: string;
   description: string;
+  media: string;
   authority_id: AccountId;
   authority_name: string;
   program: string;
@@ -64,7 +65,7 @@ function generateUUIDForTokenId(): string {
 function buildMetadata(certificateRequiredFields: CertificateRequiredFields) {
   /* eslint-disable camelcase */
   const issued_at = Date.now().toString(); // issued_at expects milliseconds since epoch as string
-  const tokenMetadata = (({ title, description }) => ({ title, description, issued_at }))(certificateRequiredFields); // https://stackoverflow.com/a/67591318/470749
+  const tokenMetadata = (({ title, description, media }) => ({ title, description, media, issued_at, copies: 1 }))(certificateRequiredFields); // https://stackoverflow.com/a/67591318/470749
   const certificationMetadata = (({
     authority_id,
     authority_name,
