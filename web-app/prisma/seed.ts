@@ -24,7 +24,7 @@ async function main() {
     signer_account_id: 'sally.testnet',
     account_activities: [
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2021-12-23T09:46:39+00:00'), // Last mainnet activity. 296 days have passed since issue date.
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-12-23T09:46:39+00:00'), // Most recent mainnet activity. 296 days have passed since issue date.
         receipt_id: 'Wt4a5NwKgihcWiKlU6NHDWhfoeE9b7HsYUIjTQAfCUoic',
       },
       {
@@ -75,7 +75,7 @@ async function main() {
     signer_account_id: 'steve.testnet',
     account_activities: [
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2022-03-05T09:46:39+00:00'),
+        included_in_block_timestamp: convertStringDateToNanoseconds('2022-03-05T09:46:39+00:00'), // Most recent mainnet activity
         receipt_id: 'st4a5NwKgihcWiKlU6NHDWhfoeE9b7HsYUIjTQAfCUost',
       },
       {
@@ -95,11 +95,11 @@ async function main() {
 
   // Create activities between dates where the account was frequently active according to the scenario.
   // Steve had frequent activity for a couple of months after issue date (2021-01-05T11:15:09+00:00) through 2021-03-16T20:08:59+00:00
-  await generateActivityData(dataSteve, '2021-01-05', '2021-03-16');
+  await generateActivityData(dataSteve, '2021-01-05T11:15:09+00:00', '2021-03-16T20:08:59+00:00');
   // and more activity after 2021-10-06T22:10:05+00:00 through 2022—03—0509:46:39+00:00
-  await generateActivityData(dataSteve, '2021-10-07', '2022-03-05');
+  await generateActivityData(dataSteve, '2021-10-06T22:10:05+00:00', '2022—03—0509:46:39+00:00');
 
-  // Seed db with steve.testnet data
+  // Seed DB with steve.testnet data
   // create receipts and action_receipts for steve.testnet
   dataSteve.account_activities.forEach(async (action) => {
     await prisma.receipts.upsert({
@@ -139,7 +139,7 @@ async function main() {
     signer_account_id: 'bob.testnet',
     account_activities: [
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2022-03-04T13:20:37+00:00'),
+        included_in_block_timestamp: convertStringDateToNanoseconds('2022-03-04T13:20:37+00:00'), // Most recent mainnet activity
         receipt_id: 'UkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
       },
       {
@@ -162,10 +162,10 @@ async function main() {
   };
 
   // Create activities between dates where the account was frequently active according to the scenario.
-  // Bob had frequent activity for a couple of years after 2019-10-01T13:20:37+00:00 through 2021-05-07T13:20:37+00:00
-  await generateActivityData(dataBob, '2019-11-05', '2021-05-07');
-  // then again had frequent activity for a couple of months after 2021-11-07T13:20:37+00:00 through 2022-03-04T13:20:37+00:00
-  await generateActivityData(dataBob, '2019-11-08', '2022-03-04');
+  // Bob had frequent activity for a couple of years after 2019-10-01T13:20:37+00:00 through 2021-05-07T13:22:15+00:00
+  await generateActivityData(dataBob, '2019-10-01T13:20:37+00:00', '2021-05-07T13:22:15+00:00');
+  // then again had frequent activity for a couple of months after 2021-11-07T13:13:12+00:00 through 2022-03-04T18:20:55+00:00
+  await generateActivityData(dataBob, '2021-11-07T13:13:12+00:00', '2022-03-04T18:20:55+00:00');
 
   // Seed DB with bob.testnet data
   // Create receipts and action_receipts for bob.testnet
@@ -198,7 +198,7 @@ async function main() {
    * She has continued to have mainnet activity every couple of days through 2022-04-07T16:25:59+00:00
    */
 
-  // seed DB with rebecca.testnet data
+  // rebecca.testnet data
   const dataRebecca = {
     signer_account_id: 'rebecca.testnet',
     account_activities: [],
@@ -208,7 +208,7 @@ async function main() {
   // Create receipts and action_receipts for rebecca.testnet
   dataRebecca.account_activities.push(
     {
-      included_in_block_timestamp: convertStringDateToNanoseconds('2022-04-07T16:25:59+00:00'), // Last activity
+      included_in_block_timestamp: convertStringDateToNanoseconds('2022-04-07T16:25:59+00:00'), // Most rcenet mainnet activity
       receipt_id: 'rei9KjsfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tsjd',
     },
     {
@@ -219,7 +219,7 @@ async function main() {
 
   // Create activities between dates where the account was frequently active according to the scenario.
   // Rebecca had frequent activity every couple of days after issue date (2021-08-03T00:00:00+00:00) through 2022-04-07T16:25:59+00:00
-  await generateActivityData(dataRebecca, '2021-08-03', '2022-04-07');
+  await generateActivityData(dataRebecca, '2021-08-03T00:00:00+00:00', '2022-04-07T16:25:59+00:00');
 
   // Seed DB with rebecca.testnet activity data
   dataRebecca.account_activities.forEach(async (action) => {
@@ -254,11 +254,12 @@ async function main() {
    * and has not had any mainnet activity since then.
    */
 
+  // alice.testnet data
   const dataAlice = {
     signer_account_id: 'alice.testnet',
     account_activities: [
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2021-03-11T19:05:12+00:00'), // 182 days have passed since previous activity which was on 2020-09-10T18:30:06+00:00
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-03-11T19:05:12+00:00'), // Most recent mainnet activity. 182 days have passed since previous activity which was on 2020-09-10T18:30:06+00:00
         receipt_id: 'al04R6f58evLaZ3h306k9vs9PpAifXytsRABt4ngpHa6b',
       },
       {

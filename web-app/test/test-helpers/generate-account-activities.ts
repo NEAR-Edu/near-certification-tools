@@ -13,17 +13,18 @@ type ActivityData = {
   }[];
 };
 
-// TODO: change startDate and endDate format to YYYY-MM-DDTHH:mm:ss+00:00
 export default async function generateActivityData(data: ActivityData, startDate: string, endDate: string) {
   const startDateDayJs = dayjs.utc(startDate);
   const endDateDayJs = dayjs.utc(endDate);
   const duration = endDateDayJs.diff(startDateDayJs, 'days'); // amount of days between startDate and endDate
 
   // add activity every 5 days
-  for (let i = 0; i < duration; i += 5) {
+  for (let i = 5; i < duration; i += 5) {
+    const date = startDateDayJs.add(i, 'day').format('YYYY-MM-DDTHH:mm:ss+00:00');
+
     data.account_activities.push({
-      included_in_block_timestamp: convertStringDateToNanoseconds(startDateDayJs.add(i, 'day').format('YYYY-MM-DDTHH:mm:ss+00:00')),
-      receipt_id: crypto.randomBytes(45).toString('hex'),
+      included_in_block_timestamp: convertStringDateToNanoseconds(date),
+      receipt_id: crypto.randomBytes(22.5).toString('hex'), // match receipt_id length convention of 45 chars. Using randomBytes, resulting string is double the size of given bytes in length.
     });
   }
 }
