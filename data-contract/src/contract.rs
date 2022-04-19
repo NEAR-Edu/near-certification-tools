@@ -2,10 +2,10 @@ pub use init::CertificationContractInitOptions;
 
 use crate::*;
 
-mod nft;
-mod mint;
 mod init;
 mod invalidate;
+mod mint;
+mod nft;
 
 #[near_bindgen]
 #[derive(PanicOnDefault, BorshDeserialize, BorshSerialize)]
@@ -24,7 +24,10 @@ impl CertificationContract {
     }
 
     pub(crate) fn assert_owner(&self) {
-        require!(env::predecessor_account_id() == self.tokens.owner_id, "Unauthorized"); // TODO: Improve this error message to give a hint about how to call the function successfully (and update the existing hint in the readme).
+        require!(
+            env::predecessor_account_id() == self.tokens.owner_id,
+            "Unauthorized"
+        ); // TODO: Improve this error message to give a hint about how to call the function successfully (and update the existing hint in the readme).
     }
 
     pub(crate) fn assert_can_transfer(&self) {

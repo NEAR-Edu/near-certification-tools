@@ -1,5 +1,5 @@
-use crate::*;
 use crate::contract::*;
+use crate::*;
 
 // Core implementation (largely the same as `impl_non_fungible_token_core`
 // macro with additional ability to disable transfers)
@@ -14,7 +14,8 @@ impl NonFungibleTokenCore for CertificationContract {
         memo: Option<String>,
     ) {
         self.assert_can_transfer();
-        self.tokens.nft_transfer(receiver_id, token_id, approval_id, memo);
+        self.tokens
+            .nft_transfer(receiver_id, token_id, approval_id, memo);
     }
 
     #[payable]
@@ -27,7 +28,8 @@ impl NonFungibleTokenCore for CertificationContract {
         msg: String,
     ) -> PromiseOrValue<bool> {
         self.assert_can_transfer();
-        self.tokens.nft_transfer_call(receiver_id, token_id, approval_id, memo, msg)
+        self.tokens
+            .nft_transfer_call(receiver_id, token_id, approval_id, memo, msg)
     }
 
     fn nft_token(&self, token_id: TokenId) -> Option<Token> {
