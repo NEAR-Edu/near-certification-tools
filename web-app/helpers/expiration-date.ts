@@ -11,7 +11,7 @@ type RawQueryResult = [
   {
     moment: string; // TODO: We need to describe here in a comment what 'moment' actually means. Is it always "end date of long inactivity period (>180 days)"?
     diff_to_previous_activity: number; // TODO: We need to describe here in a comment what this actually means.
-    has_long_period_of_inactivity: boolean; // TODO: We need to describe here in a comment what this actually means.
+    start_of_long_period_of_inactivity: string;
   },
 ];
 
@@ -24,17 +24,19 @@ type RawQueryResult = [
 // eslint-disable-next-line max-lines-per-function
 export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
   // TODO: Add explanation of query
+  // TODO: Figure out if diff_to_previous_activity needs to be decimal
   // *issue_date* <-----------Query - 1-----------> *last_activtiy*  <-----------Query - 2 -----------> *now*
   return Prisma.sql`
     WITH long_period_of_inactivity AS (
       SELECT 
       moment,
-      diff_to_previous_activity,
-      true AS has_long_period_of_inactivity
+      start_of_long_period_of_inactivity,
+      diff_to_previous_activity
       FROM (
         SELECT *,
           ((EXTRACT(epoch FROM moment) - EXTRACT(epoch FROM lag(moment) over (ORDER BY moment))) / 86400)::int /* 1 day = 60sec * 60min * 24h = 86400 sec*/
-          AS diff_to_previous_activity
+          AS diff_to_previous_activity,
+          LAG(moment) OVER (ORDER BY moment ) AS start_of_long_period_of_inactivity
         FROM (
           SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment
           FROM PUBLIC.RECEIPTS R
@@ -49,8 +51,8 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
       ), most_recent_activity AS (
       SELECT
       moment, 
-      CAST(NULL AS int) AS diff_to_previous_activity, /*  to match column numbers in both queries  */
-      false AS has_long_period_of_inactivity
+      CAST(NULL AS timestamp) AS start_of_long_period_of_inactivity,
+      CAST(NULL AS int) AS diff_to_previous_activity /*  to match column numbers in both queries  */
       FROM (
         SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment
         FROM PUBLIC.receipts R
@@ -106,6 +108,7 @@ export async function getExpiration(accountName: string, issuedAt: string): Prom
    */
   const result = await getRawQueryResult(accountName, issuedAt);
 
+  console.log({ result }); // https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
   /**
    * If the account doesn't have a period where it hasn't been active for 180 days straight after the issue date:
    * Days between last activity and render date is checked:
@@ -113,22 +116,15 @@ export async function getExpiration(accountName: string, issuedAt: string): Prom
    * Otherwise, if >180-day period of inactivity exist (has_long_period_of_inactivity === true) after issueDate,
    * -- Expiration date = the beginning of the *first* such period + 180 days
    */
-  const moment = dayjs.utc(result[0].moment); // https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
-
-  if (result[0].has_long_period_of_inactivity) {
+  if (result[0].start_of_long_period_of_inactivity) {
+    const moment = dayjs.utc(result[0].start_of_long_period_of_inactivity);
     /**
-     * >180-day period of inactivity exists. Can be anything over 180.
-     * moment is the end date of such period.
-     * Extract 180 from inactivity period to get the exact days betwen moment and actual expiration date.
+     * Add expirationDays to start_of_long_period_of_inactivity to get the specific date of expiration.
+     * This equals to (start of inactivity period + 180 days)
      */
-    const daysToMomentOfExpiration = result[0].diff_to_previous_activity - expirationDays;
-
-    /**
-     * Subtract daysToMomentOfExpiration from moment to get the specific date of expiration.
-     * This subtraction equals to (start of inactivity period + 180 days)
-     */
-    return moment.subtract(daysToMomentOfExpiration, 'days').format('YYYY-MM-DDTHH:mm:ss+00:00');
+    return moment.add(expirationDays, 'days').format('YYYY-MM-DDTHH:mm:ss+00:00');
   } else {
+    const moment = dayjs.utc(result[0].moment);
     return moment.add(expirationDays, 'days').format('YYYY-MM-DDTHH:mm:ss+00:00');
   }
 }

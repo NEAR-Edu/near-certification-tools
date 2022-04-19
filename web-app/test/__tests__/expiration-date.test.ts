@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
+import dayjs from 'dayjs';
 // import { prismaMock } from '../prisma/test-helpers/mock-client';
 import { getExpiration, getRawQueryResult } from '../../helpers/expiration-date';
-import { convertStringDateToMilliseconds } from '../../helpers/time';
+import { convertStringDateToMilliseconds, isBeforeNow } from '../../helpers/time';
 
 const prisma = new PrismaClient();
 
@@ -29,7 +30,7 @@ describe('test expiration date functions', () => {
        * --
        * Her cert has expired on
        * = 2021-03-02 + 180 days ( = 2021-12-23 - (296 - 180)days)
-       * = 2021-08-29
+       * = 2021-08-29T09:46:39+00:00
        */
       const issueDate = convertStringDateToMilliseconds('2021-03-02T00:00:00+00:00');
 
@@ -38,9 +39,9 @@ describe('test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2021-12-23T09:46:39+00:00', // moment column in query result should show end date of long inactivity period (2021-12-23T09:46:39+00:00)
+              moment: '2021-12-23T09:46:39+00:00', // moment column in query result should show end date of long inactivity period
+              start_of_long_period_of_inactivity: '2021-03-02T12:35:46+00:00', // start date of long inactivity period
               diff_to_previous_activity: 296,
-              has_long_period_of_inactivity: true,
             },
           ]),
         );
@@ -51,7 +52,7 @@ describe('test expiration date functions', () => {
          * Certificate expired 296 - 180 = 116 days prior to moment.
          * expiration date = 2021-12-23 - 116 = 2021-03-02 + 180 days = 2022-08-29
          */
-        await expect(getExpiration('sally.testnet', issueDate)).resolves.toEqual('2021-08-29T09:46:39+00:00');
+        await expect(getExpiration('sally.testnet', issueDate)).resolves.toEqual('2021-08-29T12:35:46+00:00');
       });
     });
 
@@ -79,16 +80,16 @@ describe('test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2021-10-06T22:10:05+00:00',
+              moment: '2021-10-06T22:10:05+00:00', // moment column in query result should show end date of long inactivity period
+              start_of_long_period_of_inactivity: '2021-03-16T20:08:59+00:00', // start date of long inactivity period
               diff_to_previous_activity: 204,
-              has_long_period_of_inactivity: true,
             },
           ]),
         );
       });
 
       it('should return correct expiration date for Steve', async () => {
-        await expect(getExpiration('steve.testnet', issueDate)).resolves.toEqual('2021-09-12T22:10:05+00:00');
+        await expect(getExpiration('steve.testnet', issueDate)).resolves.toEqual('2021-09-12T20:08:59+00:00');
       });
     });
   });
@@ -112,8 +113,8 @@ describe('test expiration date functions', () => {
           expect.arrayContaining([
             {
               moment: '2022-04-07T16:25:59+00:00',
+              start_of_long_period_of_inactivity: null,
               diff_to_previous_activity: null,
-              has_long_period_of_inactivity: false,
             },
           ]),
         );
@@ -155,9 +156,9 @@ describe('test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2019-10-01T00:00:00+00:00',
+              moment: '2019-10-01T00:00:00+00:00', // moment column in query result should show end date of long inactivity period
+              start_of_long_period_of_inactivity: '2018-10-01T00:00:00+00:00', // start date of long inactivity period
               diff_to_previous_activity: 365,
-              has_long_period_of_inactivity: true,
             },
           ]),
         );
@@ -172,7 +173,7 @@ describe('test expiration date functions', () => {
       // -- Test Case 5 --
       // ACCOUNT: alice.testnet
       /**
-       * Alice's cert was issued 2019-08-03
+       * Alice's cert was issued_at 2019-08-03T00:00:00+00:00
        * she has not had any mainnet activity for 214 days
        * then again no mainnet activity for 190 days
        * then again no mainnet activity for 182 days
@@ -189,9 +190,9 @@ describe('test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2020-03-04T08:25:59+00:00',
+              moment: '2020-03-04T08:25:59+00:00', // moment column in query result should show end date of long inactivity period
+              start_of_long_period_of_inactivity: '2019-08-03T00:00:00+00:00', // start date of long inactivity period
               diff_to_previous_activity: 214,
-              has_long_period_of_inactivity: true,
             },
           ]),
         );
@@ -199,8 +200,30 @@ describe('test expiration date functions', () => {
 
       it('should return expiration date for Alice as last activity date - (diff_to_previous_activity - 180)', async () => {
         // expiration date = 2020-03-04 - 34 = 2019-08-03 + 180 days = 2020-01-30
-        await expect(getExpiration('alice.testnet', issueDate)).resolves.toEqual('2020-01-30T08:25:59+00:00');
+        await expect(getExpiration('alice.testnet', issueDate)).resolves.toEqual('2020-01-30T00:00:00+00:00');
       });
+    });
+  });
+
+  // TODO: WIP!
+  describe('test the isBeforeNow function', () => {
+    // -- Test Case 6 --
+    // ACCOUNT: william.testnet
+    /**
+     * Williams's cert was issued 2019-08-03
+     * He has not had any mainnet activity for 214 days
+     * then again no mainnet activity for 190 days
+     * then again no mainnet activity for 182 days
+     * and has not had any mainnet activity since then.
+     * --
+     * Her certficate expired on
+     */
+    const issueDate = convertStringDateToMilliseconds(dayjs().subtract(180, 'day').subtract(6, 'hour').toISOString());
+
+    it('isBeforeNow should return true', async () => {
+      const expiration = await getExpiration('william.testnet', issueDate);
+      console.log({ expiration });
+      expect(isBeforeNow(expiration)).toBe(false);
     });
   });
 });
