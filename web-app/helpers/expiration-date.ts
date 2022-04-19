@@ -9,9 +9,8 @@ dayjs.extend(utc); // use dayjs utc plugin to avoid parsing different dates depe
 const expirationDays = 180; // Certificates expire after the first period of this many consecutive days of inactivity after issueDate.
 type RawQueryResult = [
   {
-    moment: string; // TODO: We need to describe here in a comment what 'moment' actually means. Is it always "end date of long inactivity period (>180 days)"?
-    diff_to_previous_activity: number; // TODO: We need to describe here in a comment what this actually means.
-    start_of_long_period_of_inactivity: string;
+    moment: string; // If account has had any inactivity period over 180 days, moment is the start date of such period. If account did not have any long (>=180 days) inactivity period, moment is the most recent activity date
+    diff_to_previous_activity: number;
   },
 ];
 
@@ -24,21 +23,19 @@ type RawQueryResult = [
 // eslint-disable-next-line max-lines-per-function
 export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
   // TODO: Add explanation of query
-  // TODO: Figure out if diff_to_previous_activity needs to be decimal
   // *issue_date* <-----------Query - 1-----------> *last_activtiy*  <-----------Query - 2 -----------> *now*
   return Prisma.sql`
     WITH long_period_of_inactivity AS (
       SELECT 
       moment,
-      start_of_long_period_of_inactivity,
-      diff_to_previous_activity
+      diff_to_previous_activity /* days passed since last activity */
       FROM (
         SELECT *,
-          ((EXTRACT(epoch FROM moment) - EXTRACT(epoch FROM lag(moment) over (ORDER BY moment))) / 86400)::int /* 1 day = 60sec * 60min * 24h = 86400 sec*/
+          ((EXTRACT(epoch FROM moment_of_activity) - EXTRACT(epoch FROM lag(moment_of_activity) over (ORDER BY moment_of_activity))) / 86400)::int /* 1 day = 60sec * 60min * 24h = 86400 sec*/
           AS diff_to_previous_activity,
-          LAG(moment) OVER (ORDER BY moment ) AS start_of_long_period_of_inactivity
+          LAG(moment_of_activity) OVER (ORDER BY moment_of_activity ) AS moment
         FROM (
-          SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment
+          SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment_of_activity
           FROM PUBLIC.RECEIPTS R
           LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
           WHERE SIGNER_ACCOUNT_ID = ${accountName}
@@ -51,7 +48,6 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
       ), most_recent_activity AS (
       SELECT
       moment, 
-      CAST(NULL AS timestamp) AS start_of_long_period_of_inactivity,
       CAST(NULL AS int) AS diff_to_previous_activity /*  to match column numbers in both queries  */
       FROM (
         SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment
@@ -104,27 +100,20 @@ export async function getExpiration(accountName: string, issuedAt: string): Prom
   /**
    * First query checks if the account has a period where it hasn't been active for 180 days straight after the issue date (excluding the render date)
    * Second query is run if no 180-day-inactivity period is found and returns most recent activity date
-   * AND amount of days between account's last activity date - render date of certificate
+   * --
+   * BOTH queries are set up to return the desired date in a column called 'moment'.
    */
+
   const result = await getRawQueryResult(accountName, issuedAt);
 
   console.log({ result }); // https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
   /**
    * If the account doesn't have a period where it hasn't been active for 180 days straight after the issue date:
    * Days between last activity and render date is checked:
-   * -- Expiration date = last activity + 180 days
-   * Otherwise, if >180-day period of inactivity exist (has_long_period_of_inactivity === true) after issueDate,
-   * -- Expiration date = the beginning of the *first* such period + 180 days
+   * -- Expiration date = last activity (moment) + 180 days
+   * Otherwise, if >180-day period of inactivity exists after issueDate,
+   * -- Expiration date = the beginning of the *first* such period (moment) + 180 days
    */
-  if (result[0].start_of_long_period_of_inactivity) {
-    const moment = dayjs.utc(result[0].start_of_long_period_of_inactivity);
-    /**
-     * Add expirationDays to start_of_long_period_of_inactivity to get the specific date of expiration.
-     * This equals to (start of inactivity period + 180 days)
-     */
-    return moment.add(expirationDays, 'days').format('YYYY-MM-DDTHH:mm:ss+00:00');
-  } else {
-    const moment = dayjs.utc(result[0].moment);
-    return moment.add(expirationDays, 'days').format('YYYY-MM-DDTHH:mm:ss+00:00');
-  }
+  const moment = dayjs.utc(result[0].moment);
+  return moment.add(expirationDays, 'days').format('YYYY-MM-DDTHH:mm:ss+00:00');
 }

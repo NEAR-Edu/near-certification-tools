@@ -28,9 +28,11 @@ describe('test expiration date functions', () => {
        * Her last mainnet activity was on 2021-12-23T09:46:39+00:00
        * and she hasn’t been active since 2021-12-23T09:46:39+00:00.
        * --
-       * Her cert has expired on
-       * = 2021-03-02 + 180 days ( = 2021-12-23 - (296 - 180)days)
-       * = 2021-08-29T09:46:39+00:00
+       * Her cert should have an expiration of:
+       * start_of_long_period_of_inactivity + 180 days
+       * So, expiration date
+       * = 2021-03-02T12:35:46+00:00 + 180 days
+       * = 2021-08-29T12:35:46+00:00
        */
       const issueDate = convertStringDateToMilliseconds('2021-03-02T00:00:00+00:00');
 
@@ -39,8 +41,7 @@ describe('test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2021-12-23T09:46:39+00:00', // moment column in query result should show end date of long inactivity period
-              start_of_long_period_of_inactivity: '2021-03-02T12:35:46+00:00', // start date of long inactivity period
+              moment: '2021-03-02T12:35:46+00:00', // Start date of long inactivity period
               diff_to_previous_activity: 296,
             },
           ]),
@@ -49,8 +50,8 @@ describe('test expiration date functions', () => {
 
       it('should return expiration date for Sally as last activity date - (diff_to_previous_activity - 180)', async () => {
         /**
-         * Certificate expired 296 - 180 = 116 days prior to moment.
-         * expiration date = 2021-12-23 - 116 = 2021-03-02 + 180 days = 2022-08-29
+         * Certificate expired 180 after start_of_long_period_of_inactivity
+         * Expiration date = 2021-03-02T12:35:46+00:00 + 180 days = 2021-08-29T12:35:46+00:00
          */
         await expect(getExpiration('sally.testnet', issueDate)).resolves.toEqual('2021-08-29T12:35:46+00:00');
       });
@@ -68,9 +69,11 @@ describe('test expiration date functions', () => {
        * But none of that activity after his 180+ days of inactivity matters because his certificate should have expired 180 days after the
        * beginning of the first long period of inactivity (>=180 days).
        * --
-       * His cert should have an expiration of: 2021-03-16 + 180 = 2021-09-12
-       * Double-check from another angle: Certificate expired 204 - 180 = 24 days prior to moment.
-       * So, expiration date = 2021-10-06 - 24 days = 2021-09-12 = 2021-03-16 + 180 days
+       * His cert should have an expiration of:
+       * start_of_long_period_of_inactivity + 180 days
+       * So, expiration date
+       * = 2021-03-16T20:08:59+00:00 + 180 days
+       * = 2021-09-12T20:08:59+00:00
        */
 
       const issueDate = convertStringDateToMilliseconds('2021-01-05T11:15:09+00:00');
@@ -80,8 +83,7 @@ describe('test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2021-10-06T22:10:05+00:00', // moment column in query result should show end date of long inactivity period
-              start_of_long_period_of_inactivity: '2021-03-16T20:08:59+00:00', // start date of long inactivity period
+              moment: '2021-03-16T20:08:59+00:00', // Start date of long inactivity period
               diff_to_previous_activity: 204,
             },
           ]),
@@ -89,6 +91,10 @@ describe('test expiration date functions', () => {
       });
 
       it('should return correct expiration date for Steve', async () => {
+        /**
+         * Certificate expired 180 after start_of_long_period_of_inactivity
+         * Expiration date = 2021-03-16T20:08:59+00:00 + 180 days = 2021-09-12T20:08:59+00:00
+         */
         await expect(getExpiration('steve.testnet', issueDate)).resolves.toEqual('2021-09-12T20:08:59+00:00');
       });
     });
@@ -112,8 +118,7 @@ describe('test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2022-04-07T16:25:59+00:00',
-              start_of_long_period_of_inactivity: null,
+              moment: '2022-04-07T16:25:59+00:00', // Most recent activity
               diff_to_previous_activity: null,
             },
           ]),
@@ -122,8 +127,8 @@ describe('test expiration date functions', () => {
 
       it('should return expiration date as last activity date + 180 for account with no 180-day inactivity period', async () => {
         /**
-         * last Activity: 2022-04-07T16:25:59+00:00
-         * expiration date = 2022-04-07T16:25:59+00:00 + 180 days = 2022-10-04
+         * Certificate expired 180 after moment (last activity)
+         * Expiration date = 2022-04-07T16:25:59+00:00 + 180 days = 2022-10-04
          */
         await expect(getExpiration('rebecca.testnet', issueDate)).resolves.toEqual('2022-10-04T16:25:59+00:00');
       });
@@ -143,9 +148,11 @@ describe('test expiration date functions', () => {
        * then, had frequent mainnet activity for a couple of months (through 2022-03-04T13:20:37+00:00)
        * His last mainnet activity was on 2022-03-04T13:20:37+00:00
        * --
-       * His cert has expired on
-       * = 2018-10-01 + 180 days (= 2019-10-01 - (365 - 180)days)
-       * = 2019-03-30, during the FIRST inactivity period
+       * His cert should have an expiration of:
+       * start_of_long_period_of_inactivity + 180 days
+       * So, expiration date
+       * = 2018-10-01T00:00:00+00:00 + 180 days
+       * = 2018-10-01T00:00:00+00:00
        */
 
       const issueDate = convertStringDateToMilliseconds('2018-10-01T00:00:00+00:00');
@@ -156,8 +163,7 @@ describe('test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2019-10-01T00:00:00+00:00', // moment column in query result should show end date of long inactivity period
-              start_of_long_period_of_inactivity: '2018-10-01T00:00:00+00:00', // start date of long inactivity period
+              moment: '2018-10-01T00:00:00+00:00', // Start date of long inactivity period
               diff_to_previous_activity: 365,
             },
           ]),
@@ -165,6 +171,10 @@ describe('test expiration date functions', () => {
       });
 
       it('should return expiration date for Bob as last activity date - (diff_to_previous_activity - 180)', async () => {
+        /**
+         * Certificate expired 180 after start_of_long_period_of_inactivity
+         * Expiration date = 2018-10-01T00:00:00+00:00 + 180 days = 2019-03-30T00:00:00+00:00
+         */
         await expect(getExpiration('bob.testnet', issueDate)).resolves.toEqual('2019-03-30T00:00:00+00:00');
       });
     });
@@ -179,7 +189,11 @@ describe('test expiration date functions', () => {
        * then again no mainnet activity for 182 days
        * and has not had any mainnet activity since then.
        * --
-       * Her certficate expired on
+       * Her cert should have an expiration of:
+       * start_of_long_period_of_inactivity + 180 days
+       * So, expiration date
+       * = 2019-08-03T00:00:00+00:00 + 180 days
+       * = 2020-01-30T00:00:00+00:00
        */
 
       const issueDate = convertStringDateToMilliseconds('2019-08-03T00:00:00+00:00');
@@ -190,8 +204,7 @@ describe('test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2020-03-04T08:25:59+00:00', // moment column in query result should show end date of long inactivity period
-              start_of_long_period_of_inactivity: '2019-08-03T00:00:00+00:00', // start date of long inactivity period
+              moment: '2019-08-03T00:00:00+00:00', // Start date of long inactivity period
               diff_to_previous_activity: 214,
             },
           ]),
@@ -199,7 +212,10 @@ describe('test expiration date functions', () => {
       });
 
       it('should return expiration date for Alice as last activity date - (diff_to_previous_activity - 180)', async () => {
-        // expiration date = 2020-03-04 - 34 = 2019-08-03 + 180 days = 2020-01-30
+        /**
+         * Certificate expired 180 after start_of_long_period_of_inactivity
+         * Expiration date = 2019-08-03T00:00:00+00:00 + 180 days = 2020-01-30T00:00:00+00:00
+         */
         await expect(getExpiration('alice.testnet', issueDate)).resolves.toEqual('2020-01-30T00:00:00+00:00');
       });
     });
@@ -210,13 +226,7 @@ describe('test expiration date functions', () => {
     // -- Test Case 6 --
     // ACCOUNT: william.testnet
     /**
-     * Williams's cert was issued 2019-08-03
-     * He has not had any mainnet activity for 214 days
-     * then again no mainnet activity for 190 days
-     * then again no mainnet activity for 182 days
-     * and has not had any mainnet activity since then.
-     * --
-     * Her certficate expired on
+     * Williams's cert was issued_at
      */
     const issueDate = convertStringDateToMilliseconds(dayjs().subtract(180, 'day').subtract(6, 'hour').toISOString());
 
