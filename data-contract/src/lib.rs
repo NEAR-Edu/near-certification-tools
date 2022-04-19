@@ -1,30 +1,19 @@
 use std::collections::HashMap;
 
-use near_contract_standards::{
-    non_fungible_token::{
-        core::{NonFungibleTokenCore, NonFungibleTokenResolver},
-        metadata::{NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata},
-        NonFungibleToken,
-        Token,
-        TokenId,
-    }
+use near_contract_standards::non_fungible_token::{
+    core::{NonFungibleTokenCore, NonFungibleTokenResolver},
+    metadata::{NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata},
+    NonFungibleToken, Token, TokenId,
 };
 use near_sdk::{
-    AccountId,
     assert_one_yocto,
     borsh::{self, BorshDeserialize, BorshSerialize},
-    BorshStorageKey,
     collections::LazyOption,
     env,
     json_types::*,
-    log,
-    near_bindgen,
-    PanicOnDefault,
-    Promise,
-    PromiseOrValue,
-    require,
+    log, near_bindgen, require,
     serde::{Deserialize, Serialize},
-    serde_json,
+    serde_json, AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseOrValue,
 };
 
 use storage_key::StorageKey;
@@ -32,25 +21,20 @@ use storage_key::StorageKey;
 pub use crate::contract::CertificationContract;
 use crate::metadata::CertificationExtraMetadata;
 
+mod contract;
+mod event;
 mod metadata;
 mod storage_key;
-mod contract;
 mod utils;
-mod event;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
-    use near_contract_standards::{
-        non_fungible_token::{
-            approval::NonFungibleTokenApproval,
-            metadata::NFT_METADATA_SPEC,
-        }
+    use near_contract_standards::non_fungible_token::{
+        approval::NonFungibleTokenApproval, metadata::NFT_METADATA_SPEC,
     };
     use near_sdk::{
-        Balance,
-        StorageUsage,
         test_utils::{accounts, VMContextBuilder},
-        testing_env,
+        testing_env, Balance, StorageUsage,
     };
 
     use crate::contract::{CertificationContract, CertificationContractInitOptions};
@@ -161,7 +145,8 @@ mod tests {
         println!(
             "Balance delta: {} yNEAR ({} NEAR)",
             final_state.balance as i128 - initial_state.balance as i128,
-            (final_state.balance as i128 - initial_state.balance as i128) as f64 / f64::powf(10f64, 24f64),
+            (final_state.balance as i128 - initial_state.balance as i128) as f64
+                / f64::powf(10f64, 24f64),
         );
         println!(
             "Storage delta: {}kB, cost: {} yNEAR ({} NEAR)",
@@ -181,7 +166,9 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: false,
-            });
+                trash_account: Some("0".repeat(64).parse().unwrap()),
+            },
+        );
         testing_env!(context.is_view(true).build());
         assert_eq!(contract.nft_token("1".to_string()), None);
     }
@@ -209,7 +196,9 @@ mod tests {
                 CertificationContractInitOptions {
                     can_transfer,
                     can_invalidate,
-                });
+                    trash_account: Some("0".repeat(64).parse().unwrap()),
+                },
+            );
 
             testing_env!(context.is_view(true).build());
             assert_eq!(contract.cert_can_transfer(), can_transfer);
@@ -217,14 +206,14 @@ mod tests {
         }
     }
 
-    fn init_contract(owner_id: AccountId, contract_metadata: NFTContractMetadata, init_options: CertificationContractInitOptions) -> (VMContextBuilder, CertificationContract) {
+    fn init_contract(
+        owner_id: AccountId,
+        contract_metadata: NFTContractMetadata,
+        init_options: CertificationContractInitOptions,
+    ) -> (VMContextBuilder, CertificationContract) {
         let context = get_context(owner_id.clone());
         testing_env!(context.build());
-        let contract = CertificationContract::new(
-            owner_id,
-            contract_metadata,
-            init_options,
-        );
+        let contract = CertificationContract::new(owner_id, contract_metadata, init_options);
 
         (context, contract)
     }
@@ -237,7 +226,9 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: true,
                 can_invalidate: false,
-            });
+                trash_account: Some("0".repeat(64).parse().unwrap()),
+            },
+        );
 
         testing_env!(context
             .storage_usage(env::storage_usage())
@@ -270,14 +261,13 @@ mod tests {
         println!("Token mint:");
         print_monitor(initial_storage);
 
-        testing_env!(context
-            .attached_deposit(1)
-            .build()
-        );
+        testing_env!(context.attached_deposit(1).build());
 
         contract.nft_transfer(accounts(1), token_id.clone(), None, None);
 
-        let transferred_token = contract.nft_token(token_id.clone()).expect("Token exists after transfer");
+        let transferred_token = contract
+            .nft_token(token_id.clone())
+            .expect("Token exists after transfer");
 
         assert_eq!(transferred_token.token_id, token_id);
         assert_eq!(transferred_token.owner_id, accounts(1));
@@ -299,7 +289,9 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: false,
-            });
+                trash_account: Some("0".repeat(64).parse().unwrap()),
+            },
+        );
 
         testing_env!(context
             .storage_usage(env::storage_usage())
@@ -332,23 +324,22 @@ mod tests {
         print_monitor(initial_storage);
 
         // Test transferability
-        testing_env!(context
-            .attached_deposit(1)
-            .build()
-        );
+        testing_env!(context.attached_deposit(1).build());
 
         contract.nft_transfer(accounts(1), token_id.clone(), None, None);
     }
 
     #[test]
-    fn mint_can_invalidate_true() {
+    fn mint_can_invalidate_true_to_trash() {
         let (mut context, mut contract) = init_contract(
             accounts(0),
             sample_metadata_contract(),
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: true,
-            });
+                trash_account: Some("0".repeat(64).parse().unwrap()),
+            },
+        );
 
         testing_env!(context
             .storage_usage(env::storage_usage())
@@ -381,14 +372,82 @@ mod tests {
         print_monitor(initial_storage);
 
         // Test transferability
-        testing_env!(context
-            .attached_deposit(1)
-            .build()
-        );
+        testing_env!(context.attached_deposit(1).build());
 
         contract.cert_invalidate(token_id.clone(), None);
 
-        let invalidated_token = contract.nft_token(token_id.clone()).expect("Token exists after invalidation");
+        let invalidated_token = contract
+            .nft_token(token_id.clone())
+            .expect("Token exists after invalidation");
+
+        assert_eq!(contract.cert_is_valid(token_id.clone()), false);
+        assert_eq!(invalidated_token.token_id, token_id);
+        assert_eq!(invalidated_token.owner_id, "0".repeat(64).parse().unwrap());
+        assert_eq!(
+            invalidated_token.metadata.unwrap(),
+            TokenMetadata {
+                extra: Some(
+                    CertificationExtraMetadata {
+                        valid: false,
+                        ..sample_metadata_certification_nontransferable()
+                    }
+                    .to_json()
+                ),
+                ..sample_metadata_token()
+            },
+        );
+    }
+
+    #[test]
+    fn mint_can_invalidate_true_no_trash() {
+        let (mut context, mut contract) = init_contract(
+            accounts(0),
+            sample_metadata_contract(),
+            CertificationContractInitOptions {
+                can_transfer: false,
+                can_invalidate: true,
+                trash_account: None,
+            },
+        );
+
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(MINT_MAX_COST)
+            .predecessor_account_id(accounts(0))
+            .build());
+
+        let initial_storage = start_monitor();
+
+        let token_id = "0".to_string();
+        let token = contract.nft_mint(
+            token_id.clone(),
+            accounts(0).into(),
+            sample_metadata_token(),
+            sample_metadata_certification_nontransferable(),
+            None,
+        );
+        assert_eq!(token.token_id, token_id);
+        assert_eq!(token.owner_id, accounts(0));
+        assert_eq!(
+            token.metadata.unwrap(),
+            TokenMetadata {
+                extra: Some(sample_metadata_certification_nontransferable().to_json()),
+                ..sample_metadata_token()
+            },
+        );
+        assert_eq!(token.approved_account_ids.unwrap(), HashMap::new());
+        assert_eq!(contract.cert_is_valid(token_id.clone()), true);
+
+        print_monitor(initial_storage);
+
+        // Test transferability
+        testing_env!(context.attached_deposit(1).build());
+
+        contract.cert_invalidate(token_id.clone(), None);
+
+        let invalidated_token = contract
+            .nft_token(token_id.clone())
+            .expect("Token exists after invalidation");
 
         assert_eq!(contract.cert_is_valid(token_id.clone()), false);
         assert_eq!(invalidated_token.token_id, token_id);
@@ -396,10 +455,13 @@ mod tests {
         assert_eq!(
             invalidated_token.metadata.unwrap(),
             TokenMetadata {
-                extra: Some(CertificationExtraMetadata {
-                    valid: false,
-                    ..sample_metadata_certification_nontransferable()
-                }.to_json()),
+                extra: Some(
+                    CertificationExtraMetadata {
+                        valid: false,
+                        ..sample_metadata_certification_nontransferable()
+                    }
+                    .to_json()
+                ),
                 ..sample_metadata_token()
             },
         );
@@ -414,7 +476,9 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: false,
-            });
+                trash_account: Some("0".repeat(64).parse().unwrap()),
+            },
+        );
 
         testing_env!(context
             .storage_usage(env::storage_usage())
@@ -447,10 +511,7 @@ mod tests {
         print_monitor(initial_storage);
 
         // Test transferability
-        testing_env!(context
-            .attached_deposit(1)
-            .build()
-        );
+        testing_env!(context.attached_deposit(1).build());
 
         contract.cert_invalidate(token_id.clone(), None);
     }
@@ -463,7 +524,9 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: false,
-            });
+                trash_account: Some("0".repeat(64).parse().unwrap()),
+            },
+        );
 
         testing_env!(context
             .storage_usage(env::storage_usage())
@@ -504,7 +567,9 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: false,
-            });
+                trash_account: Some("0".repeat(64).parse().unwrap()),
+            },
+        );
 
         testing_env!(context
             .storage_usage(env::storage_usage())
@@ -552,7 +617,9 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: false,
-            });
+                trash_account: Some("0".repeat(64).parse().unwrap()),
+            },
+        );
 
         testing_env!(context
             .storage_usage(env::storage_usage())

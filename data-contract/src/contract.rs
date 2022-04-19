@@ -14,6 +14,7 @@ pub struct CertificationContract {
     pub(crate) metadata: LazyOption<NFTContractMetadata>,
     pub(crate) can_transfer: bool,
     pub(crate) can_invalidate: bool,
+    pub(crate) trash_account: LazyOption<AccountId>,
 }
 
 #[near_bindgen]

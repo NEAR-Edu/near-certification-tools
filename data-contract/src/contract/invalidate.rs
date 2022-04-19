@@ -46,9 +46,14 @@ impl CertificationContract {
             });
 
         self.create_event_log(CertificationEventLogData::Invalidate {
-            token_id,
+            token_id: token_id.to_owned(),
             recipient_id,
             memo,
         }).emit();
+
+        if let Some(ref trash_account) = self.trash_account.get() {
+            let owner_id = self.tokens.owner_by_id.get(&token_id).unwrap();
+            self.tokens.internal_transfer(&owner_id, trash_account, &token_id, None, None);
+        }
     }
 }
