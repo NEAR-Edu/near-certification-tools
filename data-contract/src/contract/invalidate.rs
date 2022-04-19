@@ -64,4 +64,40 @@ impl CertificationContract {
                 .internal_transfer(&owner_id, trash_account, &token_id, None, None);
         }
     }
+
+    #[payable]
+    pub fn cert_delete(&mut self, token_id: TokenId, memo: Option<String>) {
+        // TODO: Refund storage deposit to somebody or provide method for withdrawing funds
+
+        // Force owner only
+        self.assert_owner();
+        // Force verification
+        assert_one_yocto();
+
+        // Remove approval
+        self.tokens.approvals_by_id.as_mut().map(|approvals_by_id| {
+            approvals_by_id.remove(&token_id);
+        });
+
+        let owner_id = self.tokens.owner_by_id.get(&token_id).unwrap();
+
+        // Remove enumeration
+        if let Some(tokens_per_owner) = &mut self.tokens.tokens_per_owner {
+            tokens_per_owner.get(&owner_id).as_mut().map(|tok| {
+                tok.remove(&token_id);
+                tokens_per_owner.insert(&owner_id, &tok);
+            });
+        }
+
+        // Remove metadata
+        self.tokens
+            .token_metadata_by_id
+            .as_mut()
+            .and_then(|by_id| by_id.remove(&token_id));
+
+        // Remove from owners map
+        self.tokens.owner_by_id.remove(&token_id);
+
+        // TODO: Emit event
+    }
 }
