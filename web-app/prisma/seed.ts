@@ -3,11 +3,10 @@
 // Disabling TypeScript checking for this file since it's only seeding. https://stackoverflow.com/a/51774725/470749
 import prisma from '../test/test-helpers/client';
 import { convertStringDateToNanoseconds } from '../helpers/time';
-import generateActivityData from '../test/test-helpers/generate-account-activities';
+import { generateActivityData, generateDynamicActivityData } from '../test/test-helpers/generate-account-activities';
 
 // TODO: Add missing data
 // TODO: refactor comments
-// TODO: change startDate and endDate format to YYYY-MM-DDTHH:mm:ss+00:00
 
 // eslint-disable-next-line max-lines-per-function
 async function main() {
@@ -301,6 +300,44 @@ async function main() {
     });
   });
   // ########### END OF SEEDING DATA FOR alice.testnet ###########
+
+  // ########### START OF SEEDING DATA FOR william.testnet ###########
+  /**
+   * ~~william.testnet
+   */
+
+  // william.testnet data
+  const dataWilliam = {
+    signer_account_id: 'william.testnet',
+    account_activities: [],
+  };
+
+  await generateDynamicActivityData(dataWilliam);
+
+  // Seed DB with william.testnet activity data
+  // Create receipts and action_receipts for william.testnet
+  dataWilliam.account_activities.forEach(async (action) => {
+    await prisma.receipts.upsert({
+      where: { receipt_id: action.receipt_id },
+      update: {
+        included_in_block_timestamp: action.included_in_block_timestamp,
+      },
+      create: {
+        receipt_id: action.receipt_id,
+        included_in_block_timestamp: action.included_in_block_timestamp,
+      },
+    });
+
+    await prisma.action_receipts.upsert({
+      where: { receipt_id: action.receipt_id },
+      update: {},
+      create: {
+        receipt_id: action.receipt_id,
+        signer_account_id: dataWilliam.signer_account_id,
+      },
+    });
+  });
+  // ########### END OF SEEDING DATA FOR william.testnet ###########
 
   console.log('✨ Seeding finished!');
 }
