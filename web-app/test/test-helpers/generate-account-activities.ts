@@ -18,7 +18,7 @@ export default async function generateActivityData(data: ActivityData, startDate
   const endDateDayJs = dayjs.utc(endDate);
   const duration = endDateDayJs.diff(startDateDayJs, timeUnit); // Duration between startDate and endDate in timeUnit (i.e. days, hours,...)
 
-  // add activity every value of interval in given timeUnit
+  // Add activity every value of interval in given timeUnit
   for (let i = interval; i < duration; i += interval) {
     const date = startDateDayJs.add(i, timeUnit).format('YYYY-MM-DDTHH:mm:ss+00:00');
 
