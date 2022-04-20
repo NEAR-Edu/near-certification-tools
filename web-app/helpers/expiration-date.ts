@@ -10,7 +10,7 @@ const expirationDays = 180; // Certificates expire after the first period of thi
 type RawQueryResult = [
   {
     moment: string; // If account has had any inactivity period over 180 days, moment is the start date of such period. If account did not have any long (>=180 days) inactivity period, moment is the most recent activity date
-    diff_to_previous_activity: number;
+    diff_to_previous_activity: number; // Number of days of inactivity if long (>=180 days) inactivity period is present for given account
   },
 ];
 
@@ -105,15 +105,19 @@ export async function getExpiration(accountName: string, issuedAt: string): Prom
    */
 
   const result = await getRawQueryResult(accountName, issuedAt);
+  console.log({ result });
 
-  console.log({ result }); // https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
   /**
    * If the account doesn't have a period where it hasn't been active for 180 days straight after the issue date:
    * Days between last activity and render date is checked:
    * -- Expiration date = last activity (moment) + 180 days
    * Otherwise, if >180-day period of inactivity exists after issueDate,
    * -- Expiration date = the beginning of the *first* such period (moment) + 180 days
+   * If query doesn't return any result:
+   * -- return expiration date as issue date + 180 days
    */
-  const moment = dayjs.utc(result[0].moment);
+
+  const moment = result.length ? dayjs.utc(result[0].moment) : dayjs.utc(parseInt(issuedAt, 10)); // https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
+
   return moment.add(expirationDays, 'days').format('YYYY-MM-DDTHH:mm:ss+00:00');
 }
