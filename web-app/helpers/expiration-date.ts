@@ -23,6 +23,7 @@ type RawQueryResult = [
 // eslint-disable-next-line max-lines-per-function
 export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
   // TODO: Add explanation of query
+  // TODO: Assuming issuance of cert doesn't show up as mainnet activity, figure out approach if account had long period of inactivity right after issue date
   // *issue_date* <-----------Query - 1-----------> *last_activtiy*  <-----------Query - 2 -----------> *now*
   return Prisma.sql`
     WITH long_period_of_inactivity AS (
