@@ -704,4 +704,65 @@ mod tests {
         );
         assert_eq!(Into::<u128>::into(contract.nft_total_supply()), 0);
     }
+
+    #[test]
+    fn test_withdraw() {
+        let (mut context, mut contract) = init_contract(
+            accounts(0),
+            sample_metadata_contract(),
+            CertificationContractInitOptions {
+                can_transfer: false,
+                can_invalidate: false,
+                trash_account: Some("0".repeat(64).parse().unwrap()),
+            },
+        );
+
+        let balance_0 = env::account_balance();
+        let max_withdrawal_0 = contract.get_max_withdrawal().0;
+
+        assert!(max_withdrawal_0 < balance_0);
+
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(MINT_MAX_COST)
+            .predecessor_account_id(accounts(0))
+            .build());
+        let token_id = "0".to_string();
+        contract.nft_mint(
+            token_id.clone(),
+            Some(accounts(0)),
+            sample_metadata_token(),
+            sample_metadata_certification_nontransferable(),
+            None,
+        );
+
+        let token = contract.nft_token(token_id.clone());
+        assert!(token.is_some());
+
+        let balance_1 = env::account_balance();
+        let max_withdrawal_1 = contract.get_max_withdrawal().0;
+
+        assert_eq!(
+            max_withdrawal_0, max_withdrawal_1,
+            "Maximum withdrawal should not change if no storage lockup has been freed",
+        );
+        assert!(balance_1 > balance_0);
+
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(1)
+            .predecessor_account_id(accounts(0))
+            .build());
+        contract.withdraw_max();
+        assert_eq!(
+            Into::<u128>::into(contract.get_max_withdrawal()),
+            0,
+            "Max withdrawal should be 0 after performing max withdrawal"
+        );
+        assert_eq!(
+            env::account_balance(),
+            balance_1 - max_withdrawal_1,
+            "Balance should have decreased by withdrawal amount"
+        );
+    }
 }

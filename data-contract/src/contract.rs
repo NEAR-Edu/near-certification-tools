@@ -55,4 +55,28 @@ impl CertificationContract {
 
         self.metadata.set(&metadata);
     }
+
+    pub fn get_max_withdrawal(&self) -> U128 {
+        U128::from(env::account_balance() - env::storage_byte_cost() * env::storage_usage() as u128)
+    }
+
+    #[payable]
+    pub fn withdraw(&mut self, amount: U128) -> Promise {
+        // Force owner
+        self.assert_owner();
+        // Force verification
+        assert_one_yocto();
+
+        let amount = amount.into();
+        let max = self.get_max_withdrawal().into();
+
+        require!(amount <= max, "Insufficient balance");
+
+        Promise::new(self.owner_id()).transfer(amount)
+    }
+
+    #[payable]
+    pub fn withdraw_max(&mut self) -> Promise {
+        self.withdraw(self.get_max_withdrawal())
+    }
 }
