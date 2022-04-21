@@ -1,3 +1,7 @@
+use std::str::FromStr;
+
+use near_contract_standards::non_fungible_token::events::NftTransfer;
+
 use crate::contract::*;
 use crate::event::*;
 use crate::*;
@@ -67,6 +71,8 @@ impl CertificationContract {
 
     #[payable]
     pub fn cert_delete(&mut self, token_id: TokenId, memo: Option<String>) {
+        // Disallow deletion if invalidation is disallowed (deletion is the stronger action)
+        self.assert_can_invalidate();
         // Force owner only
         self.assert_owner();
         // Force verification
@@ -99,6 +105,15 @@ impl CertificationContract {
         // Remove from owners map
         self.tokens.owner_by_id.remove(&token_id);
 
-        // TODO: Emit event
+        // Emit nonstandard NFT transfer event
+        NftTransfer {
+            old_owner_id: &owner_id,
+            // Intentionally invalid `new_owner_id` because a standard "NFT Deleted" event doesn't exist
+            new_owner_id: &AccountId::new_unchecked(String::new()),
+            token_ids: &[&token_id],
+            authorized_id: Some(&self.owner_id()),
+            memo: memo.as_deref(),
+        }
+        .emit();
     }
 }
