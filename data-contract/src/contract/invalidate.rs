@@ -67,8 +67,6 @@ impl CertificationContract {
 
     #[payable]
     pub fn cert_delete(&mut self, token_id: TokenId, memo: Option<String>) {
-        // TODO: Refund storage deposit to somebody or provide method for withdrawing funds
-
         // Force owner only
         self.assert_owner();
         // Force verification
