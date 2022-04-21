@@ -6,6 +6,8 @@ use crate::contract::*;
 use crate::event::*;
 use crate::*;
 
+struct UnsafeAccountId(pub String);
+
 #[near_bindgen]
 impl CertificationContract {
     pub fn cert_is_valid(&self, token_id: TokenId) -> bool {
@@ -105,11 +107,15 @@ impl CertificationContract {
         // Remove from owners map
         self.tokens.owner_by_id.remove(&token_id);
 
+        let empty_account_id: AccountId = unsafe {
+            std::mem::transmute(UnsafeAccountId(String::new()))
+        };
+
         // Emit nonstandard NFT transfer event
         NftTransfer {
             old_owner_id: &owner_id,
             // Intentionally invalid `new_owner_id` because a standard "NFT Deleted" event doesn't exist
-            new_owner_id: &AccountId::new_unchecked(String::new()),
+            new_owner_id: &empty_account_id,
             token_ids: &[&token_id],
             authorized_id: Some(&self.owner_id()),
             memo: memo.as_deref(),

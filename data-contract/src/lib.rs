@@ -667,7 +667,7 @@ mod tests {
             sample_metadata_contract(),
             CertificationContractInitOptions {
                 can_transfer: false,
-                can_invalidate: false,
+                can_invalidate: true,
                 trash_account: Some("0".repeat(64).parse().unwrap()),
             },
         );
