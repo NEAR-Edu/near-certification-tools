@@ -82,18 +82,21 @@ impl CertificationContract {
         let owner_id = self.tokens.owner_by_id.get(&token_id).unwrap();
 
         // Remove enumeration
-        if let Some(tokens_per_owner) = &mut self.tokens.tokens_per_owner {
-            tokens_per_owner.get(&owner_id).as_mut().map(|tok| {
-                tok.remove(&token_id);
-                tokens_per_owner.insert(&owner_id, &tok);
+        self.tokens
+            .tokens_per_owner
+            .as_mut()
+            .map(|tokens_per_owner| {
+                tokens_per_owner.get(&owner_id).as_mut().map(|tok| {
+                    tok.remove(&token_id);
+                    tokens_per_owner.insert(&owner_id, &tok);
+                });
             });
-        }
 
         // Remove metadata
         self.tokens
             .token_metadata_by_id
             .as_mut()
-            .and_then(|by_id| by_id.remove(&token_id));
+            .map(|by_id| by_id.remove(&token_id));
 
         // Remove from owners map
         self.tokens.owner_by_id.remove(&token_id);
