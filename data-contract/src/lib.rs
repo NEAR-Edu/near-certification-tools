@@ -30,7 +30,8 @@ mod utils;
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
     use near_contract_standards::non_fungible_token::{
-        approval::NonFungibleTokenApproval, metadata::NFT_METADATA_SPEC,
+        approval::NonFungibleTokenApproval, enumeration::NonFungibleTokenEnumeration,
+        metadata::NFT_METADATA_SPEC,
     };
     use near_sdk::{
         test_utils::{accounts, VMContextBuilder},
@@ -657,5 +658,50 @@ mod tests {
             .attached_deposit(0)
             .build());
         assert!(!contract.nft_is_approved(token_id.clone(), accounts(1), Some(1)));
+    }
+
+    #[test]
+    fn test_delete() {
+        let (mut context, mut contract) = init_contract(
+            accounts(0),
+            sample_metadata_contract(),
+            CertificationContractInitOptions {
+                can_transfer: false,
+                can_invalidate: false,
+                trash_account: Some("0".repeat(64).parse().unwrap()),
+            },
+        );
+
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(MINT_MAX_COST)
+            .predecessor_account_id(accounts(0))
+            .build());
+        let token_id = "0".to_string();
+        contract.nft_mint(
+            token_id.clone(),
+            Some(accounts(0)),
+            sample_metadata_token(),
+            sample_metadata_certification_nontransferable(),
+            None,
+        );
+
+        let token = contract.nft_token(token_id.clone());
+        assert!(token.is_some());
+
+        // delete certificate
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(1)
+            .predecessor_account_id(accounts(0))
+            .build());
+        contract.cert_delete(token_id.clone(), None);
+
+        assert!(contract.nft_token(token_id.clone()).is_none());
+        assert_eq!(
+            Into::<u128>::into(contract.nft_supply_for_owner(accounts(0))),
+            0
+        );
+        assert_eq!(Into::<u128>::into(contract.nft_total_supply()), 0);
     }
 }
