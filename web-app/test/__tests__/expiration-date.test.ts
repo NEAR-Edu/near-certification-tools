@@ -23,7 +23,7 @@ describe('Test expiration date functions', () => {
     // ACCOUNT: sally.testnet
     describe('Account with 180 day inactivity and no frequent activity after issue date of certificate', () => {
       /**
-       * Sally’s certificate was issued_at 2021-03-02TT12:35:46+00:00,
+       * Sally’s certificate was issued_at 2021-03-02T12:35:46+00:00,
        * She had no mainnet activitiy for 296 days (i.e. >180-days of inactivity)
        * Her last mainnet activity was on 2021-12-23T09:46:39+00:00
        * and she hasn’t been active since 2021-12-23T09:46:39+00:00
@@ -34,7 +34,7 @@ describe('Test expiration date functions', () => {
        * = 2021-08-29T12:35:46+00:00
        */
 
-      const issueDate = convertStringDateToMilliseconds('2021-03-02TT12:35:46+00:00');
+      const issueDate = convertStringDateToMilliseconds('2021-03-02T12:35:46+00:00');
 
       it('Should return query result for Sally when 180-days inactivity is present and moment should be start date of first occurance of such period', async () => {
         const queryResult = await getRawQueryResult('sally.testnet', issueDate);
