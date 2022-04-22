@@ -25,6 +25,7 @@ type RawQueryResult = [
 export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
   // TODO: Add explanation of query
   // TODO: Assuming issuance of cert doesn't show up as mainnet activity, figure out approach if account had long period of inactivity right after issue date
+  // TODO: figure out why steve.testnet test case is failing with new query
   // *issue_date* <-----------Query - 1-----------> *last_activtiy*  <-----------Query - 2 -----------> *now*
   return Prisma.sql`
   WITH long_period_of_inactivity AS (
@@ -65,7 +66,7 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
           ) as account_activity_dates
         ) as account_activity_periods
       ) as account_activity_periods_with_first_activity
-    ) as test
+    ) as account_activity_periods_with_days_between_issue_date_and_first_activity
     WHERE (diff_to_next_activity > ${expirationDays})
     ORDER BY moment ASC
     LIMIT 1)
