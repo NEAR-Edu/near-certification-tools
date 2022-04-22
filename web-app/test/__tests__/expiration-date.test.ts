@@ -23,7 +23,7 @@ describe('Test expiration date functions', () => {
     // ACCOUNT: sally.testnet
     describe('Account with 180 day inactivity and no frequent activity after issue date of certificate', () => {
       /**
-       * Sally’s certificate was issued_at 2021-03-02T00:00:00+00:00,
+       * Sally’s certificate was issued_at 2021-03-02TT12:35:46+00:00,
        * She had no mainnet activitiy for 296 days (i.e. >180-days of inactivity)
        * Her last mainnet activity was on 2021-12-23T09:46:39+00:00
        * and she hasn’t been active since 2021-12-23T09:46:39+00:00
@@ -34,7 +34,7 @@ describe('Test expiration date functions', () => {
        * = 2021-08-29T12:35:46+00:00
        */
 
-      const issueDate = convertStringDateToMilliseconds('2021-03-02T00:00:00+00:00');
+      const issueDate = convertStringDateToMilliseconds('2021-03-02TT12:35:46+00:00');
 
       it('Should return query result for Sally when 180-days inactivity is present and moment should be start date of first occurance of such period', async () => {
         const queryResult = await getRawQueryResult('sally.testnet', issueDate);
@@ -42,7 +42,8 @@ describe('Test expiration date functions', () => {
           expect.arrayContaining([
             {
               moment: '2021-03-02T12:35:46+00:00', // Start date of long inactivity period
-              diff_to_previous_activity: 296,
+              diff_to_next_activity: null,
+              days_between_issue_date_and_first_activity: 296,
             },
           ]),
         );
@@ -116,7 +117,8 @@ describe('Test expiration date functions', () => {
           expect.arrayContaining([
             {
               moment: '2021-03-16T20:08:59+00:00', // Start date of long inactivity period
-              diff_to_previous_activity: 204,
+              diff_to_next_activity: 204,
+              days_between_issue_date_and_first_activity: null,
             },
           ]),
         );
@@ -157,7 +159,8 @@ describe('Test expiration date functions', () => {
           expect.arrayContaining([
             {
               moment: '2018-10-01T00:00:00+00:00', // Start date of long inactivity period
-              diff_to_previous_activity: 365,
+              diff_to_next_activity: null,
+              days_between_issue_date_and_first_activity: 365,
             },
           ]),
         );
@@ -197,7 +200,8 @@ describe('Test expiration date functions', () => {
           expect.arrayContaining([
             {
               moment: '2019-08-03T00:00:00+00:00', // Start date of long inactivity period
-              diff_to_previous_activity: 214,
+              diff_to_next_activity: null,
+              days_between_issue_date_and_first_activity: 214,
             },
           ]),
         );
@@ -213,6 +217,7 @@ describe('Test expiration date functions', () => {
     });
   });
 
+  // eslint-disable-next-line max-lines-per-function
   describe('Accounts with frequent activity and no 180 day inactivity after issue date', () => {
     // -- Test Case 6 --
     // ACCOUNT: rebecca.testnet
@@ -235,7 +240,8 @@ describe('Test expiration date functions', () => {
           expect.arrayContaining([
             {
               moment: '2022-04-07T16:25:59+00:00', // Most recent activity
-              diff_to_previous_activity: null,
+              diff_to_next_activity: null,
+              days_between_issue_date_and_first_activity: null,
             },
           ]),
         );
@@ -264,6 +270,19 @@ describe('Test expiration date functions', () => {
        */
 
       const issueDate = convertStringDateToMilliseconds('2022-04-06T01:00:00+00:00');
+
+      it('should return query result for Jennifer', async () => {
+        const queryResult = await getRawQueryResult('jennifer.testnet', issueDate);
+        expect(queryResult).toEqual(
+          expect.arrayContaining([
+            {
+              moment: '2022-04-06T10:10:00+00:00', // Most recent activity
+              diff_to_next_activity: null,
+              days_between_issue_date_and_first_activity: null,
+            },
+          ]),
+        );
+      });
 
       it('jennifer', async () => {
         /**
