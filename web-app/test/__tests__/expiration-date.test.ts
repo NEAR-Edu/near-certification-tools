@@ -42,8 +42,7 @@ describe('Test expiration date functions', () => {
           expect.arrayContaining([
             {
               moment: '2021-03-02T12:35:46+00:00', // Start date of long inactivity period
-              diff_to_next_activity: null,
-              days_between_issue_date_and_first_activity: 296,
+              diff_to_next_activity: 296,
             },
           ]),
         );
@@ -118,7 +117,6 @@ describe('Test expiration date functions', () => {
             {
               moment: '2021-03-16T20:08:59+00:00', // Start date of long inactivity period
               diff_to_next_activity: 204,
-              days_between_issue_date_and_first_activity: null,
             },
           ]),
         );
@@ -159,8 +157,7 @@ describe('Test expiration date functions', () => {
           expect.arrayContaining([
             {
               moment: '2018-10-01T00:00:00+00:00', // Start date of long inactivity period
-              diff_to_next_activity: null,
-              days_between_issue_date_and_first_activity: 365,
+              diff_to_next_activity: 365,
             },
           ]),
         );
@@ -200,8 +197,7 @@ describe('Test expiration date functions', () => {
           expect.arrayContaining([
             {
               moment: '2019-08-03T00:00:00+00:00', // Start date of long inactivity period
-              diff_to_next_activity: null,
-              days_between_issue_date_and_first_activity: 214,
+              diff_to_next_activity: 214,
             },
           ]),
         );
@@ -241,7 +237,6 @@ describe('Test expiration date functions', () => {
             {
               moment: '2022-04-07T16:25:59+00:00', // Most recent activity
               diff_to_next_activity: null,
-              days_between_issue_date_and_first_activity: null,
             },
           ]),
         );
@@ -278,7 +273,6 @@ describe('Test expiration date functions', () => {
             {
               moment: '2022-04-06T10:10:00+00:00', // Most recent activity
               diff_to_next_activity: null,
-              days_between_issue_date_and_first_activity: null,
             },
           ]),
         );

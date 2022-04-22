@@ -11,7 +11,6 @@ type RawQueryResult = [
   {
     moment: string; // If account has had any inactivity period over 180 days, moment is the start date of such period. If account did not have any long (>=180 days) inactivity period, moment is the most recent activity date
     diff_to_next_activity: number; // Number of days of inactivity if long (>=180 days) inactivity period is present for given account
-    days_between_issue_date_and_first_activity: number; // Number of days between issue date and first account activity after issue date
   },
 ];
 
@@ -31,27 +30,24 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
   WITH long_period_of_inactivity AS (
     (SELECT 
     case
+    when days_between_issue_date_and_first_activity >= ${expirationDays} then TO_TIMESTAMP((${issuedAtUnixNano}::text)::numeric/1000000000)
       when days_between_issue_date_and_first_activity < ${expirationDays} then moment
-      when days_between_issue_date_and_first_activity >= ${expirationDays} then TO_TIMESTAMP((${issuedAtUnixNano}::text)::numeric/1000000000)
       else null
     end as moment,
     case
-      when days_between_issue_date_and_first_activity >= ${expirationDays} then null
-      else diff_to_next_activity
-    end as diff_to_next_activity,
-    case
-      when days_between_issue_date_and_first_activity < ${expirationDays} then null
-      else days_between_issue_date_and_first_activity
-    end as days_between_issue_date_and_first_activity
+      when days_between_issue_date_and_first_activity >= ${expirationDays} then days_between_issue_date_and_first_activity
+      when days_between_issue_date_and_first_activity < ${expirationDays} then diff_to_next_activity
+      else null
+    end as diff_to_next_activity
     FROM(
       SELECT *,
       ((EXTRACT(epoch FROM first_activity) - (${issuedAtUnixNano}::text)::numeric/1000000000 ) / 86400)::int AS days_between_issue_date_and_first_activity
       FROM (
         SELECT *,
-        FIRST_VALUE(moment) 
+        COALESCE(FIRST_VALUE(moment) 
           OVER(
             ORDER BY moment
-          ) first_activity
+          ), moment_of_activity) first_activity
         FROM (
           SELECT *,
             ((EXTRACT(epoch FROM moment_of_activity) - EXTRACT(epoch FROM lag(moment_of_activity) over (ORDER BY moment_of_activity))) / 86400)::int /* 1 day = 60sec * 60min * 24h = 86400 sec*/
@@ -70,12 +66,10 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
     WHERE (diff_to_next_activity > ${expirationDays})
     ORDER BY moment ASC
     LIMIT 1)
-
     ), most_recent_activity AS (
     SELECT
     moment, 
-    CAST(NULL AS int) AS diff_to_next_activity /*  to match column numbers in both queries  */,
-    CAST(NULL AS int) AS days_between_issue_date_and_first_activity /*  to match column numbers in both queries  */
+    CAST(NULL AS int) AS diff_to_next_activity /*  to match column numbers in both queries  */
     FROM (
       SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment
       FROM PUBLIC.receipts R
