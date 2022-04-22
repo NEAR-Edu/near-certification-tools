@@ -30,14 +30,12 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
   WITH long_period_of_inactivity AS (
     (SELECT 
     case
-    when days_between_issue_date_and_first_activity >= ${expirationDays} then TO_TIMESTAMP((${issuedAtUnixNano}::text)::numeric/1000000000)
-      when days_between_issue_date_and_first_activity < ${expirationDays} then moment
-      else null
+      when days_between_issue_date_and_first_activity >= ${expirationDays} then TO_TIMESTAMP((${issuedAtUnixNano}::text)::numeric/1000000000)
+      else moment
     end as moment,
     case
       when days_between_issue_date_and_first_activity >= ${expirationDays} then days_between_issue_date_and_first_activity
-      when days_between_issue_date_and_first_activity < ${expirationDays} then diff_to_next_activity
-      else null
+      else diff_to_next_activity
     end as diff_to_next_activity
     FROM(
       SELECT *,
