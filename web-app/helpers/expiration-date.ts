@@ -23,8 +23,6 @@ type RawQueryResult = [
 // eslint-disable-next-line max-lines-per-function
 export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
   // TODO: Add explanation of query
-  // TODO: Assuming issuance of cert doesn't show up as mainnet activity, figure out approach if account had long period of inactivity right after issue date
-  // TODO: figure out why steve.testnet test case is failing with new query
   // *issue_date* <-----------Query - 1-----------> *last_activtiy*  <-----------Query - 2 -----------> *now*
   return Prisma.sql`
   WITH long_period_of_inactivity AS (
@@ -38,30 +36,27 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
       else diff_to_next_activity
     end as diff_to_next_activity
     FROM(
-      SELECT *,
-      ((EXTRACT(epoch FROM first_activity) - (${issuedAtUnixNano}::text)::numeric/1000000000 ) / 86400)::int AS days_between_issue_date_and_first_activity
+    SELECT *,
+    ((EXTRACT(epoch FROM first_activity) - (${issuedAtUnixNano}::text)::numeric/1000000000 ) / 86400)::int AS days_between_issue_date_and_first_activity
       FROM (
         SELECT *,
-        COALESCE(FIRST_VALUE(moment) 
+          ((EXTRACT(epoch FROM moment_of_activity) - EXTRACT(epoch FROM lag(moment_of_activity) over (ORDER BY moment_of_activity))) / 86400)::int /* 1 day = 60sec * 60min * 24h = 86400 sec*/
+          AS diff_to_next_activity,
+          LAG(moment_of_activity) OVER (ORDER BY moment_of_activity ) AS moment,
+          FIRST_VALUE(moment_of_activity) 
           OVER(
-            ORDER BY moment
-          ), moment_of_activity) first_activity
+            ORDER BY moment_of_activity
+          ) first_activity
         FROM (
-          SELECT *,
-            ((EXTRACT(epoch FROM moment_of_activity) - EXTRACT(epoch FROM lag(moment_of_activity) over (ORDER BY moment_of_activity))) / 86400)::int /* 1 day = 60sec * 60min * 24h = 86400 sec*/
-            AS diff_to_next_activity,
-            LAG(moment_of_activity) OVER (ORDER BY moment_of_activity ) AS moment
-          FROM (
-            SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment_of_activity
-            FROM PUBLIC.RECEIPTS R
-            LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
-            WHERE SIGNER_ACCOUNT_ID = ${accountName}
-            AND R."included_in_block_timestamp" >= (${issuedAtUnixNano}::text)::numeric /*  double casting because of prisma template literal throwing 22P03 Error in DB */
-          ) as account_activity_dates
-        ) as account_activity_periods
-      ) as account_activity_periods_with_first_activity
-    ) as account_activity_periods_with_days_between_issue_date_and_first_activity
-    WHERE (diff_to_next_activity > ${expirationDays})
+          SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment_of_activity
+          FROM PUBLIC.RECEIPTS R
+          LEFT OUTER JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
+          WHERE SIGNER_ACCOUNT_ID = ${accountName}
+          AND R."included_in_block_timestamp" >= (${issuedAtUnixNano}::text)::numeric /*  double casting because of prisma template literal throwing 22P03 Error in DB */
+        ) as account_activity_dates
+      ) as account_activity_periods
+    ) as account_activity_periods_with_first_activity
+    WHERE (diff_to_next_activity > ${expirationDays}) OR (days_between_issue_date_and_first_activity > ${expirationDays})
     ORDER BY moment ASC
     LIMIT 1)
     ), most_recent_activity AS (
