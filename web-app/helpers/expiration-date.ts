@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'; // https://day.js.org/docs/en/plugin/utc
 import BN from 'bn.js';
@@ -22,18 +23,62 @@ type RawQueryResult = [
  */
 // eslint-disable-next-line max-lines-per-function
 export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
-  // TODO: Add explanation of query
-  // *issue_date* <-----------Query - 1-----------> *last_activtiy*  <-----------Query - 2 -----------> *now*
+  // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
+  /**
+   * This query uses Common Table Expressions(CTE) to execute two separate queries conditionally;
+   * the second query being executed if first query doesn't return any result.
+   * https://www.postgresql.org/docs/9.1/queries-with.html
+   * https://stackoverflow.com/a/68684814/10684149
+   */
+  /**
+   * ---- QUERY 1 ----
+   * First query checks if the account has a period where it hasn't been active for 180 days straight after the issue date
+   * IMPORTANT: When a certificate is issued to an account, it does not appear as a transaction on the account's transaction history. 
+   * Therefore, the period between the first mainnet activity and issue date needs to be checked as well whether it exceeds 180 days, or not.
+   * 
+   * This is done by: 
+   * 1. Calculating the difference between account's first activity after issue date and the issue date. 
+   * 2. Retrieving account activities after the issue date and checking differences between these dates in days.
+   *    
+   * Since it is important to detect the FIRST occurance of a >180-day period,
+   * only in case such period is present:
+   * -- 1. if difference between (first activity - issue date) > 180, moment is the issue date
+   * -- 2. if difference between (first activity - issue date) < 180, moment is the first occurence of >180-day period after the first activity
+   * 
+   * -- Example result: 
+   * [
+      { 
+        moment: '2019-08-03T00:00:00+00:00', // The beginning of the *first* such period (moment) + 180 days
+        diff_to_next_activity: 214 // Either (first activity - issue date) or any other period where >180-day inacitivity is present, in days
+      }
+    ]
+
+   * ---- QUERY 2 ----
+   * Second query is run if no 180-day-inactivity period is found and returns most recent activity date
+   * -- Example result: 
+   * [
+      {
+        moment: '2022-04-07T16:25:59+00:00', // Most recent activity
+        diff_to_next_activity: null // Null, since no >180-day inactivity was found
+      }
+    ]
+   * 
+   * BOTH queries are set up to return the desired date in a column called 'moment'.
+   */
+
+  // *issue_date* <-----------Query - 1-----------> *last_activtiy*  <-----------Query - 2 -----------> *now (render date)*
+
   return Prisma.sql`
+  /* <--- START OF FIRST QUERY ---> */
   WITH long_period_of_inactivity AS (
     (SELECT 
     case
-      when days_between_issue_date_and_first_activity >= ${expirationDays} then TO_TIMESTAMP((${issuedAtUnixNano}::text)::numeric/1000000000)
-      else moment
+      when days_between_issue_date_and_first_activity >= ${expirationDays} then TO_TIMESTAMP((${issuedAtUnixNano}::text)::numeric/1000000000) /* return issue date as moment if days_between_issue_date_and_first_activity > 180 */
+      else moment /* else, return the start date of first occurance of >=180 day inactivity period if present */
     end as moment,
     case
-      when days_between_issue_date_and_first_activity >= ${expirationDays} then days_between_issue_date_and_first_activity
-      else diff_to_next_activity
+      when days_between_issue_date_and_first_activity >= ${expirationDays} then days_between_issue_date_and_first_activity /* if first activity - issue date exceeds 180 days, return the difference in days */
+      else diff_to_next_activity /* else, return the days between start of inactivity period and the next activity date */
     end as diff_to_next_activity
     FROM(
     SELECT *,
@@ -59,9 +104,12 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
     WHERE (diff_to_next_activity > ${expirationDays}) OR (days_between_issue_date_and_first_activity > ${expirationDays})
     ORDER BY moment ASC
     LIMIT 1)
+    /* <--- END OF FIRST QUERY ---> */
+
+    /* <--- START OF SECOND QUERY, IN CASE FIRST QUERY DOESN'T MATCH CONDITIONS ---> */
     ), most_recent_activity AS (
     SELECT
-    moment, 
+    moment, /* moment refers to the most recent activity date of account */
     CAST(NULL AS int) AS diff_to_next_activity /*  to match column numbers in both queries  */
     FROM (
       SELECT TO_TIMESTAMP(R."included_in_block_timestamp"/1000000000) as moment
@@ -74,6 +122,9 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
     ORDER BY moment DESC
     LIMIT 1
   )
+  /* <--- END OF SECOND QUERY ---> */
+
+  /* <---  BINDING CTEs WITH UNION ALL. IF FIRST QUERY (long_period_of_inactivity) DOESN'T RETURN ANY RESULT, RUN SECOND QUERY (most_recent_activity) ---> */
   TABLE long_period_of_inactivity
   UNION ALL
   TABLE most_recent_activity`;
@@ -104,20 +155,6 @@ export async function getRawQueryResult(accountName: string, issuedAt: string): 
  * @returns {string} result of formatDate (i.e. uses 'YYYY-MM-DD') of the expiration date
  */
 export async function getExpiration(accountName: string, issuedAt: string): Promise<string> {
-  // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
-  /**
-   * This query uses Common Table Expressions(CTE) to execute two separate queries conditionally;
-   * the second query being executed if first query doesn't return any result.
-   * https://www.postgresql.org/docs/9.1/queries-with.html
-   * https://stackoverflow.com/a/68684814/10684149
-   */
-  /**
-   * First query checks if the account has a period where it hasn't been active for 180 days straight after the issue date (excluding the render date)
-   * Second query is run if no 180-day-inactivity period is found and returns most recent activity date
-   * --
-   * BOTH queries are set up to return the desired date in a column called 'moment'.
-   */
-
   const result = await getRawQueryResult(accountName, issuedAt);
   console.log({ result });
 
