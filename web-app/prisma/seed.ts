@@ -6,7 +6,6 @@ import prisma from '../test/test-helpers/client';
 import { convertStringDateToNanoseconds } from '../helpers/time';
 import generateActivityData from '../test/test-helpers/generate-account-activities';
 
-// TODO: Add missing data
 // TODO: refactor comments
 
 // eslint-disable-next-line max-lines-per-function
@@ -17,7 +16,7 @@ async function main() {
   // -- Test Case 1 --
   // ACCOUNT: sally.testnet
   /**
-   * Sally’s certificate was issued_at 2021-03-02TT12:35:46+00:00,
+   * Sally’s certificate was issued_at 2021-03-02T12:35:46+00:00,
    * She had no mainnet activitiy for 296 days (i.e. >180-days of inactivity)
    * Her last mainnet activity was on 2021-12-23T09:46:39+00:00
    * and she hasn’t been active since 2021-12-23T09:46:39+00:00
@@ -31,10 +30,6 @@ async function main() {
         included_in_block_timestamp: convertStringDateToNanoseconds('2021-12-23T09:46:39+00:00'), // Most recent mainnet activity. 296 days have passed since issue date.
         receipt_id: 'Wt4a5NwKgihcWiKlU6NHDWhfoeE9b7HsYUIjTQAfCUoic',
       },
-      // {
-      //   included_in_block_timestamp: convertStringDateToNanoseconds('2021-03-02T12:35:46+00:00'), // moment = Issue date, also start date of long inactivity period
-      //   receipt_id: 'r74mcWqH2zCQeBzOgiS4skLnjvARIONorhfKroxrFAEts',
-      // },
     ],
   };
 
@@ -94,10 +89,6 @@ async function main() {
         included_in_block_timestamp: convertStringDateToNanoseconds('2021-03-16T20:08:59+00:00'), // moment = start date of long inactivity period
         receipt_id: 'st02R6f58evLaZ3h306k9vs9PpAifXytsRABt4ngpHa6V',
       },
-      // {
-      //   included_in_block_timestamp: convertStringDateToNanoseconds('2021-01-05T11:15:09+00:00'), // Issue Date
-      //   receipt_id: 'st06R6f58evLaZ3h306k9vs9PpAifXytsRABt4ngpHa6V',
-      // },
     ],
   };
 
@@ -164,10 +155,6 @@ async function main() {
         included_in_block_timestamp: convertStringDateToNanoseconds('2019-10-01T00:00:00+00:00'), // 365 days have passed since previous activity which was on 2018-10-01T00:00:00+00:00
         receipt_id: 'FkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
       },
-      // {
-      //   included_in_block_timestamp: convertStringDateToNanoseconds('2018-10-01T00:00:00+00:00'), // moment = start date of long inactivity period
-      //   receipt_id: 'EkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
-      // },
     ],
   };
 
@@ -229,10 +216,6 @@ async function main() {
         included_in_block_timestamp: convertStringDateToNanoseconds('2020-03-04T08:25:59+00:00'), // 214 days have passed since previous activity which was on 2019-08-03T00:00:00+00:00
         receipt_id: 'al98R6f58evkjlvmewopOFOKDjfdkKdjfksdfcmkskldew',
       },
-      // {
-      //   included_in_block_timestamp: convertStringDateToNanoseconds('2019-08-03T00:00:00+00:00'), // moment = start date of long inactivity period
-      //   receipt_id: 'al14R6f58evkjlcmkMcmdWA89dsfkfuewiUIDbcdsacDs2',
-      // },
     ],
   };
 
@@ -277,16 +260,10 @@ async function main() {
 
   // Seed DB with rebecca.testnet activity data
   // Create receipts and action_receipts for rebecca.testnet
-  dataRebecca.account_activities.push(
-    {
-      included_in_block_timestamp: convertStringDateToNanoseconds('2022-04-07T16:25:59+00:00'), // Most rcenet mainnet activity
-      receipt_id: 'rei9KjsfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tsjd',
-    },
-    // {
-    //   included_in_block_timestamp: convertStringDateToNanoseconds('2021-08-03T00:00:00+00:00'), // moment = issue date
-    //   receipt_id: 'reoJh87STcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tsdlf',
-    // },
-  );
+  dataRebecca.account_activities.push({
+    included_in_block_timestamp: convertStringDateToNanoseconds('2022-04-07T16:25:59+00:00'), // Most recent mainnet activity
+    receipt_id: 'rei9KjsfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tsjd',
+  });
 
   // Create activities between dates where the account was frequently active according to the scenario.
   // Rebecca had frequent activity every couple of days after issue date (2021-08-03T00:00:00+00:00) through 2022-04-07T16:25:59+00:00
