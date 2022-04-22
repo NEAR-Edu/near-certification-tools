@@ -55,11 +55,12 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
 
    * ---- QUERY 2 ----
    * Second query is run if no 180-day-inactivity period is found and returns most recent activity date
+   * 
    * -- Example result: 
    * [
       {
         moment: '2022-04-07T16:25:59+00:00', // Most recent activity
-        diff_to_next_activity: null // Null, since no >180-day inactivity was found
+        diff_to_next_activity: null // null, since no >180-day period was found
       }
     ]
    * 
@@ -124,7 +125,7 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
   )
   /* <--- END OF SECOND QUERY ---> */
 
-  /* <---  BINDING CTEs WITH UNION ALL. IF FIRST QUERY (long_period_of_inactivity) DOESN'T RETURN ANY RESULT, RUN SECOND QUERY (most_recent_activity) ---> */
+  /* <--- BINDING CTEs WITH UNION ALL. IF FIRST QUERY (long_period_of_inactivity) DOESN'T RETURN ANY RESULT, RUN SECOND QUERY (most_recent_activity) ---> */
   TABLE long_period_of_inactivity
   UNION ALL
   TABLE most_recent_activity`;

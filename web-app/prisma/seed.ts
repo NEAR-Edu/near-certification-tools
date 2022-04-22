@@ -27,7 +27,7 @@ async function main() {
     signer_account_id: 'sally.testnet',
     account_activities: [
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2021-12-23T09:46:39+00:00'), // Most recent mainnet activity. 296 days have passed since issue date.
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-12-23T09:46:39+00:00'), // 296 days have passed since issue date, which was on 2021-03-02T12:35:46+00:00. moment = issue date. When getExpiration is called, query will return issue date as moment. Issuing a cert to an account is not an action recorded on account's mainnet transaction history and therefore cannot be directly reached from account activity data, also the reason for not being seeded here.
         receipt_id: 'Wt4a5NwKgihcWiKlU6NHDWhfoeE9b7HsYUIjTQAfCUoic',
       },
     ],
@@ -58,7 +58,9 @@ async function main() {
   });
   // ########### END OF SEEDING DATA FOR sally.testnet ###########
 
-  // Note: Test Case 2 does not rquire seeding data
+  // ###########
+  // Note: Test Case 2 (Account: patricia.testnet) does not rquire seeding data since account did not have had any activity after issue date.
+  // ###########
 
   // ########### START OF SEEDING DATA FOR steve.testnet ###########
   // -- Test Case 3 --
@@ -86,7 +88,7 @@ async function main() {
         receipt_id: 'st02R6f58evLaZ3h306k9vs9PpAifXytsRABt4ngpHast',
       },
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2021-03-16T20:08:59+00:00'), // moment = start date of long inactivity period
+        included_in_block_timestamp: convertStringDateToNanoseconds('2021-03-16T20:08:59+00:00'), // moment (start date of long inactivity period)
         receipt_id: 'st02R6f58evLaZ3h306k9vs9PpAifXytsRABt4ngpHa6V',
       },
     ],
@@ -152,7 +154,7 @@ async function main() {
         receipt_id: 'QkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
       },
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2019-10-01T00:00:00+00:00'), // 365 days have passed since previous activity which was on 2018-10-01T00:00:00+00:00
+        included_in_block_timestamp: convertStringDateToNanoseconds('2019-10-01T00:00:00+00:00'), // 365 days have passed since issue date, which was on 2018-10-01T00:00:00+00:00. moment = issue date. When getExpiration is called, query will return issue date as moment. Issuing a cert to an account is not an action recorded on account's mainnet transaction history and therefore cannot be directly reached from account activity data, also the reason for not being seeded here.
         receipt_id: 'FkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
       },
     ],
@@ -213,7 +215,7 @@ async function main() {
         receipt_id: 'al376vbsREdvLakfmcVkieiJhdshjfgbIewj73hncytsRb',
       },
       {
-        included_in_block_timestamp: convertStringDateToNanoseconds('2020-03-04T08:25:59+00:00'), // 214 days have passed since previous activity which was on 2019-08-03T00:00:00+00:00
+        included_in_block_timestamp: convertStringDateToNanoseconds('2020-03-04T08:25:59+00:00'), // 214 days have passed since issue date, which was on 2019-08-03T00:00:00+00:00. moment = issue date. When getExpiration is called, query will return issue date as moment. Issuing a cert to an account is not an action recorded on account's mainnet transaction history and therefore cannot be directly reached from account activity data, also the reason for not being seeded here.
         receipt_id: 'al98R6f58evkjlvmewopOFOKDjfdkKdjfksdfcmkskldew',
       },
     ],
@@ -261,7 +263,7 @@ async function main() {
   // Seed DB with rebecca.testnet activity data
   // Create receipts and action_receipts for rebecca.testnet
   dataRebecca.account_activities.push({
-    included_in_block_timestamp: convertStringDateToNanoseconds('2022-04-07T16:25:59+00:00'), // Most recent mainnet activity
+    included_in_block_timestamp: convertStringDateToNanoseconds('2022-04-07T16:25:59+00:00'), // moment (most recent mainnet activity)
     receipt_id: 'rei9KjsfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tsjd',
   });
 
@@ -270,6 +272,7 @@ async function main() {
   await generateActivityData(dataRebecca, '2021-08-03T00:00:00+00:00', '2022-04-07T16:25:59+00:00', 'days', 5);
 
   // Seed DB with rebecca.testnet activity data
+  // Create receipts and action_receipts for rebecca.testnet
   dataRebecca.account_activities.forEach(async (action) => {
     await prisma.receipts.upsert({
       where: { receipt_id: action.receipt_id },
@@ -309,6 +312,7 @@ async function main() {
 
   // Create activities between dates where the account was frequently active according to the scenario.
   // Jennifer had frequent activity every couple of minutes from 2022-04-06T01:00:00+00:00 through 2022-04-06T10:20:00+00:00
+  // moment is 2022-04-06T10:10:00+00:00 (most recent mainnet activity)
   await generateActivityData(dataJennifer, '2022-04-06T01:00:00+00:00', '2022-04-06T10:20:00+00:00', 'minutes', 10);
 
   // Seed DB with jennifer.testnet activity data
@@ -356,6 +360,7 @@ async function main() {
 
   // Create activities between dates where the account was frequently active according to the scenario.
   // William had activity between the hour of (present moment - 180 days - 2 hours) and (present moment - 180 days)
+  // moment is present moment - 180 days - 1 hour (most recent mainnet activity)
   await generateActivityData(dataWilliam, startDateWilliam, endDateWilliam, 'hours', 1);
 
   // Seed DB with william.testnet activity data
@@ -403,9 +408,10 @@ async function main() {
 
   // Create activities between dates where the account was frequently active according to the scenario.
   // John had activity between the hour of (present moment - 180 days) and (present moment - 180 days + 2 hours)
+  // moment is present moment - 180 days + 1 hour (most recent mainnet activity)
   await generateActivityData(dataJohn, startDateJohn, endDateJohn, 'hours', 1);
 
-  // Seed DB with william.testnet activity data
+  // Seed DB with john.testnet activity data
   // Create receipts and action_receipts for john.testnet
   dataJohn.account_activities.forEach(async (action) => {
     await prisma.receipts.upsert({
