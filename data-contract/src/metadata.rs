@@ -94,14 +94,37 @@ mod tests {
         let metadata = test_metadata();
         let json_str = metadata.to_json();
         let deserialized = serde_json::from_str::<CertificationExtraMetadata>(&*json_str).unwrap();
-        assert_eq!(deserialized.authority_name.as_ref().unwrap(), "Test Authority");
-        assert_eq!(deserialized.authority_id.as_ref().unwrap().to_string(), "test_authority.near");
+        assert_eq!(
+            deserialized.authority_name.as_ref().unwrap(),
+            "Test Authority"
+        );
+        assert_eq!(
+            deserialized.authority_id.as_ref().unwrap().to_string(),
+            "test_authority.near"
+        );
         assert_eq!(deserialized.program.as_ref().unwrap().to_string(), "PRG101");
-        assert_eq!(deserialized.program_name.as_ref().unwrap().to_string(), "Program Name");
+        assert_eq!(
+            deserialized.program_name.as_ref().unwrap().to_string(),
+            "Program Name"
+        );
         assert!(deserialized.program_start_date.as_ref().is_none());
         assert!(deserialized.program_end_date.as_ref().is_none());
-        assert_eq!(deserialized.original_recipient_id.as_ref().unwrap().to_string(), "original_recipient.near");
-        assert_eq!(deserialized.original_recipient_name.as_ref().unwrap().to_string(), "Original Recipient");
+        assert_eq!(
+            deserialized
+                .original_recipient_id
+                .as_ref()
+                .unwrap()
+                .to_string(),
+            "original_recipient.near"
+        );
+        assert_eq!(
+            deserialized
+                .original_recipient_name
+                .as_ref()
+                .unwrap()
+                .to_string(),
+            "Original Recipient"
+        );
         assert_eq!(deserialized.valid, true);
         assert!(deserialized.memo.as_ref().is_none());
     }

@@ -11,6 +11,7 @@
   },
   "options": {
     "can_transfer": false,
-    "can_invalidate": true
+    "can_invalidate": true,
+    "trash_account": "0000000000000000000000000000000000000000000000000000000000000000"
   }
 }
