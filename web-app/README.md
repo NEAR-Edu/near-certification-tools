@@ -20,6 +20,14 @@ The Integromat flow then calls the [HTTP "app"](https://www.integromat.com/en/he
 
 The next step in the Integromat flow is to email the recipient of the NCD with a link directly to their wallet where they can see the NFT (and also a link to this frontend).
 
+### Testing posting to the API endpoint
+
+You can use CURL in the Terminal.
+
+Change to the `/web-app` directory, and then:
+
+`curl -X POST -H "Content-Type: application/json" -H "x-api-key: xxxxxxxx" -d @"pages/api/sample_api_payload.json" "http://localhost:3000/api/mint-cert"`
+
 ### Viewing the dynamically-generated png image
 
 Visitors can view the image at /api/cert/abcd.svg or /api/cert/abcd.png. See [/web-app/pages/api/cert/[imageFileName].ts](/web-app/pages/api/cert/[imageFileName].ts)
