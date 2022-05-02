@@ -35,7 +35,8 @@ registerFont(manropeFontFile, { family: manropeFontFamily });
 registerFont(monoFontFile, { family: monoFontFamily });
 
 function getExpiratonExplanation(expirationDateString: string) {
-  return `* Will expire after the first 6-month period of inactivity of this mainnet account (which currently would be ${expirationDateString} if no future activity)`;
+  const expirationDateStringFormatted = formatDate(expirationDateString);
+  return `* Will expire after the first 6-month period of inactivity of this mainnet account (which currently would be ${expirationDateStringFormatted} if no future activity)`;
 }
 
 function getBaseContext(canvas: Canvas) {

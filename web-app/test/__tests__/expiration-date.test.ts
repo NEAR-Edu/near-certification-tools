@@ -64,7 +64,7 @@ describe('Test expiration date functions', () => {
        * Patricia's cert was issued_at 2022-04-01T21:08:07+00:00,
        * She has not had any mainnet activity since then
        * --
-       * Issuance of certificate does not show up as mainnet activity // TODO: Confirm with Ryan
+       * Issuance of certificate does not show up as mainnet activity
        * Therefore, query returns an empty result
        * Her cert should have an expiration of:
        * = issue date + 180 days

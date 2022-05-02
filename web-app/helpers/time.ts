@@ -19,7 +19,7 @@ export function convertNanoTimestampDecimalToDayjsMoment(timestampDecimal: Decim
   return convertTimestampToDayjsMoment(timestampDecimal, 1_000_000_000);
 }
 
-export function formatDate(dateTime: Dayjs) {
+export function formatDate(dateTime: Dayjs | string) {
   // https://day.js.org/docs/en/display/format
   // https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
   return dayjs.utc(dateTime).format(defaultDateFormat); // UTC (Coordinated Universal Time) to date string in defaultDateFormat (YYYY-MM-DD)
