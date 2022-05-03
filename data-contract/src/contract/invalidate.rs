@@ -1,12 +1,7 @@
-use std::str::FromStr;
-
-use near_contract_standards::non_fungible_token::events::NftTransfer;
+use near_contract_standards::non_fungible_token::events::NftBurn;
 
 use crate::contract::*;
 use crate::event::*;
-use crate::*;
-
-struct UnsafeAccountId(pub String);
 
 #[near_bindgen]
 impl CertificationContract {
@@ -107,17 +102,11 @@ impl CertificationContract {
         // Remove from owners map
         self.tokens.owner_by_id.remove(&token_id);
 
-        let empty_account_id: AccountId = unsafe {
-            std::mem::transmute(UnsafeAccountId(String::new()))
-        };
-
-        // Emit nonstandard NFT transfer event
-        NftTransfer {
-            old_owner_id: &owner_id,
-            // Intentionally invalid `new_owner_id` because a standard "NFT Deleted" event doesn't exist
-            new_owner_id: &empty_account_id,
-            token_ids: &[&token_id],
+        // Emit NFT burn event
+        NftBurn {
+            owner_id: &owner_id,
             authorized_id: Some(&self.owner_id()),
+            token_ids: &[&token_id],
             memo: memo.as_deref(),
         }
         .emit();
