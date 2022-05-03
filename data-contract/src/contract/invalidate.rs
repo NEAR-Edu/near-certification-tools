@@ -1,7 +1,13 @@
-use near_contract_standards::non_fungible_token::events::NftBurn;
+use near_contract_standards::non_fungible_token::{
+    events::NftBurn, metadata::TokenMetadata, TokenId,
+};
+use near_sdk::{assert_one_yocto, near_bindgen, serde_json};
 
-use crate::contract::*;
-use crate::event::*;
+use crate::{
+    contract::*,
+    event::{CertificationEventLogData, CreateEventLog},
+    metadata::CertificationExtraMetadata,
+};
 
 #[near_bindgen]
 impl CertificationContract {

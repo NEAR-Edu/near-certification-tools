@@ -1,4 +1,9 @@
-use crate::*;
+use near_sdk::{
+    borsh::{self, BorshDeserialize, BorshSerialize},
+    json_types::*,
+    serde::{Deserialize, Serialize},
+    serde_json, AccountId,
+};
 
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize, PartialEq)]
 #[serde(crate = "near_sdk::serde")]

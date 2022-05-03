@@ -1,4 +1,11 @@
-use crate::*;
+use near_contract_standards::non_fungible_token::TokenId;
+use near_sdk::{
+    log,
+    serde::{Deserialize, Serialize},
+    serde_json, AccountId,
+};
+
+use crate::CertificationContract;
 
 const EVENT_STANDARD: &'static str = "x-nearedu-cert";
 const EVENT_VERSION: &'static str = "1.0.0";

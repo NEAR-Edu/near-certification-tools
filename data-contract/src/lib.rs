@@ -1,25 +1,4 @@
-use std::collections::HashMap;
-
-use near_contract_standards::non_fungible_token::{
-    core::{NonFungibleTokenCore, NonFungibleTokenResolver},
-    metadata::{NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata},
-    NonFungibleToken, Token, TokenId,
-};
-use near_sdk::{
-    assert_one_yocto,
-    borsh::{self, BorshDeserialize, BorshSerialize},
-    collections::LazyOption,
-    env,
-    json_types::*,
-    log, near_bindgen, require,
-    serde::{Deserialize, Serialize},
-    serde_json, AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseOrValue,
-};
-
-use storage_key::StorageKey;
-
 pub use crate::contract::CertificationContract;
-use crate::metadata::CertificationExtraMetadata;
 
 mod contract;
 mod event;
@@ -29,18 +8,24 @@ mod utils;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
+    use std::collections::HashMap;
+
     use near_contract_standards::non_fungible_token::{
-        approval::NonFungibleTokenApproval, enumeration::NonFungibleTokenEnumeration,
-        metadata::NFT_METADATA_SPEC,
+        approval::NonFungibleTokenApproval,
+        core::NonFungibleTokenCore,
+        enumeration::NonFungibleTokenEnumeration,
+        metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
     };
     use near_sdk::{
+        env,
         test_utils::{accounts, VMContextBuilder},
-        testing_env, Balance, StorageUsage,
+        testing_env, AccountId, Balance, StorageUsage,
     };
 
-    use crate::contract::{CertificationContract, CertificationContractInitOptions};
-
-    use super::*;
+    use crate::{
+        contract::{CertificationContract, CertificationContractInitOptions},
+        metadata::CertificationExtraMetadata,
+    };
 
     const MINT_MAX_COST: u128 = 20000000000000000000000;
 
@@ -119,14 +104,12 @@ mod tests {
     struct EnvironmentState {
         storage: StorageUsage,
         balance: Balance,
-        locked_balance: Balance,
     }
 
     fn environment_state() -> EnvironmentState {
         EnvironmentState {
             storage: env::storage_usage(),
             balance: env::account_balance(),
-            locked_balance: env::account_locked_balance(),
         }
     }
 

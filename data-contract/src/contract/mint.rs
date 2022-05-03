@@ -1,7 +1,12 @@
-use crate::contract::*;
-use crate::event::*;
-use crate::utils::*;
-use crate::*;
+use crate::{
+    contract::*,
+    event::{CertificationEventLogData, CreateEventLog},
+    metadata::CertificationExtraMetadata,
+    utils::assert_nonzero_deposit,
+};
+
+use near_contract_standards::non_fungible_token::{metadata::TokenMetadata, Token, TokenId};
+use near_sdk::{near_bindgen, require, AccountId};
 
 #[near_bindgen]
 impl CertificationContract {

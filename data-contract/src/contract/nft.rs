@@ -1,5 +1,13 @@
+use std::collections::HashMap;
+
+use near_contract_standards::non_fungible_token::{
+    core::{NonFungibleTokenCore, NonFungibleTokenResolver},
+    metadata::{NFTContractMetadata, NonFungibleTokenMetadataProvider},
+    Token, TokenId,
+};
+use near_sdk::{near_bindgen, AccountId, Promise, PromiseOrValue};
+
 use crate::contract::*;
-use crate::*;
 
 // Core implementation (largely the same as `impl_non_fungible_token_core`
 // macro with additional ability to disable transfers)

@@ -1,4 +1,7 @@
-use crate::*;
+use near_sdk::{
+    borsh::{self, BorshSerialize},
+    BorshStorageKey,
+};
 
 #[derive(BorshSerialize, BorshStorageKey)]
 pub enum StorageKey {
