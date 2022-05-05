@@ -1,22 +1,22 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { AccountId, apiKey, gas, getNftContract, NFT, HTTP_SUCCESS, HTTP_ERROR, rejectAsUnauthorized } from '../../helpers/near';
-import { depositAmountYoctoNear } from './mint-cert';
+import { Certificate } from '../../helpers/certificate';
+import { AccountId, apiKey, gas, getNftContract, HTTP_ERROR, HTTP_SUCCESS, NFT, rejectAsUnauthorized } from '../../helpers/near';
 
 const apiKeyHeaderName = 'x-api-key'; // Although the user interface of Integromat shows the capitalization as "X-API-Key", inspecting the actual header reveals that lowercase is used.
 
 async function invalidateAllCertsForAccount(accountId: AccountId) {
   const contract = await getNftContract();
-  const tokens = await (contract as NFT).nft_tokens_for_owner(accountId);
+  const tokens = await (contract as NFT).nft_tokens_for_owner({ account_id: accountId });
 
   try {
     await Promise.all(
-      tokens.map((token: string) =>
+      tokens.map((token: Certificate) =>
         (contract as NFT).cert_invalidate(
           // https://github.com/near/near-api-js/issues/719
-          token,
-          gas, // attached GAS (optional)
-          depositAmountYoctoNear, // attached deposit in yoctoNEAR (optional).
+          { token_id: token.token_id }, // `memo` here?
+          gas,
+          '1', // deposit exactly 1 yoctoNEAR
         ),
       ),
     );
@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   const { headers } = req; // https://stackoverflow.com/a/63529345/470749
   if (headers?.[apiKeyHeaderName] !== apiKey) {
-    rejectAsUnauthorized(res, headers);
+    return rejectAsUnauthorized(res, headers);
   }
 
   const body = req?.body;

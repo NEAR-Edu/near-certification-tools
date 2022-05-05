@@ -77,7 +77,7 @@ export function getNftContractOfAccount(account: Account) {
     certificateContractName,
     {
       viewMethods: ['nft_token', 'nft_tokens_for_owner'], // view methods do not change state but usually return a value
-      changeMethods: ['nft_mint'], // change methods modify state
+      changeMethods: ['nft_mint', 'cert_invalidate', 'cert_delete'], // change methods modify state
     },
   );
   return contract;
