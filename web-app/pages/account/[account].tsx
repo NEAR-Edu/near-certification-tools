@@ -4,8 +4,7 @@ import type { GetServerSideProps, NextPage } from 'next';
 import Layout from '../../components/Layout';
 import styles from '../../styles/Account.module.scss';
 import { getImageUrl, getSimpleStringFromParam } from '../../helpers/strings';
-import { AccountId, getNearAccountWithoutAccountIdOrKeyStoreForFrontend } from '../../helpers/near';
-import { getNftContract, NFT } from '../api/mint-cert';
+import { AccountId, getNearAccountWithoutAccountIdOrKeyStoreForFrontend, getNftContractOfAccount, NFT } from '../../helpers/near';
 import { Certificate, isValid } from '../../helpers/certificate';
 import ExplorerAccountLink from '../../components/ExplorerAccountLink';
 import ExpirationWarning from '../../components/ExpirationWarning';
@@ -25,7 +24,7 @@ type AccountPageProps = { accountId: AccountId; certificates: Certificate[] };
 
 async function getCertificates(accountId: string): Promise<string[]> {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForFrontend();
-  const contract = getNftContract(account);
+  const contract = getNftContractOfAccount(account);
   const response = await (contract as NFT).nft_tokens_for_owner({ account_id: accountId });
   console.log({ account, accountId, response });
   return response.filter((cert: Certificate) => isValid(cert)).map((cert: Certificate) => cert.token_id);
