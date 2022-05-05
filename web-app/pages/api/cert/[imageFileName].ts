@@ -3,8 +3,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createCanvas } from 'canvas';
 import { getSimpleStringFromParam } from '../../../helpers/strings';
-import { getNftContract, NFT } from '../mint-cert';
-import { getNearAccountWithoutAccountIdOrKeyStoreForBackend } from '../../../helpers/near';
+import { getNearAccountWithoutAccountIdOrKeyStoreForBackend, getNftContractOfAccount, NFT } from '../../../helpers/near';
 import { height, populateCert, width } from '../../../helpers/certificate-designs';
 import { addCacheHeader } from '../../../helpers/caching';
 import { convertMillisecondsTimestampToFormattedDate } from '../../../helpers/time';
@@ -40,7 +39,7 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
 
 export async function fetchCertificateDetails(tokenId: string) {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForBackend();
-  const contract = getNftContract(account);
+  const contract = getNftContractOfAccount(account);
   const response = await (contract as NFT).nft_token({ token_id: tokenId });
   if (response) {
     const { metadata } = response;
