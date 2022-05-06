@@ -10,5 +10,4 @@ pub enum StorageKey {
     TokenMetadata,
     Enumeration,
     Approval,
-    TrashAccount,
 }

@@ -150,7 +150,6 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: false,
-                trash_account: Some("0".repeat(64).parse().unwrap()),
             },
         );
         testing_env!(context.is_view(true).build());
@@ -180,7 +179,6 @@ mod tests {
                 CertificationContractInitOptions {
                     can_transfer,
                     can_invalidate,
-                    trash_account: Some("0".repeat(64).parse().unwrap()),
                 },
             );
 
@@ -210,7 +208,6 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: true,
                 can_invalidate: false,
-                trash_account: Some("0".repeat(64).parse().unwrap()),
             },
         );
 
@@ -273,7 +270,6 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: false,
-                trash_account: Some("0".repeat(64).parse().unwrap()),
             },
         );
 
@@ -314,83 +310,13 @@ mod tests {
     }
 
     #[test]
-    fn mint_can_invalidate_true_to_trash() {
+    fn mint_can_invalidate_true() {
         let (mut context, mut contract) = init_contract(
             accounts(0),
             sample_metadata_contract(),
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: true,
-                trash_account: Some("0".repeat(64).parse().unwrap()),
-            },
-        );
-
-        testing_env!(context
-            .storage_usage(env::storage_usage())
-            .attached_deposit(MINT_MAX_COST)
-            .predecessor_account_id(accounts(0))
-            .build());
-
-        let initial_storage = start_monitor();
-
-        let token_id = "0".to_string();
-        let token = contract.nft_mint(
-            token_id.clone(),
-            accounts(0).into(),
-            sample_metadata_token(),
-            sample_metadata_certification_nontransferable(),
-            None,
-        );
-        assert_eq!(token.token_id, token_id);
-        assert_eq!(token.owner_id, accounts(0));
-        assert_eq!(
-            token.metadata.unwrap(),
-            TokenMetadata {
-                extra: Some(sample_metadata_certification_nontransferable().to_json()),
-                ..sample_metadata_token()
-            },
-        );
-        assert_eq!(token.approved_account_ids.unwrap(), HashMap::new());
-        assert_eq!(contract.cert_is_valid(token_id.clone()), true);
-
-        print_monitor(initial_storage);
-
-        // Test transferability
-        testing_env!(context.attached_deposit(1).build());
-
-        contract.cert_invalidate(token_id.clone(), None);
-
-        let invalidated_token = contract
-            .nft_token(token_id.clone())
-            .expect("Token exists after invalidation");
-
-        assert_eq!(contract.cert_is_valid(token_id.clone()), false);
-        assert_eq!(invalidated_token.token_id, token_id);
-        assert_eq!(invalidated_token.owner_id, "0".repeat(64).parse().unwrap());
-        assert_eq!(
-            invalidated_token.metadata.unwrap(),
-            TokenMetadata {
-                extra: Some(
-                    CertificationExtraMetadata {
-                        valid: false,
-                        ..sample_metadata_certification_nontransferable()
-                    }
-                    .to_json()
-                ),
-                ..sample_metadata_token()
-            },
-        );
-    }
-
-    #[test]
-    fn mint_can_invalidate_true_no_trash() {
-        let (mut context, mut contract) = init_contract(
-            accounts(0),
-            sample_metadata_contract(),
-            CertificationContractInitOptions {
-                can_transfer: false,
-                can_invalidate: true,
-                trash_account: None,
             },
         );
 
@@ -460,7 +386,6 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: false,
-                trash_account: Some("0".repeat(64).parse().unwrap()),
             },
         );
 
@@ -508,7 +433,6 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: false,
-                trash_account: Some("0".repeat(64).parse().unwrap()),
             },
         );
 
@@ -551,7 +475,6 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: false,
-                trash_account: Some("0".repeat(64).parse().unwrap()),
             },
         );
 
@@ -601,7 +524,6 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: false,
-                trash_account: Some("0".repeat(64).parse().unwrap()),
             },
         );
 
@@ -651,7 +573,6 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: true,
-                trash_account: Some("0".repeat(64).parse().unwrap()),
             },
         );
 
@@ -696,7 +617,6 @@ mod tests {
             CertificationContractInitOptions {
                 can_transfer: false,
                 can_invalidate: false,
-                trash_account: Some("0".repeat(64).parse().unwrap()),
             },
         );
 

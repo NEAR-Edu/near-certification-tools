@@ -64,12 +64,6 @@ impl CertificationContract {
             memo,
         })
         .emit();
-
-        if let Some(ref trash_account) = self.trash_account.get() {
-            let owner_id = self.tokens.owner_by_id.get(&token_id).unwrap();
-            self.tokens
-                .internal_transfer(&owner_id, trash_account, &token_id, None, None);
-        }
     }
 
     #[payable]

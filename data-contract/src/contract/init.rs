@@ -14,7 +14,6 @@ use near_sdk::{
 pub struct CertificationContractInitOptions {
     pub can_transfer: bool,
     pub can_invalidate: bool,
-    pub trash_account: Option<AccountId>,
 }
 
 #[near_bindgen]
@@ -42,10 +41,6 @@ impl CertificationContract {
             metadata: LazyOption::new(StorageKey::Metadata, Some(&metadata)),
             can_transfer: options.can_transfer,
             can_invalidate: options.can_invalidate,
-            trash_account: LazyOption::new(
-                StorageKey::TrashAccount,
-                options.trash_account.as_ref(),
-            ),
         }
     }
 }
