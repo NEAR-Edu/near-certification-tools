@@ -87,26 +87,4 @@ impl CertificationContract {
     pub fn withdraw_max(&mut self) -> Promise {
         self.withdraw(self.get_max_withdrawal())
     }
-
-    #[private]
-    #[init(ignore_state)]
-    pub fn migrate() -> Self {
-        #[derive(BorshDeserialize)]
-        pub struct OldContract {
-            pub tokens: NonFungibleToken,
-            pub metadata: LazyOption<NFTContractMetadata>,
-            pub can_transfer: bool,
-            pub can_invalidate: bool,
-            pub trash_account: LazyOption<AccountId>,
-        }
-
-        let old: OldContract = env::state_read().unwrap();
-
-        Self {
-            tokens: old.tokens,
-            metadata: old.metadata,
-            can_transfer: old.can_transfer,
-            can_invalidate: old.can_invalidate,
-        }
-    }
 }
