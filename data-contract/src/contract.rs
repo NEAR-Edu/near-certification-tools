@@ -11,8 +11,6 @@ use near_sdk::{
     near_bindgen, require, AccountId, PanicOnDefault, Promise,
 };
 
-use crate::storage_key::StorageKey;
-
 mod init;
 mod invalidate;
 mod mint;
