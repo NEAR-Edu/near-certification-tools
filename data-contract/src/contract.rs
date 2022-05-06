@@ -11,6 +11,8 @@ use near_sdk::{
     near_bindgen, require, AccountId, PanicOnDefault, Promise,
 };
 
+use crate::storage_key::StorageKey;
+
 mod init;
 mod invalidate;
 mod mint;
@@ -87,5 +89,45 @@ impl CertificationContract {
     #[payable]
     pub fn withdraw_max(&mut self) -> Promise {
         self.withdraw(self.get_max_withdrawal())
+    }
+
+    pub fn get_trash_account(&self) -> Option<AccountId> {
+        self.trash_account.get()
+    }
+
+    #[payable]
+    pub fn set_trash_account(&mut self, trash_account: Option<AccountId>) {
+        // Force owner
+        self.assert_owner();
+        // Force verification
+        assert_one_yocto();
+
+        if let Some(trash_account) = trash_account {
+            self.trash_account.set(&trash_account);
+        } else {
+            self.trash_account.remove();
+        }
+    }
+
+    #[private]
+    #[init(ignore_state)]
+    pub fn migrate(trash_account: Option<AccountId>) -> Self {
+        #[derive(BorshDeserialize)]
+        pub struct OldContract {
+            pub tokens: NonFungibleToken,
+            pub metadata: LazyOption<NFTContractMetadata>,
+            pub can_transfer: bool,
+            pub can_invalidate: bool,
+        }
+
+        let old: OldContract = env::state_read().unwrap();
+
+        Self {
+            tokens: old.tokens,
+            metadata: old.metadata,
+            can_transfer: old.can_transfer,
+            can_invalidate: old.can_invalidate,
+            trash_account: LazyOption::new(StorageKey::TrashAccount, trash_account.as_ref()),
+        }
     }
 }
