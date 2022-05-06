@@ -87,9 +87,13 @@ impl CertificationContract {
             .tokens_per_owner
             .as_mut()
             .map(|tokens_per_owner| {
-                tokens_per_owner.get(&owner_id).as_mut().map(|tok| {
-                    tok.remove(&token_id);
-                    tokens_per_owner.insert(&owner_id, &tok);
+                tokens_per_owner.get(&owner_id).as_mut().map(|token_ids| {
+                    token_ids.remove(&token_id);
+                    if token_ids.len() == 0 {
+                        tokens_per_owner.remove(&owner_id);
+                    } else {
+                        tokens_per_owner.insert(&owner_id, &token_ids);
+                    }
                 });
             });
 
