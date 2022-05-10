@@ -19,7 +19,7 @@ export type Certificate = {
 
 export function isValid(cert: Certificate): boolean {
   try {
-    const { extra } = cert?.metadata;
+    const extra = cert?.metadata.extra;
     return !!(extra && JSON.parse(extra).valid);
   } catch (_) {
     return false;
