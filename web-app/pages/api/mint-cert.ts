@@ -5,6 +5,7 @@ import { utils } from 'near-api-js'; // https://github.com/near/near-api-js/blob
 import { AccountId, getNftContract, NFT, apiKey, gas, HTTP_SUCCESS, HTTP_ERROR, rejectAsUnauthorized } from '../../helpers/near';
 import { getImageUrl } from '../../helpers/strings';
 import { convertStringDateToNanoseconds } from '../../helpers/time';
+import { getBase64ImageHash } from './cert/[imageFileName]';
 
 // Could also use https://github.com/near/units-js#parsing-strings for this:
 export const depositAmountYoctoNear = utils.format.parseNearAmount('0.2'); // 0.2Ⓝ is max. There will be a certain deposit required to pay for the storage of the data on chain. Contract will automatically refund any excess.
@@ -38,7 +39,8 @@ async function buildTokenMetadata(tokenId: string, certificateRequiredFields: Ce
   /* eslint-disable camelcase */
   const issued_at = Date.now().toString(); // issued_at expects milliseconds since epoch as string
   const media = getImageUrl(tokenId);
-  const tokenMetadata = (({ title, description }) => ({ title, description, media, issued_at, copies: 1 }))(certificateRequiredFields); // https://stackoverflow.com/a/67591318/470749
+  const media_hash = await getBase64ImageHash(tokenId, undefined); // Base64-encoded sha256 hash of content referenced by the `media` field. Required if `media` is included.
+  const tokenMetadata = (({ title, description }) => ({ title, description, media, media_hash, issued_at, copies: 1 }))(certificateRequiredFields); // https://stackoverflow.com/a/67591318/470749
   /* eslint-enable camelcase */
   return tokenMetadata;
 }

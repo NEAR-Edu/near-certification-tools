@@ -2,7 +2,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createCanvas } from 'canvas';
-import { getSimpleStringFromParam } from '../../../helpers/strings';
+import { getBase64Hash, getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend, getNftContractOfAccount, NFT } from '../../../helpers/near';
 import { height, populateCert, width } from '../../../helpers/certificate-designs';
 import { addCacheHeader } from '../../../helpers/caching';
@@ -75,6 +75,16 @@ export async function fetchCertificateDetails(tokenId: string) {
 async function getImageBufferFromTokenId(tokenId: string, canvasType: CanvasTypeDef, bufferType: BufferTypeDef) {
   const details = await fetchCertificateDetails(tokenId);
   return details ? generateImage(canvasType, bufferType, details) : null;
+}
+
+export async function getBase64ImageHash(tokenId: string, bufferType: BufferTypeDef) {
+  const canvasType = getCanvasType(bufferType);
+  const imageBuffer = await getImageBufferFromTokenId(tokenId, canvasType, bufferType);
+  if (imageBuffer) {
+    return getBase64Hash(imageBuffer);
+  } else {
+    throw new Error('No certificate found at this address.'); // TODO: getBase64ImageHash needs to be rewritten because it will be called *before* minting, so it should not be fetching details from on-chain and instead should rely on all details being provided.
+  }
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Buffer | { error: string }>) {
