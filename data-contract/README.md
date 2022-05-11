@@ -161,6 +161,12 @@ Run something like `NEAR_ENV=testnet near call <the contract ID> cert_invalidate
 NEAR_ENV=testnet near call dev-1643292007908-55838431863482 cert_invalidate '{ "token_id": "303216412112497cb6c193152a27c49c"}' --account-id ryancwalsh.testnet --depositYocto 1 --gas 300000000000000
 ```
 
+### Delete a cert (only in rare cases, pre-launch)
+
+```bash
+NEAR_ENV=testnet near call dev-1649780593510-28371141287670 cert_delete '{ "token_id": "e03216412112497cb6c193152a27c49a"}' --account-id ryancwalsh.testnet --depositYocto 1 --gas 300000000000000
+```
+
 ---
 
 # Notes about versions, standards, datetime types and formats, etc
