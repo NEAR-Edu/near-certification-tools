@@ -17,31 +17,42 @@ const CACHE_SECONDS: number = Number(process.env.DYNAMIC_CERT_IMAGE_GENERATION_C
 type CanvasTypeDef = 'pdf' | 'svg' | undefined;
 type BufferTypeDef = 'image/png' | undefined;
 
-export function getCanvasType(bufferType: BufferTypeDef) {
-  return bufferType === imagePng ? undefined : svg;
+export type ImageIngredients = {
+  tokenId: string;
+  date: string;
+  programCode: string; // This will determine which background image gets used.
+  programName: string;
+  accountName: string;
+  programDescription: string;
+  instructor: string;
+};
+
+export function getTypesFromExtension(extension = svg) {
+  const contentType = extension === svg ? 'image/svg+xml' : imagePng;
+  const bufferType: BufferTypeDef = extension === svg ? undefined : imagePng;
+  const canvasType: CanvasTypeDef = extension === svg ? svg : undefined;
+  return { bufferType, contentType, canvasType };
 }
 
 function parseFileName(imageFileNameString: string) {
   const extension = imageFileNameString.split(dot).pop(); // https://stackoverflow.com/a/1203361/470749
-  const contentType = extension === svg ? 'image/svg+xml' : imagePng;
-  const bufferType: BufferTypeDef = extension === svg ? undefined : imagePng;
-  const canvasType: CanvasTypeDef = getCanvasType(bufferType);
+  const { bufferType, contentType, canvasType } = getTypesFromExtension(extension);
   const lastIndex = imageFileNameString.lastIndexOf(`${dot}${extension}`); // https://stackoverflow.com/a/9323226/470749
   const tokenId = imageFileNameString.substring(0, lastIndex);
   return { extension, bufferType, contentType, canvasType, tokenId };
 }
 
-async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDef, details: any) {
+async function generateImage(imageIngredients: ImageIngredients, canvasType: CanvasTypeDef, bufferType: BufferTypeDef) {
   const canvas = createCanvas(width, height, canvasType);
 
-  await populateCert(canvas, details);
+  await populateCert(canvas, imageIngredients);
 
   // Convert the Canvas to a buffer
   const buffer = bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();
   return buffer;
 }
 
-export async function fetchCertificateDetails(tokenId: string) {
+export async function fetchCertificateDetails(tokenId: string): Promise<ImageIngredients | null> {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForBackend();
   const contract = getNftContractOfAccount(account);
   const response = await (contract as NFT).nft_token({ token_id: tokenId });
@@ -59,9 +70,10 @@ export async function fetchCertificateDetails(tokenId: string) {
       const programDescription = metadata.description;
       const instructor = certificateMetadata.authority_id;
       return {
+        // Field mappings here must stay in sync with getImageIngredientsFromCertificateRequiredFields.
         tokenId,
         date,
-        programCode, // This will determine which background image gets used.
+        programCode,
         programName,
         accountName,
         programDescription,
@@ -72,19 +84,12 @@ export async function fetchCertificateDetails(tokenId: string) {
   return null;
 }
 
-async function getImageBufferFromTokenId(tokenId: string, canvasType: CanvasTypeDef, bufferType: BufferTypeDef) {
-  const details = await fetchCertificateDetails(tokenId);
-  return details ? generateImage(canvasType, bufferType, details) : null;
-}
-
-export async function getBase64ImageHash(tokenId: string, bufferType: BufferTypeDef) {
-  const canvasType = getCanvasType(bufferType);
-  const imageBuffer = await getImageBufferFromTokenId(tokenId, canvasType, bufferType);
-  if (imageBuffer) {
-    return getBase64Hash(imageBuffer);
-  } else {
-    throw new Error('No certificate found at this address.'); // TODO: getBase64ImageHash needs to be rewritten because it will be called *before* minting, so it should not be fetching details from on-chain and instead should rely on all details being provided.
-  }
+export async function getBase64ImageHash(imageIngredients: ImageIngredients, extension = svg) {
+  const { bufferType, canvasType } = getTypesFromExtension(extension);
+  const imageBuffer = await generateImage(imageIngredients, canvasType, bufferType);
+  const hash = getBase64Hash(imageBuffer);
+  console.log({ hash });
+  return hash;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Buffer | { error: string }>) {
@@ -93,8 +98,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const imageFileNameString = getSimpleStringFromParam(imageFileName);
   const { bufferType, contentType, canvasType, tokenId } = parseFileName(imageFileNameString);
   // console.log({ bufferType, contentType, canvasType, tokenId });
-  const imageBuffer = await getImageBufferFromTokenId(tokenId, canvasType, bufferType);
-  if (imageBuffer) {
+  const imageIngredients = await fetchCertificateDetails(tokenId);
+  if (imageIngredients) {
+    const imageBuffer = await generateImage(imageIngredients, canvasType, bufferType);
     res.setHeader('Content-Type', contentType);
     addCacheHeader(res, CACHE_SECONDS);
     // Caching is important (especially if we have a getExpiration function that pulls from the public indexer database).

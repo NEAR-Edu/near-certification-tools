@@ -4,8 +4,8 @@ import { randomUUID } from 'crypto'; // Added in: node v14.17.0
 import { utils } from 'near-api-js'; // https://github.com/near/near-api-js/blob/master/examples/quick-reference.md
 import { AccountId, getNftContract, NFT, apiKey, gas, HTTP_SUCCESS, HTTP_ERROR, rejectAsUnauthorized } from '../../helpers/near';
 import { getImageUrl } from '../../helpers/strings';
-import { convertStringDateToNanoseconds } from '../../helpers/time';
-import { getBase64ImageHash } from './cert/[imageFileName]';
+import { convertMillisecondsTimestampToFormattedDate, convertStringDateToNanoseconds } from '../../helpers/time';
+import { getBase64ImageHash, ImageIngredients } from './cert/[imageFileName]';
 
 // Could also use https://github.com/near/units-js#parsing-strings for this:
 export const depositAmountYoctoNear = utils.format.parseNearAmount('0.2'); // 0.2Ⓝ is max. There will be a certain deposit required to pay for the storage of the data on chain. Contract will automatically refund any excess.
@@ -31,6 +31,19 @@ function generateUUIDForTokenId(): string {
   return randomUUID().replace(/-/g, ''); // https://stackoverflow.com/a/67624847/470749 https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID
 }
 
+function getImageIngredientsFromCertificateRequiredFields(tokenId: string, issuedAt: string, certificateRequiredFields: CertificateRequiredFields): ImageIngredients {
+  // Field mappings here must stay in sync with fetchCertificateDetails.
+  return {
+    tokenId,
+    date: convertMillisecondsTimestampToFormattedDate(issuedAt),
+    programCode: certificateRequiredFields.program,
+    programName: certificateRequiredFields.program_name,
+    accountName: certificateRequiredFields.original_recipient_id,
+    programDescription: certificateRequiredFields.description,
+    instructor: certificateRequiredFields.authority_id,
+  };
+}
+
 /**
  *
  * @see https://nomicon.io/Standards/Tokens/NonFungibleToken/Metadata#interface
@@ -39,7 +52,8 @@ async function buildTokenMetadata(tokenId: string, certificateRequiredFields: Ce
   /* eslint-disable camelcase */
   const issued_at = Date.now().toString(); // issued_at expects milliseconds since epoch as string
   const media = getImageUrl(tokenId);
-  const media_hash = await getBase64ImageHash(tokenId, undefined); // Base64-encoded sha256 hash of content referenced by the `media` field. Required if `media` is included.
+  const imageIngredients = getImageIngredientsFromCertificateRequiredFields(tokenId, issued_at, certificateRequiredFields);
+  const media_hash = await getBase64ImageHash(imageIngredients); // Base64-encoded sha256 hash of content referenced by the `media` field. Required if `media` is included.
   const tokenMetadata = (({ title, description }) => ({ title, description, media, media_hash, issued_at, copies: 1 }))(certificateRequiredFields); // https://stackoverflow.com/a/67591318/470749
   /* eslint-enable camelcase */
   return tokenMetadata;
