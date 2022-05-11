@@ -11,10 +11,10 @@ async function invalidateAllCertsForAccount(accountId: AccountId) {
 
   try {
     await Promise.all(
-      tokens.map((token: Certificate) =>
+      tokens.map((certificate: Certificate) =>
         (contract as NFT).cert_invalidate(
           // https://github.com/near/near-api-js/issues/719
-          { token_id: token.token_id }, // `memo` here?
+          { token_id: certificate.token_id }, // `memo` here?
           gas,
           '1', // deposit exactly 1 yoctoNEAR
         ),
@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   const { headers } = req; // https://stackoverflow.com/a/63529345/470749
   if (headers?.[apiKeyHeaderName] !== apiKey) {
-    return rejectAsUnauthorized(res, headers);
+    rejectAsUnauthorized(res, headers);
   }
 
   const body = req?.body;
