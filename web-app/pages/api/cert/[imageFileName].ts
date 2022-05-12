@@ -7,6 +7,7 @@ import { getNearAccountWithoutAccountIdOrKeyStoreForBackend, getNftContractOfAcc
 import { height, populateCert, width } from '../../../helpers/certificate-designs';
 import { addCacheHeader } from '../../../helpers/caching';
 import { convertMillisecondsTimestampToFormattedDate } from '../../../helpers/time';
+import { getExpiration } from '../../../helpers/expiration-date';
 
 export const HTTP_ERROR_CODE_MISSING = 404;
 const svg = 'svg';
@@ -41,6 +42,7 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
   return buffer;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export async function fetchCertificateDetails(tokenId: string) {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForBackend();
   const contract = getNftContractOfAccount(account);
@@ -54,7 +56,14 @@ export async function fetchCertificateDetails(tokenId: string) {
     if (certificateMetadata.valid) {
       const accountName = certificateMetadata.original_recipient_id;
       const programCode = certificateMetadata.program;
+      let expiration = null; // The UI (see `generateImage`) will need to gracefully handle this case when indexer service is unavailable.
+      try {
+        expiration = await getExpiration(accountName, metadata.issued_at);
+      } catch (error) {
+        console.error('Perhaps a certificate for the original_recipient_id could not be found or the public indexer query timed out.', error);
+      }
       const date = convertMillisecondsTimestampToFormattedDate(metadata.issued_at);
+
       const programName = metadata.title;
       const programDescription = metadata.description;
       const instructor = certificateMetadata.authority_id;
@@ -64,6 +73,7 @@ export async function fetchCertificateDetails(tokenId: string) {
         programCode, // This will determine which background image gets used.
         programName,
         accountName,
+        expiration,
         programDescription,
         instructor,
       };
@@ -87,6 +97,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   if (imageBuffer) {
     res.setHeader('Content-Type', contentType);
     addCacheHeader(res, CACHE_SECONDS);
+
     // Caching is important (especially if we have a getExpiration function that pulls from the public indexer database).
     res.send(imageBuffer);
   } else {

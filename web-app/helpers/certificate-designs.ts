@@ -1,5 +1,6 @@
 // https://dev.to/sudo_overflow/diy-generating-dynamic-images-on-the-fly-for-email-marketing-h51
 import { Canvas, registerFont, loadImage } from 'canvas';
+import { isBeforeNow, formatDate } from './time';
 
 export const width = 1080; // width of the image
 export const height = 1080; // height of the image
@@ -17,17 +18,26 @@ const BODY_WIDTH = 950;
 const LEFT_PADDING = 65;
 const X_POSITION_OF_INSTRUCTOR = 200; // https://www.figma.com/file/sTYSqGHiCoH0p82uh1TsTs/NC-Certs?node-id=0%3A1 does not have the actual measurements needed for left-align, so this is just a guess, but it's possibly good enough.
 const X_POSITION_OF_DATE = LEFT_PADDING + BODY_WIDTH;
+const X_POSITION_OF_DATE_LABEL = X_POSITION_OF_DATE - 190;
 const X_POSITION_OF_DESCRIPTION = LEFT_PADDING;
 const X_CENTER = width / 2;
+const Y_POSITION_ISSUED_DATE = 807;
 
 const dateFont = `30px '${monoFontFamily}' medium`;
 const descriptionFont = `33px '${manropeFontFamily}' regular`;
 const tokenIdFont = `30px '${monoFontFamily}' medium`;
 const programFont = `40px '${monoFontFamily}' medium`;
 const titleFont = `64px '${manropeFontFamily}' extraBold`;
+const fieldLabelFont = `28px '${manropeFontFamily}' extraBold`;
+const expirationExplanationFont = `20px '${manropeFontFamily}' regular`;
 
 registerFont(manropeFontFile, { family: manropeFontFamily });
 registerFont(monoFontFile, { family: monoFontFamily });
+
+function getExpiratonExplanation(expirationDateString: string) {
+  const expirationDateStringFormatted = formatDate(expirationDateString);
+  return `* Will expire after the first 6-month period of inactivity of this mainnet account (which currently would be ${expirationDateStringFormatted} if no future activity)`;
+}
 
 function getBaseContext(canvas: Canvas) {
   const context = canvas.getContext('2d');
@@ -86,7 +96,7 @@ function wrapText(context: CanvasRenderingContext2D, text: string, x: number, y:
 
 export async function populateCert(canvas: Canvas, details: any) {
   console.log('populateCert', { details });
-  const { tokenId, date, programName, accountName, programDescription, instructor, programCode } = details;
+  const { tokenId, date, expiration, programName, accountName, programDescription, instructor, programCode } = details;
 
   // Load and draw the background image first
   const certificateBackgroundImage = `./public/certificate-backgrounds/${programCode}_certificate.svg`; // Background images must be in SVG format
@@ -100,7 +110,16 @@ export async function populateCert(canvas: Canvas, details: any) {
   fitText(context, accountName, 60, black, X_CENTER, 304, BODY_WIDTH, 'center');
   wrapText(context, programDescription, X_POSITION_OF_DESCRIPTION, 450, 60, descriptionFont, gray);
   addText(context, programName, programFont, black, X_CENTER, 680, 'center');
-  fitText(context, instructor, 30, black, X_POSITION_OF_INSTRUCTOR, 807, 550, 'left');
-  addText(context, date, dateFont, black, X_POSITION_OF_DATE, 807, 'right');
+  addText(context, 'Instructor:', fieldLabelFont, gray, LEFT_PADDING, Y_POSITION_ISSUED_DATE, 'left');
+  fitText(context, instructor, 30, black, X_POSITION_OF_INSTRUCTOR, Y_POSITION_ISSUED_DATE, 550, 'left');
+  addText(context, 'Issued:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, Y_POSITION_ISSUED_DATE, 'right');
+  addText(context, date, dateFont, black, X_POSITION_OF_DATE, Y_POSITION_ISSUED_DATE, 'right');
+  if (isBeforeNow(expiration)) {
+    addText(context, 'Expired:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, 850, 'right');
+  } else {
+    addText(context, 'Expiration*:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, 850, 'right');
+    wrapText(context, getExpiratonExplanation(expiration), X_POSITION_OF_DESCRIPTION, 910, 110, expirationExplanationFont, gray);
+  }
+  addText(context, formatDate(expiration), dateFont, black, X_POSITION_OF_DATE, 850, 'right');
   addText(context, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
 }
