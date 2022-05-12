@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model action_receipts {
+  receipt_id        String   @id
+  signer_account_id String
+  receipts          receipts @relation(fields: [receipt_id], references: [receipt_id], onDelete: Cascade, onUpdate: NoAction, map: "receipt_fk")
+
+  @@index([signer_account_id], map: "action_receipt_signer_account_id_idx")
+}
+
+model receipts {
+  receipt_id                                              String                              @id
+  included_in_block_timestamp                             Decimal                             @db.Decimal(20, 0)                      
+  action_receipts                                         action_receipts?
+                                        
+  @@index([included_in_block_timestamp], map: "receipts_timestamp_idx")
+}
+
+

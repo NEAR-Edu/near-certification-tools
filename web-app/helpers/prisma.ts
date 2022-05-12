@@ -23,7 +23,7 @@ const prisma = new PrismaClient({
 
 // https://www.prisma.io/docs/concepts/components/prisma-client/working-with-prismaclient/logging
 prisma.$on('query', (event: any) => {
-  console.log(`Query: ${event.query}`);
+  // console.log(`Query: ${event.query}`);
   console.log(`Duration: ${event.duration}ms`);
 });
 

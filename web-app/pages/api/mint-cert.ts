@@ -5,7 +5,8 @@ import { utils } from 'near-api-js'; // https://github.com/near/near-api-js/blob
 import { AccountId, getNftContract, NFT, apiKey, gas, HTTP_SUCCESS, HTTP_ERROR, rejectAsUnauthorized } from '../../helpers/near';
 import { getImageUrl } from '../../helpers/strings';
 import { convertMillisecondsTimestampToFormattedDate, convertStringDateToNanoseconds } from '../../helpers/time';
-import { getBase64ImageHash, ImageIngredients } from './cert/[imageFileName]';
+import { getBase64ImageHash } from './cert/[imageFileName]';
+import { ImageIngredients } from '../../helpers/types';
 
 // Could also use https://github.com/near/units-js#parsing-strings for this:
 export const depositAmountYoctoNear = utils.format.parseNearAmount('0.2'); // 0.2Ⓝ is max. There will be a certain deposit required to pay for the storage of the data on chain. Contract will automatically refund any excess.

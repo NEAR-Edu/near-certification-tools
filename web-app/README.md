@@ -1,6 +1,6 @@
 # Overview
 
-This project will be accessible at https://cert.near.university. See [deployment_notes.md](deployment_notes.md).
+This project will be accessible at https://certificates.near.university. See [deployment_notes.md](deployment_notes.md).
 
 ## Frontend
 

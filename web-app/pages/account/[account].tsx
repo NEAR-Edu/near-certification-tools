@@ -7,7 +7,6 @@ import { getImageUrl, getSimpleStringFromParam } from '../../helpers/strings';
 import { AccountId, getNearAccountWithoutAccountIdOrKeyStoreForFrontend, getNftContractOfAccount, NFT } from '../../helpers/near';
 import { Certificate, isValid } from '../../helpers/certificate';
 import ExplorerAccountLink from '../../components/ExplorerAccountLink';
-import ExpirationWarning from '../../components/ExpirationWarning';
 
 function Tile({ tokenId }: { tokenId: string }): JSX.Element {
   const svgUrl = getImageUrl(tokenId);
@@ -49,9 +48,6 @@ const Account: NextPage<AccountPageProps> = ({ accountId, tokenIds }: AccountPag
       <h1 className="text-center text-3xl sm:text-4xl">{accountId}&rsquo;s Certificates</h1>
 
       <div className={styles.grid}>{tokenIds.length > 0 ? tiles : <span>No certificates yet!</span>}</div>
-      <div className="mt-5">
-        <ExpirationWarning />
-      </div>
       <div className="mt-5">
         <ExplorerAccountLink accountId={accountId} />
       </div>
