@@ -58,7 +58,7 @@ export async function fetchCertificateDetails(tokenId: string): Promise<ImageIng
     if (certificateMetadata.valid) {
       const accountName = certificateMetadata.original_recipient_id;
       const programCode = certificateMetadata.program;
-      let expiration = null; // The UI (see `generateImage`) will need to gracefully handle this case when indexer service is unavailable.
+      let expiration = ''; // The UI (see `populateCert`) will need to gracefully handle this case when indexer service is unavailable.
       try {
         expiration = await getExpiration(accountName, metadata.issued_at);
       } catch (error) {
@@ -86,6 +86,7 @@ export async function fetchCertificateDetails(tokenId: string): Promise<ImageIng
 }
 
 export async function getBase64ImageHash(imageIngredients: ImageIngredients, extension = svg) {
+  // Note: ImageIngredients contains 'expiration', which is dynamic, so this concept of hashing the original contents of the image is kind of weird.
   const { bufferType, canvasType } = getTypesFromExtension(extension);
   const imageBuffer = await generateImage(imageIngredients, canvasType, bufferType);
   const hash = getBase64Hash(imageBuffer);
