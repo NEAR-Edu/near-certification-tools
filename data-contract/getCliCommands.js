@@ -26,7 +26,7 @@ console.log(tokenIds.length, { tokenIds })
 let lines = '';
 
 certs.forEach(cert => { 
-    lines = lines + `NEAR_ENV=mainnet near call certificates.unv.near cert_delete '{ "token_id": "${cert.token_id}"}' --account-id ryancwalsh.near --depositYocto 1 --gas 300000000000000\n`;
+    lines = lines + `NEAR_ENV=mainnet near call certificates.unv.near cert_delete '{ "token_id": "${cert.token_id}"}' --account-id certificates.unv.near --depositYocto 1 --gas 300000000000000\n`;
 });
 
 // https://stackabuse.com/reading-and-writing-json-files-with-node-js/

@@ -20,9 +20,9 @@ function Tile({ tokenId }: { tokenId: string }): JSX.Element {
   );
 }
 
-type AccountPageProps = { accountId: AccountId; certificates: Certificate[] };
+type AccountPageProps = { accountId: AccountId; tokenIds: string[] };
 
-async function getCertificates(accountId: string): Promise<string[]> {
+async function getTokenIdsOfCertificates(accountId: string): Promise<string[]> {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForFrontend();
   const contract = getNftContractOfAccount(account);
   const response = await (contract as NFT).nft_tokens_for_owner({ account_id: accountId });
@@ -35,21 +35,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   // TODO: Replace `"near-api-js": "ryancwalsh/near-api-js#gracefully-handle-window-and-buffer"` with the official "near-api-js" in `package.json` once https://github.com/near/near-api-js/issues/747 is fixed.
   const { account } = context.query; // https://nextjs.org/docs/routing/dynamic-routes
   const accountId = getSimpleStringFromParam(account);
-  const certificates = await getCertificates(accountId);
-  console.log({ accountId, certificates });
+  const tokenIds = await getTokenIdsOfCertificates(accountId);
+  console.log({ accountId, tokenIds });
   // Pass data to the page via props
-  const props: AccountPageProps = { accountId, certificates };
+  const props: AccountPageProps = { accountId, tokenIds };
   return { props };
 };
 
-const Account: NextPage<AccountPageProps> = ({ accountId, certificates }: AccountPageProps) => {
+const Account: NextPage<AccountPageProps> = ({ accountId, tokenIds }: AccountPageProps) => {
+  const tiles = tokenIds.map((tokenId: string) => <Tile tokenId={tokenId} key={tokenId} />);
   return (
     <Layout>
       <h1 className="text-center text-3xl sm:text-4xl">{accountId}&rsquo;s Certificates</h1>
 
-      <div className={styles.grid}>
-        {certificates.length > 0 ? certificates.map((tokenId: string) => <Tile tokenId={tokenId} key={tokenId} />) : <span>No certificates yet!</span>}
-      </div>
+      <div className={styles.grid}>{tokenIds.length > 0 ? tiles : <span>No certificates yet!</span>}</div>
       <div className="mt-5">
         <ExpirationWarning />
       </div>

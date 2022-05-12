@@ -17,11 +17,15 @@ const CACHE_SECONDS: number = Number(process.env.DYNAMIC_CERT_IMAGE_GENERATION_C
 type CanvasTypeDef = 'pdf' | 'svg' | undefined;
 type BufferTypeDef = 'image/png' | undefined;
 
+export function getCanvasType(bufferType: BufferTypeDef) {
+  return bufferType === imagePng ? undefined : svg;
+}
+
 function parseFileName(imageFileNameString: string) {
   const extension = imageFileNameString.split(dot).pop(); // https://stackoverflow.com/a/1203361/470749
   const contentType = extension === svg ? 'image/svg+xml' : imagePng;
   const bufferType: BufferTypeDef = extension === svg ? undefined : imagePng;
-  const canvasType: CanvasTypeDef = extension === svg ? svg : undefined;
+  const canvasType: CanvasTypeDef = getCanvasType(bufferType);
   const lastIndex = imageFileNameString.lastIndexOf(`${dot}${extension}`); // https://stackoverflow.com/a/9323226/470749
   const tokenId = imageFileNameString.substring(0, lastIndex);
   return { extension, bufferType, contentType, canvasType, tokenId };
@@ -68,17 +72,19 @@ export async function fetchCertificateDetails(tokenId: string) {
   return null;
 }
 
+async function getImageBufferFromTokenId(tokenId: string, canvasType: CanvasTypeDef, bufferType: BufferTypeDef) {
+  const details = await fetchCertificateDetails(tokenId);
+  return details ? generateImage(canvasType, bufferType, details) : null;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Buffer | { error: string }>) {
   // Grab payload from query.
   const { imageFileName } = req.query;
-
   const imageFileNameString = getSimpleStringFromParam(imageFileName);
   const { bufferType, contentType, canvasType, tokenId } = parseFileName(imageFileNameString);
-  console.log({ bufferType, contentType, canvasType, tokenId });
-  const details = await fetchCertificateDetails(tokenId);
-  if (details) {
-    // Provide each piece of text to generateImage.
-    const imageBuffer = await generateImage(canvasType, bufferType, details);
+  // console.log({ bufferType, contentType, canvasType, tokenId });
+  const imageBuffer = await getImageBufferFromTokenId(tokenId, canvasType, bufferType);
+  if (imageBuffer) {
     res.setHeader('Content-Type', contentType);
     addCacheHeader(res, CACHE_SECONDS);
     // Caching is important (especially if we have a getExpiration function that pulls from the public indexer database).

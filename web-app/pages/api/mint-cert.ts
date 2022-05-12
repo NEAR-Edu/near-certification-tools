@@ -30,10 +30,21 @@ function generateUUIDForTokenId(): string {
   return randomUUID().replace(/-/g, ''); // https://stackoverflow.com/a/67624847/470749 https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID
 }
 
-function buildMetadata(certificateRequiredFields: CertificateRequiredFields) {
+/**
+ *
+ * @see https://nomicon.io/Standards/Tokens/NonFungibleToken/Metadata#interface
+ */
+async function buildTokenMetadata(tokenId: string, certificateRequiredFields: CertificateRequiredFields) {
   /* eslint-disable camelcase */
   const issued_at = Date.now().toString(); // issued_at expects milliseconds since epoch as string
-  const tokenMetadata = (({ title, description, media }) => ({ title, description, media, issued_at, copies: 1 }))(certificateRequiredFields); // https://stackoverflow.com/a/67591318/470749
+  const media = getImageUrl(tokenId);
+  const tokenMetadata = (({ title, description }) => ({ title, description, media, issued_at, copies: 1 }))(certificateRequiredFields); // https://stackoverflow.com/a/67591318/470749
+  /* eslint-enable camelcase */
+  return tokenMetadata;
+}
+
+function buildCertificationMetadata(certificateRequiredFields: CertificateRequiredFields) {
+  /* eslint-disable camelcase */
   const certificationMetadata = (({
     authority_id,
     authority_name,
@@ -60,13 +71,14 @@ function buildMetadata(certificateRequiredFields: CertificateRequiredFields) {
   }))(certificateRequiredFields);
   /* eslint-enable camelcase */
 
-  console.log({ tokenMetadata, certificationMetadata });
-  return { tokenMetadata, certificationMetadata };
+  console.log({ certificationMetadata });
+  return certificationMetadata;
 }
 
 async function mintCertificate(tokenId: string, certificateRequiredFields: CertificateRequiredFields) {
   const contract = await getNftContract();
-  const { tokenMetadata, certificationMetadata } = buildMetadata(certificateRequiredFields);
+  const tokenMetadata = await buildTokenMetadata(tokenId, certificateRequiredFields);
+  const certificationMetadata = buildCertificationMetadata(certificateRequiredFields);
   const payload = {
     receiver_account_id: certificateRequiredFields.original_recipient_id,
     token_id: tokenId,
@@ -74,6 +86,7 @@ async function mintCertificate(tokenId: string, certificateRequiredFields: Certi
     certification_metadata: certificationMetadata,
     memo: null,
   };
+  console.log({ payload });
   const result = (contract as NFT).nft_mint(
     // https://github.com/near/near-api-js/issues/719
     payload,
