@@ -6,6 +6,7 @@ import { Certificate } from '../../helpers/certificate';
 import { AccountId, apiKey, gas, getNftContract, HTTP_ERROR, HTTP_SUCCESS, NFT, rejectAsUnauthorized } from '../../helpers/near';
 import { getImageUrl } from '../../helpers/strings';
 import { convertStringDateToNanoseconds } from '../../helpers/time';
+import { JsonResponse, NftMintResult } from '../../helpers/types';
 
 // Could also use https://github.com/near/units-js#parsing-strings for this:
 export const depositAmountYoctoNear = utils.format.parseNearAmount('0.2'); // 0.2Ⓝ is max. There will be a certain deposit required to pay for the storage of the data on chain. Contract will automatically refund any excess.
@@ -68,7 +69,7 @@ function buildCertificationMetadata(certificateRequiredFields: CertificateRequir
   return certificationMetadata;
 }
 
-async function mintCertificate(tokenId: string, certificateRequiredFields: CertificateRequiredFields) {
+async function mintCertificate(tokenId: string, certificateRequiredFields: CertificateRequiredFields): Promise<NftMintResult> {
   const contract = await getNftContract();
   const tokenMetadata = buildTokenMetadata(tokenId, certificateRequiredFields);
   const certificationMetadata = buildCertificationMetadata(certificateRequiredFields);
@@ -89,7 +90,7 @@ async function mintCertificate(tokenId: string, certificateRequiredFields: Certi
   return result;
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<JsonResponse | { url: string; tokenId: string; result: NftMintResult }>) {
   // Require that this request is authenticated!
   const tokenId = generateUUIDForTokenId();
   console.log({ tokenId });

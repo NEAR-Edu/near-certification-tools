@@ -3,6 +3,7 @@ import type { NextApiResponse } from 'next';
 import { KeyPair, Account, connect, ConnectConfig, Contract } from 'near-api-js'; // https://github.com/near/near-api-js/blob/master/examples/quick-reference.md
 import { BrowserLocalStorageKeyStore, InMemoryKeyStore, KeyStore } from 'near-api-js/lib/key_stores';
 import { IncomingHttpHeaders } from 'http';
+import { NftMintResult } from './types';
 
 const privateKey = process.env.ISSUING_AUTHORITY_PRIVATE_KEY || '';
 export const apiKey = process.env.API_KEY || '';
@@ -64,7 +65,7 @@ export async function getNearAccountWithoutAccountIdOrKeyStoreForFrontend() {
 
 export type NFT = Contract & {
   // https://stackoverflow.com/a/41385149/470749
-  nft_mint: (args: any, gas: any, depositAmount: any) => Promise<any>; // TODO Add types
+  nft_mint: (args: any, gas: any, depositAmount: any) => Promise<NftMintResult>; // TODO Add types
   cert_invalidate: (args: any, gas: any, depositAmount: any) => Promise<any>;
   nft_token: (args: any) => Promise<any>;
   nft_tokens_for_owner: (args: any) => Promise<any>;

@@ -8,3 +8,12 @@ export type ImageIngredients = {
   programDescription: string;
   instructor: string;
 };
+
+export type JsonResponse =
+  | {
+      status: string;
+      message: string;
+    }
+  | { success: boolean; error?: undefined | unknown };
+
+export type NftMintResult = any;
