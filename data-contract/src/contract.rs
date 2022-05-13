@@ -2,19 +2,26 @@ pub use init::CertificationContractInitOptions;
 use near_contract_standards::non_fungible_token::{
     metadata::NFTContractMetadata, NonFungibleToken,
 };
+use near_contract_tools::{impl_ownership, ownership::Ownership, rbac::Rbac};
 use near_sdk::{
     assert_one_yocto,
     borsh::{self, BorshDeserialize, BorshSerialize},
     collections::LazyOption,
     env,
     json_types::*,
-    near_bindgen, require, AccountId, PanicOnDefault, Promise,
+    near_bindgen, require, AccountId, BorshStorageKey, PanicOnDefault, Promise,
 };
 
 mod init;
 mod invalidate;
 mod mint;
 mod nft;
+mod permissions;
+
+#[derive(BorshSerialize, BorshStorageKey)]
+pub enum Role {
+    Issuer,
+}
 
 #[near_bindgen]
 #[derive(PanicOnDefault, BorshDeserialize, BorshSerialize)]
@@ -23,21 +30,12 @@ pub struct CertificationContract {
     pub(crate) metadata: LazyOption<NFTContractMetadata>,
     pub(crate) can_transfer: bool,
     pub(crate) can_invalidate: bool,
+    pub(crate) ownership: Ownership,
+    pub(crate) rbac: Rbac<Role>,
 }
 
 #[near_bindgen]
 impl CertificationContract {
-    pub fn owner_id(&self) -> AccountId {
-        self.tokens.owner_id.clone()
-    }
-
-    pub(crate) fn assert_owner(&self) {
-        require!(
-            env::predecessor_account_id() == self.tokens.owner_id,
-            "Unauthorized"
-        ); // TODO: Improve this error message to give a hint about how to call the function successfully (and update the existing hint in the readme).
-    }
-
     pub(crate) fn assert_can_transfer(&self) {
         require!(self.can_transfer, "Certifications cannot be transferred");
     }
@@ -57,7 +55,7 @@ impl CertificationContract {
     #[payable]
     pub fn set_metadata(&mut self, metadata: NFTContractMetadata) {
         // Force owner
-        self.assert_owner();
+        self.ownership.require_owner();
         // Force verification
         assert_one_yocto();
 
@@ -71,7 +69,7 @@ impl CertificationContract {
     #[payable]
     pub fn withdraw(&mut self, amount: U128) -> Promise {
         // Force owner
-        self.assert_owner();
+        self.ownership.require_owner();
         // Force verification
         assert_one_yocto();
 
@@ -80,7 +78,7 @@ impl CertificationContract {
 
         require!(amount <= max, "Insufficient balance");
 
-        Promise::new(self.owner_id()).transfer(amount)
+        Promise::new(self.ownership.owner.as_ref().unwrap().to_owned()).transfer(amount)
     }
 
     #[payable]
@@ -88,3 +86,5 @@ impl CertificationContract {
         self.withdraw(self.get_max_withdrawal())
     }
 }
+
+impl_ownership!(CertificationContract, ownership);

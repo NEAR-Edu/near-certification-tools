@@ -31,7 +31,7 @@ impl CertificationContract {
     pub fn cert_invalidate(&mut self, token_id: TokenId, memo: Option<String>) {
         self.assert_can_invalidate();
         // Force owner only
-        self.assert_owner();
+        self.ownership.require_owner();
         // Force verification
         assert_one_yocto();
 
@@ -71,7 +71,7 @@ impl CertificationContract {
         // Disallow deletion if invalidation is disallowed (deletion is the stronger action)
         self.assert_can_invalidate();
         // Force owner only
-        self.assert_owner();
+        self.ownership.require_owner();
         // Force verification
         assert_one_yocto();
 
@@ -109,7 +109,7 @@ impl CertificationContract {
         // Emit NFT burn event
         NftBurn {
             owner_id: &owner_id,
-            authorized_id: Some(&self.owner_id()),
+            authorized_id: self.ownership.owner.as_ref(),
             token_ids: &[&token_id],
             memo: memo.as_deref(),
         }

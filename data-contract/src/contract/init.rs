@@ -33,7 +33,7 @@ impl CertificationContract {
         Self {
             tokens: NonFungibleToken::new(
                 StorageKey::NonFungibleToken,
-                owner_id,
+                owner_id.clone(),
                 Some(StorageKey::TokenMetadata),
                 Some(StorageKey::Enumeration),
                 Some(StorageKey::Approval),
@@ -41,6 +41,33 @@ impl CertificationContract {
             metadata: LazyOption::new(StorageKey::Metadata, Some(&metadata)),
             can_transfer: options.can_transfer,
             can_invalidate: options.can_invalidate,
+            ownership: Ownership::new(StorageKey::Ownership, owner_id),
+            rbac: Rbac::new(StorageKey::Rbac),
+        }
+    }
+
+    #[private]
+    #[init(ignore_state)]
+    pub fn migrate() -> Self {
+        #[derive(BorshDeserialize)]
+        struct OldSchema {
+            pub tokens: NonFungibleToken,
+            pub metadata: LazyOption<NFTContractMetadata>,
+            pub can_transfer: bool,
+            pub can_invalidate: bool,
+        }
+
+        let old: OldSchema = env::state_read().unwrap();
+
+        let owner_id = old.tokens.owner_id.to_owned();
+
+        Self {
+            tokens: old.tokens,
+            metadata: old.metadata,
+            can_transfer: old.can_transfer,
+            can_invalidate: old.can_invalidate,
+            ownership: Ownership::new(StorageKey::Ownership, owner_id),
+            rbac: Rbac::new(StorageKey::Rbac),
         }
     }
 }
