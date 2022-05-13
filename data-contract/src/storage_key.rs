@@ -11,4 +11,5 @@ pub enum StorageKey {
     Enumeration,
     Approval,
     Ownership,
+    Rbac,
 }

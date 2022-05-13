@@ -19,8 +19,8 @@ impl CertificationContract {
         certification_metadata: CertificationExtraMetadata,
         memo: Option<String>,
     ) -> Token {
-        // Force owner
-        self.ownership.require_owner();
+        // Access control
+        self.rbac.require_role(&Role::Issuer);
         // Force verification
         assert_nonzero_deposit();
 

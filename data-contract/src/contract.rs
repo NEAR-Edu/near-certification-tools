@@ -2,22 +2,26 @@ pub use init::CertificationContractInitOptions;
 use near_contract_standards::non_fungible_token::{
     metadata::NFTContractMetadata, NonFungibleToken,
 };
-use near_contract_tools::{impl_ownership, ownership::Ownership};
+use near_contract_tools::{impl_ownership, ownership::Ownership, rbac::Rbac};
 use near_sdk::{
     assert_one_yocto,
     borsh::{self, BorshDeserialize, BorshSerialize},
     collections::LazyOption,
     env,
     json_types::*,
-    near_bindgen, require, AccountId, PanicOnDefault, Promise,
+    near_bindgen, require, AccountId, BorshStorageKey, PanicOnDefault, Promise,
 };
-
-use crate::storage_key::StorageKey;
 
 mod init;
 mod invalidate;
 mod mint;
 mod nft;
+mod permissions;
+
+#[derive(BorshSerialize, BorshStorageKey)]
+pub enum Role {
+    Issuer,
+}
 
 #[near_bindgen]
 #[derive(PanicOnDefault, BorshDeserialize, BorshSerialize)]
@@ -27,6 +31,7 @@ pub struct CertificationContract {
     pub(crate) can_transfer: bool,
     pub(crate) can_invalidate: bool,
     pub(crate) ownership: Ownership,
+    pub(crate) rbac: Rbac<Role>,
 }
 
 #[near_bindgen]
@@ -79,30 +84,6 @@ impl CertificationContract {
     #[payable]
     pub fn withdraw_max(&mut self) -> Promise {
         self.withdraw(self.get_max_withdrawal())
-    }
-
-    #[private]
-    #[init(ignore_state)]
-    pub fn migrate() -> Self {
-        #[derive(BorshDeserialize)]
-        struct OldSchema {
-            pub tokens: NonFungibleToken,
-            pub metadata: LazyOption<NFTContractMetadata>,
-            pub can_transfer: bool,
-            pub can_invalidate: bool,
-        }
-
-        let old: OldSchema = env::state_read().unwrap();
-
-        let owner_id = old.tokens.owner_id.to_owned();
-
-        Self {
-            tokens: old.tokens,
-            metadata: old.metadata,
-            can_transfer: old.can_transfer,
-            can_invalidate: old.can_invalidate,
-            ownership: Ownership::new(StorageKey::Ownership, owner_id),
-        }
     }
 }
 
