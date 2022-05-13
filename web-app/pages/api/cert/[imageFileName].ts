@@ -2,7 +2,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createCanvas } from 'canvas';
-import { getBase64Hash, getSimpleStringFromParam } from '../../../helpers/strings';
+import { getSimpleStringFromParam } from '../../../helpers/strings';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend, getNftContractOfAccount, NFT } from '../../../helpers/near';
 import { height, populateCert, width } from '../../../helpers/certificate-designs';
 import { addCacheHeader } from '../../../helpers/caching';
@@ -83,15 +83,6 @@ export async function fetchCertificateDetails(tokenId: string): Promise<ImageIng
     }
   }
   return null;
-}
-
-export async function getBase64ImageHash(imageIngredients: ImageIngredients, extension = svg) {
-  // Note: ImageIngredients contains 'expiration', which is dynamic, so this concept of hashing the original contents of the image is kind of weird.
-  const { bufferType, canvasType } = getTypesFromExtension(extension);
-  const imageBuffer = await generateImage(imageIngredients, canvasType, bufferType);
-  const hash = getBase64Hash(imageBuffer);
-  console.log({ hash });
-  return hash;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Buffer | { error: string }>) {
