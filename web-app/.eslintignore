@@ -1,0 +1,14 @@
+*.scss
+*.md
+*.ttf
+docker-compose.yml
+package.json
+package-lock.json
+pages/api/sample_api_payload.json
+postcss.config.js
+public/**/*.svg
+schema.prisma
+test-schema.prisma
+tsconfig.json
+yarn-error.log
+yarn.lock
