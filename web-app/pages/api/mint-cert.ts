@@ -1,13 +1,14 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { randomUUID } from 'crypto'; // Added in: node v14.17.0
 import { utils } from 'near-api-js'; // https://github.com/near/near-api-js/blob/master/examples/quick-reference.md
-import { AccountId, getNftContract, NFT, apiKey, gas, HTTP_SUCCESS, HTTP_ERROR, rejectAsUnauthorized } from '../../helpers/near';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { Certificate } from '../../helpers/certificate';
+import { getExpiration } from '../../helpers/expiration-date';
+import { AccountId, apiKey, gas, getNftContract, HTTP_ERROR, HTTP_SUCCESS, NFT, rejectAsUnauthorized } from '../../helpers/near';
 import { getImageUrl } from '../../helpers/strings';
 import { convertMillisecondsTimestampToFormattedDate, convertStringDateToNanoseconds } from '../../helpers/time';
-import { getBase64ImageHash } from './cert/[imageFileName]';
 import { ImageIngredients } from '../../helpers/types';
-import { getExpiration } from '../../helpers/expiration-date';
+import { getBase64ImageHash } from './cert/[imageFileName]';
 
 // Could also use https://github.com/near/units-js#parsing-strings for this:
 export const depositAmountYoctoNear = utils.format.parseNearAmount('0.2'); // 0.2Ⓝ is max. There will be a certain deposit required to pay for the storage of the data on chain. Contract will automatically refund any excess.
@@ -57,15 +58,13 @@ async function getImageIngredientsFromCertificateRequiredFields(
  *
  * @see https://nomicon.io/Standards/Tokens/NonFungibleToken/Metadata#interface
  */
-async function buildTokenMetadata(tokenId: string, certificateRequiredFields: CertificateRequiredFields) {
+function buildTokenMetadata(tokenId: string, certificateRequiredFields: CertificateRequiredFields): Certificate['metadata'] {
   /* eslint-disable camelcase */
   const issued_at = Date.now().toString(); // issued_at expects milliseconds since epoch as string
   const media = getImageUrl(tokenId);
-  const imageIngredients = await getImageIngredientsFromCertificateRequiredFields(tokenId, issued_at, certificateRequiredFields);
-  const media_hash = await getBase64ImageHash(imageIngredients); // Base64-encoded sha256 hash of content referenced by the `media` field. Required if `media` is included.
-  const tokenMetadata = (({ title, description }) => ({ title, description, media, media_hash, issued_at, copies: 1 }))(certificateRequiredFields); // https://stackoverflow.com/a/67591318/470749
+  const { title, description } = certificateRequiredFields;
+  return { title, description, media, issued_at, copies: 1 };
   /* eslint-enable camelcase */
-  return tokenMetadata;
 }
 
 function buildCertificationMetadata(certificateRequiredFields: CertificateRequiredFields) {
@@ -102,7 +101,7 @@ function buildCertificationMetadata(certificateRequiredFields: CertificateRequir
 
 async function mintCertificate(tokenId: string, certificateRequiredFields: CertificateRequiredFields) {
   const contract = await getNftContract();
-  const tokenMetadata = await buildTokenMetadata(tokenId, certificateRequiredFields);
+  const tokenMetadata = buildTokenMetadata(tokenId, certificateRequiredFields);
   const certificationMetadata = buildCertificationMetadata(certificateRequiredFields);
   const payload = {
     receiver_account_id: certificateRequiredFields.original_recipient_id,
