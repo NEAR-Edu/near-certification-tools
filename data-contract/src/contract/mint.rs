@@ -20,7 +20,7 @@ impl CertificationContract {
         memo: Option<String>,
     ) -> Token {
         // Force owner
-        self.assert_owner();
+        self.ownership.require_owner();
         // Force verification
         assert_nonzero_deposit();
 

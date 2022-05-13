@@ -33,7 +33,7 @@ impl CertificationContract {
         Self {
             tokens: NonFungibleToken::new(
                 StorageKey::NonFungibleToken,
-                owner_id,
+                owner_id.clone(),
                 Some(StorageKey::TokenMetadata),
                 Some(StorageKey::Enumeration),
                 Some(StorageKey::Approval),
@@ -41,6 +41,7 @@ impl CertificationContract {
             metadata: LazyOption::new(StorageKey::Metadata, Some(&metadata)),
             can_transfer: options.can_transfer,
             can_invalidate: options.can_invalidate,
+            ownership: Ownership::new(StorageKey::Ownership, owner_id),
         }
     }
 }
