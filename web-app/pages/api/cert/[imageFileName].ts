@@ -8,6 +8,7 @@ import { height, populateCert, width } from '../../../helpers/certificate-design
 import { addCacheHeader } from '../../../helpers/caching';
 import { convertMillisecondsTimestampToFormattedDate } from '../../../helpers/time';
 import { getExpiration } from '../../../helpers/expiration-date';
+import { ImageIngredients } from '../../../helpers/types';
 
 export const HTTP_ERROR_CODE_MISSING = 404;
 const svg = 'svg';
@@ -18,24 +19,25 @@ const CACHE_SECONDS: number = Number(process.env.DYNAMIC_CERT_IMAGE_GENERATION_C
 type CanvasTypeDef = 'pdf' | 'svg' | undefined;
 type BufferTypeDef = 'image/png' | undefined;
 
-export function getCanvasType(bufferType: BufferTypeDef) {
-  return bufferType === imagePng ? undefined : svg;
+export function getTypesFromExtension(extension = svg) {
+  const contentType = extension === svg ? 'image/svg+xml' : imagePng;
+  const bufferType: BufferTypeDef = extension === svg ? undefined : imagePng;
+  const canvasType: CanvasTypeDef = extension === svg ? svg : undefined;
+  return { bufferType, contentType, canvasType };
 }
 
 function parseFileName(imageFileNameString: string) {
   const extension = imageFileNameString.split(dot).pop(); // https://stackoverflow.com/a/1203361/470749
-  const contentType = extension === svg ? 'image/svg+xml' : imagePng;
-  const bufferType: BufferTypeDef = extension === svg ? undefined : imagePng;
-  const canvasType: CanvasTypeDef = getCanvasType(bufferType);
+  const { bufferType, contentType, canvasType } = getTypesFromExtension(extension);
   const lastIndex = imageFileNameString.lastIndexOf(`${dot}${extension}`); // https://stackoverflow.com/a/9323226/470749
   const tokenId = imageFileNameString.substring(0, lastIndex);
   return { extension, bufferType, contentType, canvasType, tokenId };
 }
 
-async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDef, details: any) {
+async function generateImage(imageIngredients: ImageIngredients, canvasType: CanvasTypeDef, bufferType: BufferTypeDef) {
   const canvas = createCanvas(width, height, canvasType);
 
-  await populateCert(canvas, details);
+  await populateCert(canvas, imageIngredients);
 
   // Convert the Canvas to a buffer
   const buffer = bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();
@@ -43,7 +45,7 @@ async function generateImage(canvasType: CanvasTypeDef, bufferType: BufferTypeDe
 }
 
 // eslint-disable-next-line max-lines-per-function
-export async function fetchCertificateDetails(tokenId: string) {
+export async function fetchCertificateDetails(tokenId: string): Promise<ImageIngredients | null> {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForBackend();
   const contract = getNftContractOfAccount(account);
   const response = await (contract as NFT).nft_token({ token_id: tokenId });
@@ -56,7 +58,7 @@ export async function fetchCertificateDetails(tokenId: string) {
     if (certificateMetadata.valid) {
       const accountName = certificateMetadata.original_recipient_id;
       const programCode = certificateMetadata.program;
-      let expiration = null; // The UI (see `generateImage`) will need to gracefully handle this case when indexer service is unavailable.
+      let expiration = ''; // The UI (see `populateCert`) will need to gracefully handle this case when indexer service is unavailable.
       try {
         expiration = await getExpiration(accountName, metadata.issued_at);
       } catch (error) {
@@ -68,9 +70,10 @@ export async function fetchCertificateDetails(tokenId: string) {
       const programDescription = metadata.description;
       const instructor = certificateMetadata.authority_id;
       return {
+        // Field mappings here must stay in sync with getImageIngredientsFromCertificateRequiredFields.
         tokenId,
         date,
-        programCode, // This will determine which background image gets used.
+        programCode,
         programName,
         accountName,
         expiration,
@@ -82,19 +85,15 @@ export async function fetchCertificateDetails(tokenId: string) {
   return null;
 }
 
-async function getImageBufferFromTokenId(tokenId: string, canvasType: CanvasTypeDef, bufferType: BufferTypeDef) {
-  const details = await fetchCertificateDetails(tokenId);
-  return details ? generateImage(canvasType, bufferType, details) : null;
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse<Buffer | { error: string }>) {
   // Grab payload from query.
   const { imageFileName } = req.query;
   const imageFileNameString = getSimpleStringFromParam(imageFileName);
   const { bufferType, contentType, canvasType, tokenId } = parseFileName(imageFileNameString);
   // console.log({ bufferType, contentType, canvasType, tokenId });
-  const imageBuffer = await getImageBufferFromTokenId(tokenId, canvasType, bufferType);
-  if (imageBuffer) {
+  const imageIngredients = await fetchCertificateDetails(tokenId);
+  if (imageIngredients) {
+    const imageBuffer = await generateImage(imageIngredients, canvasType, bufferType);
     res.setHeader('Content-Type', contentType);
     addCacheHeader(res, CACHE_SECONDS);
 

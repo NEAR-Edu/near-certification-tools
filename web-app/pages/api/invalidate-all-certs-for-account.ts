@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Certificate } from '../../helpers/certificate';
 import { AccountId, apiKey, gas, getNftContract, HTTP_ERROR, HTTP_SUCCESS, NFT, rejectAsUnauthorized } from '../../helpers/near';
+import { JsonResponse } from '../../helpers/types';
 
 const apiKeyHeaderName = 'x-api-key'; // Although the user interface of Integromat shows the capitalization as "X-API-Key", inspecting the actual header reveals that lowercase is used.
 
@@ -29,7 +30,7 @@ async function invalidateAllCertsForAccount(accountId: AccountId) {
   }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<JsonResponse>) {
   // Require that this request is authenticated!
 
   const { headers } = req; // https://stackoverflow.com/a/63529345/470749
@@ -43,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   try {
     const result = await invalidateAllCertsForAccount(accountId);
-    res.status(HTTP_SUCCESS).json({ result });
+    res.status(HTTP_SUCCESS).json(result);
   } catch (err) {
     console.error(err);
     res.status(HTTP_ERROR).json({ status: 'error', message: 'invalidateAllCertsForAccount failed.' });

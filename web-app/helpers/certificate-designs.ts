@@ -1,6 +1,7 @@
 // https://dev.to/sudo_overflow/diy-generating-dynamic-images-on-the-fly-for-email-marketing-h51
 import { Canvas, registerFont, loadImage } from 'canvas';
 import { isBeforeNow, formatDate } from './time';
+import { ImageIngredients } from './types';
 
 export const width = 1080; // width of the image
 export const height = 1080; // height of the image
@@ -94,7 +95,7 @@ function wrapText(context: CanvasRenderingContext2D, text: string, x: number, y:
   addText(context, replacedText, font, fillStyle, x, y, 'left');
 }
 
-export async function populateCert(canvas: Canvas, details: any) {
+export async function populateCert(canvas: Canvas, details: ImageIngredients) {
   console.log('populateCert', { details });
   const { tokenId, date, expiration, programName, accountName, programDescription, instructor, programCode } = details;
 
@@ -114,12 +115,15 @@ export async function populateCert(canvas: Canvas, details: any) {
   fitText(context, instructor, 30, black, X_POSITION_OF_INSTRUCTOR, Y_POSITION_ISSUED_DATE, 550, 'left');
   addText(context, 'Issued:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, Y_POSITION_ISSUED_DATE, 'right');
   addText(context, date, dateFont, black, X_POSITION_OF_DATE, Y_POSITION_ISSUED_DATE, 'right');
-  if (isBeforeNow(expiration)) {
-    addText(context, 'Expired:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, 850, 'right');
-  } else {
-    addText(context, 'Expiration*:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, 850, 'right');
-    wrapText(context, getExpiratonExplanation(expiration), X_POSITION_OF_DESCRIPTION, 910, 110, expirationExplanationFont, gray);
+  if (expiration) {
+    // Expiration should always exist (unless maybe the public indexer query timed out?)
+    if (isBeforeNow(expiration)) {
+      addText(context, 'Expired:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, 850, 'right');
+    } else {
+      addText(context, 'Expiration*:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, 850, 'right');
+      wrapText(context, getExpiratonExplanation(expiration), X_POSITION_OF_DESCRIPTION, 910, 110, expirationExplanationFont, gray);
+    }
+    addText(context, formatDate(expiration), dateFont, black, X_POSITION_OF_DATE, 850, 'right');
   }
-  addText(context, formatDate(expiration), dateFont, black, X_POSITION_OF_DATE, 850, 'right');
   addText(context, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
 }

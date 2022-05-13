@@ -1,10 +1,12 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { randomUUID } from 'crypto'; // Added in: node v14.17.0
 import { utils } from 'near-api-js'; // https://github.com/near/near-api-js/blob/master/examples/quick-reference.md
-import { AccountId, getNftContract, NFT, apiKey, gas, HTTP_SUCCESS, HTTP_ERROR, rejectAsUnauthorized } from '../../helpers/near';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { Certificate } from '../../helpers/certificate';
+import { AccountId, apiKey, gas, getNftContract, HTTP_ERROR, HTTP_SUCCESS, NFT, rejectAsUnauthorized } from '../../helpers/near';
 import { getImageUrl } from '../../helpers/strings';
 import { convertStringDateToNanoseconds } from '../../helpers/time';
+import { JsonResponse, NftMintResult } from '../../helpers/types';
 
 // Could also use https://github.com/near/units-js#parsing-strings for this:
 export const depositAmountYoctoNear = utils.format.parseNearAmount('0.2'); // 0.2Ⓝ is max. There will be a certain deposit required to pay for the storage of the data on chain. Contract will automatically refund any excess.
@@ -34,29 +36,21 @@ function generateUUIDForTokenId(): string {
  *
  * @see https://nomicon.io/Standards/Tokens/NonFungibleToken/Metadata#interface
  */
-async function buildTokenMetadata(tokenId: string, certificateRequiredFields: CertificateRequiredFields) {
+function buildTokenMetadata(tokenId: string, certificateRequiredFields: CertificateRequiredFields): Certificate['metadata'] {
   /* eslint-disable camelcase */
   const issued_at = Date.now().toString(); // issued_at expects milliseconds since epoch as string
   const media = getImageUrl(tokenId);
-  const tokenMetadata = (({ title, description }) => ({ title, description, media, issued_at, copies: 1 }))(certificateRequiredFields); // https://stackoverflow.com/a/67591318/470749
+  const { title, description } = certificateRequiredFields;
+  return { title, description, media, issued_at, copies: 1 }; // Jacob L, Ryan W, and Petar V just decided to omit media_hash (even though the NFT standard requires it) since `media` points to a URL that dynamically generates the image (and since these NFTs aren't transferrable anyway).
   /* eslint-enable camelcase */
-  return tokenMetadata;
 }
 
 function buildCertificationMetadata(certificateRequiredFields: CertificateRequiredFields) {
   /* eslint-disable camelcase */
-  const certificationMetadata = (({
-    authority_id,
-    authority_name,
-    program,
-    program_name,
-    program_link,
-    program_start_date,
-    program_end_date,
-    original_recipient_id,
-    original_recipient_name,
-    memo,
-  }) => ({
+  const { authority_id, authority_name, program, program_name, program_link, program_start_date, program_end_date, original_recipient_id, original_recipient_name, memo } =
+    certificateRequiredFields;
+
+  const certificationMetadata = {
     authority_id,
     authority_name,
     program,
@@ -68,16 +62,16 @@ function buildCertificationMetadata(certificateRequiredFields: CertificateRequir
     original_recipient_name,
     valid: true,
     memo, // This will list out the competencies that have been certified.
-  }))(certificateRequiredFields);
+  };
   /* eslint-enable camelcase */
 
   console.log({ certificationMetadata });
   return certificationMetadata;
 }
 
-async function mintCertificate(tokenId: string, certificateRequiredFields: CertificateRequiredFields) {
+async function mintCertificate(tokenId: string, certificateRequiredFields: CertificateRequiredFields): Promise<NftMintResult> {
   const contract = await getNftContract();
-  const tokenMetadata = await buildTokenMetadata(tokenId, certificateRequiredFields);
+  const tokenMetadata = buildTokenMetadata(tokenId, certificateRequiredFields);
   const certificationMetadata = buildCertificationMetadata(certificateRequiredFields);
   const payload = {
     receiver_account_id: certificateRequiredFields.original_recipient_id,
@@ -96,7 +90,7 @@ async function mintCertificate(tokenId: string, certificateRequiredFields: Certi
   return result;
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<JsonResponse | { url: string; tokenId: string; result: NftMintResult }>) {
   // Require that this request is authenticated!
   const tokenId = generateUUIDForTokenId();
   console.log({ tokenId });

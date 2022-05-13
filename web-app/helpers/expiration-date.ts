@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'; // https://day.js.org/docs/en/plugin/utc
 import BN from 'bn.js';
@@ -156,8 +155,8 @@ export async function getRawQueryResult(accountName: string, issuedAt: string): 
  * @returns {string} result of formatDate (i.e. uses 'YYYY-MM-DD') of the expiration date
  */
 export async function getExpiration(accountName: string, issuedAt: string): Promise<string> {
-  const result = await getRawQueryResult(accountName, issuedAt);
-  console.log({ result });
+  const expiration = await getRawQueryResult(accountName, issuedAt);
+  console.log({ result: expiration });
 
   /**
    * If the account doesn't have a period where it hasn't been active for 180 days straight after the issue date:
@@ -169,7 +168,7 @@ export async function getExpiration(accountName: string, issuedAt: string): Prom
    * -- return expiration date as issue date + 180 days
    */
 
-  const moment = result.length ? dayjs.utc(result[0].moment) : dayjs.utc(parseInt(issuedAt, 10)); // https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
+  const moment = expiration.length ? dayjs.utc(expiration[0].moment) : dayjs.utc(parseInt(issuedAt, 10)); // https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
 
   return moment.add(expirationDays, 'days').format('YYYY-MM-DDTHH:mm:ss+00:00');
 }

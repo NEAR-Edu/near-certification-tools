@@ -71,7 +71,12 @@ function OpenGraphMetaData({ pngUrl, certificateUrl }: { pngUrl: string; certifi
   );
 }
 
-type CertificatePageProps = { details: any };
+type CertificatePageProps = {
+  details: {
+    tokenId: string;
+    accountName: string;
+  };
+};
 
 const CertificatePage: NextPage<CertificatePageProps> = ({ details }: CertificatePageProps) => {
   // https://nextjs.org/docs/routing/dynamic-routes
