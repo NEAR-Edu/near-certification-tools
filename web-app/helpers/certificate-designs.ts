@@ -17,7 +17,7 @@ const blue = '#5F8AFA';
 const CERTIFICATE_OF_ACHIEVEMENT = 'CERTIFICATE OF ACHIEVEMENT';
 const BODY_WIDTH = 950;
 const LEFT_PADDING = 65;
-const X_POSITION_OF_INSTRUCTOR = 200; // https://www.figma.com/file/sTYSqGHiCoH0p82uh1TsTs/NC-Certs?node-id=0%3A1 does not have the actual measurements needed for left-align, so this is just a guess, but it's possibly good enough.
+const X_POSITION_OF_INSTRUCTOR = 210; // https://www.figma.com/file/sTYSqGHiCoH0p82uh1TsTs/NC-Certs?node-id=0%3A1 does not have the actual measurements needed for left-align, so this is just a guess, but it's possibly good enough.
 const X_POSITION_OF_DATE = LEFT_PADDING + BODY_WIDTH;
 const X_POSITION_OF_DATE_LABEL = X_POSITION_OF_DATE - 190;
 const X_POSITION_OF_DESCRIPTION = LEFT_PADDING;
@@ -112,7 +112,7 @@ export async function populateCert(canvas: Canvas, details: ImageIngredients) {
   wrapText(context, programDescription, X_POSITION_OF_DESCRIPTION, 450, 60, descriptionFont, gray);
   addText(context, programName, programFont, black, X_CENTER, 680, 'center');
   addText(context, 'Instructor:', fieldLabelFont, gray, LEFT_PADDING, Y_POSITION_ISSUED_DATE, 'left');
-  fitText(context, instructor, 30, black, X_POSITION_OF_INSTRUCTOR, Y_POSITION_ISSUED_DATE, 550, 'left');
+  fitText(context, instructor, 30, black, X_POSITION_OF_INSTRUCTOR, Y_POSITION_ISSUED_DATE, 540, 'left');
   addText(context, 'Issued:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, Y_POSITION_ISSUED_DATE, 'right');
   addText(context, date, dateFont, black, X_POSITION_OF_DATE, Y_POSITION_ISSUED_DATE, 'right');
   if (expiration) {
