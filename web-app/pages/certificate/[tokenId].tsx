@@ -8,6 +8,7 @@ https://cards-dev.twitter.com/validator
 
 import type { GetServerSideProps, NextPage } from 'next';
 import Head from 'next/head';
+import Link from 'next/link'; // https://nextjs.org/docs/api-reference/next/link
 import ExplorerAccountLink from '../../components/ExplorerAccountLink';
 import Layout from '../../components/Layout';
 import { baseUrl } from '../../helpers/strings';
@@ -78,6 +79,7 @@ type CertificatePageProps = {
   };
 };
 
+// eslint-disable-next-line max-lines-per-function
 const CertificatePage: NextPage<CertificatePageProps> = ({ details }: CertificatePageProps) => {
   // https://nextjs.org/docs/routing/dynamic-routes
   const { tokenId, accountName } = details;
@@ -91,7 +93,7 @@ const CertificatePage: NextPage<CertificatePageProps> = ({ details }: Certificat
         <a href={`/api/cert/${tokenId}.svg`} className="md:max-w-lg lg:max-w-2xl">
           <img src={pngUrl} alt={`certificate ${tokenId}`} />
         </a>
-        <div className="text-sm mt-2 ml-2">
+        <div className="text-xl mt-2 ml-2">
           Share:{' '}
           <a href={buildTwitterUrl(certificateUrl)} target="_blank" rel="noreferrer">
             <i className="fab fa-twitter-square not-italic text-sky-700 p-1" />
@@ -99,6 +101,13 @@ const CertificatePage: NextPage<CertificatePageProps> = ({ details }: Certificat
           <a href={buildLinkedInUrl(certificateUrl)} target="_blank" rel="noreferrer">
             <i className="fab fa-linkedin-in not-italic text-sky-700 p-1" />
           </a>
+        </div>
+        <div className="mt-5">
+          <Link href={`/account/${accountName}`}>
+            <a href={`/account/${accountName}`} className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
+              View all certificates for {accountName}
+            </a>
+          </Link>
         </div>
         <div className="mt-5">
           <ExplorerAccountLink accountId={accountName} />
