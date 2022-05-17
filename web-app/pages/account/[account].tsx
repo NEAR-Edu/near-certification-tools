@@ -1,20 +1,23 @@
 // This page is visible at /account/example.near
 
 import type { GetServerSideProps, NextPage } from 'next';
-import Layout from '../../components/Layout';
-import styles from '../../styles/Account.module.scss';
-import { getImageUrl, getSimpleStringFromParam } from '../../helpers/strings';
-import { AccountId, getNearAccountWithoutAccountIdOrKeyStoreForFrontend, getNftContractOfAccount, NFT } from '../../helpers/near';
-import { Certificate, isValid } from '../../helpers/certificate';
+import Link from 'next/link'; // https://nextjs.org/docs/api-reference/next/link
 import ExplorerAccountLink from '../../components/ExplorerAccountLink';
+import Layout from '../../components/Layout';
+import { Certificate, isValid } from '../../helpers/certificate';
+import { AccountId, getNearAccountWithoutAccountIdOrKeyStoreForFrontend, getNftContractOfAccount, NFT } from '../../helpers/near';
+import { getImageUrl, getSimpleStringFromParam } from '../../helpers/strings';
+import styles from '../../styles/Account.module.scss';
 
 function Tile({ tokenId }: { tokenId: string }): JSX.Element {
   const svgUrl = getImageUrl(tokenId);
   return (
     <div className={styles.card} key={tokenId}>
-      <a href={`/certificate/${tokenId}`}>
-        <img src={svgUrl} alt={`certificate ${tokenId}`} />
-      </a>
+      <Link href={`/certificate/${tokenId}`}>
+        <a href={`/certificate/${tokenId}`}>
+          <img src={svgUrl} alt={`certificate ${tokenId}`} />
+        </a>
+      </Link>
     </div>
   );
 }
