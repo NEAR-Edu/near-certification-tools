@@ -20,7 +20,7 @@ const description = 'View NEAR University certificates of any .near account';
 function buildTwitterUrl(certificateUrl: string) {
   // https://stevenwestmoreland.com/2018/07/creating-social-sharing-links-without-javascript.html
   const hashtags = ['NEAR', 'blockchain', 'NEARUniversity'];
-  const via = 'NEARedu';
+  const via = 'NEARUniversity';
   const url = encodeURI(`https://twitter.com/intent/tweet?text=${title}&url=${certificateUrl}&hashtags=${hashtags.join(',')}&via=${via}`);
   console.log({ url });
   return url;
