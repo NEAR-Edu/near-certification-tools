@@ -1,0 +1,17 @@
+{
+  "details": {
+    "title": "NEAR Certified Developer",
+    "description": "has successfully completed the NEAR Certified Developer program by demonstrating proficiency in working with smart contracts on NEAR Protocol",
+    "authority_id": "sherif.near",
+    "authority_name": "Sherif Abushadi",
+    "program": "Developer",
+    "program_name": "NEAR Certified Developer",
+    "program_link": "https://www.near.university/courses/near-certified-developer",
+    "program_start_date": null,
+    "program_end_date": "2022-04-01T13:00:00+00:00",
+    "original_recipient_id": "hatchet.testnet",
+    "original_recipient_name": "Hatchet",
+    "media": "data:image/svg+xml,%3csvg id='Layer_1' data-name='Layer 1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'%3e%3cpath d='M115.58%2c7.31%2c85.48%2c52a3.2%2c3.2%2c0%2c0%2c0%2c4.75%2c4.2l29.63-25.68a1.2%2c1.2%2c0%2c0%2c1%2c2%2c.91v80.46a1.2%2c1.2%2c0%2c0%2c1-2.12.77L30.18%2c5.43A15.35%2c15.35%2c0%2c0%2c0%2c18.47%2c0H15.34A15.34%2c15.34%2c0%2c0%2c0%2c0%2c15.34V128.66A15.34%2c15.34%2c0%2c0%2c0%2c15.34%2c144h0a15.35%2c15.35%2c0%2c0%2c0%2c13.08-7.31L58.52%2c92a3.2%2c3.2%2c0%2c0%2c0-4.75-4.2L24.14%2c113.48a1.2%2c1.2%2c0%2c0%2c1-2-.91V32.11a1.2%2c1.2%2c0%2c0%2c1%2c2.12-.77l89.55%2c107.23A15.35%2c15.35%2c0%2c0%2c0%2c125.53%2c144h3.13A15.34%2c15.34%2c0%2c0%2c0%2c144%2c128.66V15.34A15.34%2c15.34%2c0%2c0%2c0%2c128.66%2c0h0A15.35%2c15.35%2c0%2c0%2c0%2c115.58%2c7.31Z'/%3e%3c/svg%3e",
+    "memo": ""
+  }
+}

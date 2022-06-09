@@ -12,7 +12,7 @@ The index page will prompt the visitor to log in, after which it will display th
 
 There is also an API endpoint ([/api/mint-cert](/web-app/pages/api/mint-cert.ts)) for generating a cert for a given mainnet address (and the endpoint will only function if a server-side secret is also provided in the payload).
 
-See [sample_api_payload.json](/web-app/pages/api/sample_api_payload.json).
+See [sample_api_payload_mint-cert.json](/web-app/pages/api/sample_api_payload_mint-cert.json).
 
 Airtable and Integromat are connected via a polling function in Integromat. Once every day or so, Integromat can poll Airtable to retrieve all certified developers, only grabbing the most recently added ones (since the last poll). In the Integromat flow, we have all the data from the submissions table that we need to issue a cert (including name, mainnet address, course, etc).
 
@@ -20,13 +20,21 @@ The Integromat flow then calls the [HTTP "app"](https://www.integromat.com/en/he
 
 The next step in the Integromat flow is to email the recipient of the NCD with a link directly to their wallet where they can see the NFT (and also a link to this frontend).
 
-### Testing posting to the API endpoint
+### Testing posting to the mint-cert API endpoint
 
 You can use CURL in the Terminal.
 
 Change to the `/web-app` directory, and then:
 
-`curl -X POST -H "Content-Type: application/json" -H "x-api-key: xxxxxxxx" -d @"pages/api/sample_api_payload.json" "http://localhost:3000/api/mint-cert"`
+`curl -X POST -H "Content-Type: application/json" -H "x-api-key: xxxxxxxx" -d @"pages/api/sample_api_payload_mint-cert.json" "http://localhost:3000/api/mint-cert"`
+
+### Testing posting to the invalidate-all-certs-for-account API endpoint
+
+You can use CURL in the Terminal.
+
+Change to the `/web-app` directory, and then:
+
+`curl -X POST -H "Content-Type: application/json" -H "x-api-key: xxxxxxxx" -d @"pages/api/sample_api_payload_invalidate-all-certs-for-account.json" "http://localhost:3000/api/invalidate-all-certs-for-account"`
 
 ### Viewing the dynamically-generated png image
 

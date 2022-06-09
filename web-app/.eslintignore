@@ -4,7 +4,8 @@
 docker-compose.yml
 package.json
 package-lock.json
-pages/api/sample_api_payload.json
+pages/api/sample_api_payload_invalidate-all-certs-for-account.json
+pages/api/sample_api_payload_mint-cert.json
 postcss.config.js
 public/**/*.svg
 schema.prisma
