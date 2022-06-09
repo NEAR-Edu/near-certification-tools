@@ -15,7 +15,6 @@ const apiKeyHeaderName = 'x-api-key'; // Although the user interface of Integrom
 type CertificateRequiredFields = {
   title: string;
   description: string;
-  media: string;
   authority_id: AccountId;
   authority_name: string;
   program: string;

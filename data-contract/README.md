@@ -36,7 +36,7 @@ It might be worth reviewing the Metadata standard: https://nomicon.io/Standards/
 
 You might want something in the `icon` field so that it looks nice in a wallet. The `icon` field controls which image is used at the contract level. See the note in the above Nomicon page about using an optimized SVG in the data URL. https://npm.runkit.com/mini-svg-data-uri looks useful.  
 
-The Collectibles tab of Wallet lists out NFTs nested within groups, where each group is a contract (and displays its name and icon as mentioned above). Then each NFT within the group has its own name and icon, but its icon is defined in `token_metadata.media`. See [sample_mint.json](sample_mint.json).
+The Collectibles tab of Wallet lists out NFTs nested within groups, where each group is a contract (and displays its name and icon as mentioned above). Then each NFT within the group has its own name and image (media), but its media is defined in `token_metadata.media`. See [sample_mint.json](sample_mint.json). But now we dynamically generate this media to show a personalized certificate. Also see comment in web-app/pages/api/mint-cert.ts about our decision to omit media_hash.
 
 ## Testnet
 
