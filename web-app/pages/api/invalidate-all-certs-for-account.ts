@@ -1,8 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { Certificate } from '../../helpers/certificate';
-import { AccountId, apiKey, gas, getNftContract, HTTP_ERROR, HTTP_SUCCESS, NFT, rejectAsUnauthorized } from '../../helpers/near';
-import { JsonResponse } from '../../helpers/types';
+import { type NextApiRequest, type NextApiResponse } from 'next';
+import { type Certificate } from '../../helpers/certificate';
+import { type AccountId, type NFT, apiKey, gas, getNftContract, HTTP_ERROR, HTTP_SUCCESS, rejectAsUnauthorized } from '../../helpers/near';
+import { type JsonResponse } from '../../helpers/types';
 
 const apiKeyHeaderName = 'x-api-key'; // Although the user interface of Integromat shows the capitalization as "X-API-Key", inspecting the actual header reveals that lowercase is used.
 
@@ -26,27 +26,27 @@ async function invalidateAllCertsForAccount(accountId: AccountId) {
   } catch (error) {
     console.error(error);
 
-    return { success: false, error };
+    return { error, success: false };
   }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<JsonResponse>) {
+export default async function handler(request: NextApiRequest, response: NextApiResponse<JsonResponse>) {
   // Require that this request is authenticated!
 
-  const { headers } = req; // https://stackoverflow.com/a/63529345/470749
-  if (headers?.[apiKeyHeaderName] !== apiKey) {
-    rejectAsUnauthorized(res, headers);
+  const { headers } = request; // https://stackoverflow.com/a/63529345/470749
+  if (headers[apiKeyHeaderName] !== apiKey) {
+    rejectAsUnauthorized(response, headers);
   }
 
-  const body = req?.body;
-  console.log({ headers, body });
+  const { body } = request;
+  console.log({ body, headers });
   const { accountId } = body; // Eventually we will want to add error-handling / validation.
 
   try {
     const result = await invalidateAllCertsForAccount(accountId);
-    res.status(HTTP_SUCCESS).json(result);
-  } catch (err) {
-    console.error(err);
-    res.status(HTTP_ERROR).json({ status: 'error', message: 'invalidateAllCertsForAccount failed.' });
+    response.status(HTTP_SUCCESS).json(result);
+  } catch (error) {
+    console.error(error);
+    response.status(HTTP_ERROR).json({ message: 'invalidateAllCertsForAccount failed.', status: 'error' });
   }
 }

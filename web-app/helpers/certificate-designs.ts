@@ -1,10 +1,12 @@
 // https://dev.to/sudo_overflow/diy-generating-dynamic-images-on-the-fly-for-email-marketing-h51
-import { Canvas, registerFont, loadImage } from 'canvas';
+import { type Canvas, registerFont, loadImage } from 'canvas';
 import { isBeforeNow, formatDate } from './time';
-import { ImageIngredients } from './types';
+import { type ImageIngredients } from './types';
 
-export const width = 1080; // width of the image
-export const height = 1080; // height of the image
+type NodeCanvasRenderingContext2D = ReturnType<Canvas['getContext']>;
+
+export const width = 1_080; // width of the image
+export const height = 1_080; // height of the image
 const manropeFontFile = './fonts/Manrope-VariableFont_wght.ttf';
 const manropeFontFamily = 'Manrope, Sans Serif';
 const monoFontFile = './fonts/DMMono-Medium.ttf';
@@ -46,19 +48,19 @@ function getBaseContext(canvas: Canvas) {
   return context;
 }
 
-function addText(context: CanvasRenderingContext2D, text: string, font: string, fillStyle: string, xPos: number, yPos: number, textAlign: CanvasTextAlign) {
+function addText(context: NodeCanvasRenderingContext2D, text: string, font: string, fillStyle: string, xPos: number, yPos: number, textAlign: CanvasTextAlign) {
   // Define the font style
   context.fillStyle = fillStyle;
   context.font = font;
   context.textAlign = textAlign;
-  context.fillText(text, xPos, yPos); // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillText
+  context.fillText(text, xPos, yPos); // https://developer.mozilla.org/en-US/docs/Web/API/NodeCanvasRenderingContext2D/fillText
 }
 
 /**
  * Adds text (via addText) but also iteratively decreases the fontSize until the whole string fits the context.
  */
 function fitText(
-  context: CanvasRenderingContext2D,
+  context: NodeCanvasRenderingContext2D,
   text: string,
   fontSize: number,
   fillStyle: string,
@@ -90,7 +92,7 @@ function fitText(
  * Dynamic Width (Build Regex) https://stackoverflow.com/a/51506718
  * maxChars is the max number of characters per line
  */
-function wrapText(context: CanvasRenderingContext2D, text: string, x: number, y: number, maxChars: number, font: string, fillStyle: string) {
+function wrapText(context: NodeCanvasRenderingContext2D, text: string, x: number, y: number, maxChars: number, font: string, fillStyle: string) {
   const replacedText = text.replace(new RegExp(`(?![^\\n]{1,${maxChars}}$)([^\\n]{1,${maxChars}})\\s`, 'g'), '$1\n');
   addText(context, replacedText, font, fillStyle, x, y, 'left');
 }
@@ -123,7 +125,9 @@ export async function populateCert(canvas: Canvas, details: ImageIngredients) {
       addText(context, 'Expiration*:', fieldLabelFont, gray, X_POSITION_OF_DATE_LABEL, 850, 'right');
       wrapText(context, getExpiratonExplanation(expiration), X_POSITION_OF_DESCRIPTION, 910, 110, expirationExplanationFont, gray);
     }
+
     addText(context, formatDate(expiration), dateFont, black, X_POSITION_OF_DATE, 850, 'right');
   }
+
   addText(context, tokenId, tokenIdFont, black, X_CENTER, 995, 'center');
 }
