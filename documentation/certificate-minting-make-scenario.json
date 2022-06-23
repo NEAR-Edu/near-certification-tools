@@ -9,7 +9,7 @@
       "mapper": {
         "name": "batchNumber",
         "scope": "roundtrip",
-        "value": "9"
+        "value": "11"
       },
       "metadata": {
         "designer": {
@@ -48,8 +48,8 @@
         "interface": [
           {
             "name": "batchNumber",
-            "type": "any",
-            "label": "batchNumber"
+            "label": "batchNumber",
+            "type": "any"
           }
         ]
       }
@@ -59,14 +59,14 @@
       "module": "airtable:ActionSearchRecords",
       "version": 3,
       "parameters": {
-        "__IMTCONN__": 138028
+        "__IMTCONN__": 138023
       },
       "mapper": {
         "base": "appncY8IjPHkOVapz",
+        "useColumnId": false,
         "table": "certificate-batches",
         "formula": "{Batch ID} = {{20.batchNumber}}",
-        "maxRecords": "1",
-        "useColumnId": false
+        "maxRecords": "1"
       },
       "metadata": {
         "designer": {
@@ -74,32 +74,33 @@
           "y": 0
         },
         "restore": {
+          "parameters": {
+            "__IMTCONN__": {
+              "label": "NEAR Edu Workspace",
+              "data": {
+                "scoped": "true",
+                "connection": "airtable2"
+              }
+            }
+          },
           "expect": {
             "base": {
               "mode": "chose",
               "label": "NEAR University"
             },
-            "sort": {
-              "mode": "chose"
-            },
-            "view": {
+            "useColumnId": {
               "mode": "chose"
             },
             "table": {
               "mode": "chose",
               "label": "certificate-batches"
             },
-            "useColumnId": {
+            "sort": {
               "mode": "chose"
-            }
-          },
-          "parameters": {
-            "__IMTCONN__": {
-              "data": {
-                "scoped": "true",
-                "connection": "airtable2"
-              },
-              "label": "NEAR University"
+            },
+            "view": {
+              "mode": "chose",
+              "label": "Empty"
             }
           }
         },
@@ -142,11 +143,15 @@
           },
           {
             "name": "sort",
+            "type": "array",
+            "label": "Sort",
             "spec": [
               {
                 "name": "field",
                 "type": "select",
-                "label": "Field"
+                "label": "Field",
+                "options": [],
+                "dynamic": true
               },
               {
                 "name": "direction",
@@ -163,9 +168,69 @@
                   }
                 ]
               }
-            ],
+            ]
+          },
+          {
+            "name": "view",
+            "type": "select",
+            "label": "View"
+          },
+          {
+            "name": "base",
+            "type": "select",
+            "label": "Base",
+            "required": true
+          },
+          {
+            "name": "useColumnId",
+            "type": "boolean",
+            "label": "Use Column ID",
+            "required": true
+          },
+          {
+            "name": "table",
+            "type": "select",
+            "label": "Table",
+            "required": true
+          },
+          {
+            "name": "formula",
+            "type": "text",
+            "label": "Formula"
+          },
+          {
+            "name": "maxRecords",
+            "type": "integer",
+            "label": "Limit"
+          },
+          {
+            "name": "sort",
             "type": "array",
-            "label": "Sort"
+            "label": "Sort",
+            "spec": [
+              {
+                "name": "field",
+                "type": "select",
+                "label": "Field",
+                "options": [],
+                "dynamic": true
+              },
+              {
+                "name": "direction",
+                "type": "select",
+                "label": "Direction",
+                "options": [
+                  {
+                    "label": "Descending",
+                    "value": "desc"
+                  },
+                  {
+                    "label": "Ascending",
+                    "value": "asc"
+                  }
+                ]
+              }
+            ]
           },
           {
             "name": "view",
@@ -176,13 +241,13 @@
         "interface": [
           {
             "name": "__IMTLENGTH__",
-            "type": "uinteger",
-            "label": "Total number of bundles"
+            "label": "Total number of bundles",
+            "type": "uinteger"
           },
           {
             "name": "__IMTINDEX__",
-            "type": "uinteger",
-            "label": "Bundle order position"
+            "label": "Bundle order position",
+            "type": "uinteger"
           },
           {
             "name": "id",
@@ -196,33 +261,33 @@
           },
           {
             "name": "Batch ID",
-            "type": "number",
-            "label": "Batch ID"
+            "label": "Batch ID",
+            "type": "number"
           },
           {
             "name": "nc-submissions",
-            "spec": {
-              "name": "value",
-              "type": "text",
-              "label": "Record ID"
-            },
+            "label": "nc-submissions",
             "type": "array",
-            "label": "nc-submissions"
+            "spec": {
+              "label": "Record ID",
+              "name": "value",
+              "type": "text"
+            }
           },
           {
             "name": "Count (nc-submissions)",
-            "type": "number",
-            "label": "Count (nc-submissions)"
+            "label": "Count (nc-submissions)",
+            "type": "number"
           },
           {
             "name": "Count minted",
-            "type": "array",
-            "label": "Count minted"
+            "label": "Count minted",
+            "type": "array"
           },
           {
             "name": "nft-icon",
-            "type": "text",
-            "label": "nft-icon"
+            "label": "nft-icon",
+            "type": "text"
           }
         ]
       }
@@ -263,13 +328,13 @@
       "module": "airtable:ActionGetRecord",
       "version": 3,
       "parameters": {
-        "__IMTCONN__": 138030
+        "__IMTCONN__": 138023
       },
       "mapper": {
-        "id": "{{10.value}}",
         "base": "appncY8IjPHkOVapz",
+        "useColumnId": false,
         "table": "nc-submissions",
-        "useColumnId": false
+        "id": "{{10.value}}"
       },
       "metadata": {
         "designer": {
@@ -277,26 +342,26 @@
           "y": 0
         },
         "restore": {
+          "parameters": {
+            "__IMTCONN__": {
+              "label": "NEAR Edu Workspace",
+              "data": {
+                "scoped": "true",
+                "connection": "airtable2"
+              }
+            }
+          },
           "expect": {
             "base": {
               "mode": "chose",
               "label": "NEAR University"
             },
+            "useColumnId": {
+              "mode": "chose"
+            },
             "table": {
               "mode": "chose",
               "label": "nc-submissions"
-            },
-            "useColumnId": {
-              "mode": "chose"
-            }
-          },
-          "parameters": {
-            "__IMTCONN__": {
-              "data": {
-                "scoped": "true",
-                "connection": "airtable2"
-              },
-              "label": "Airtable Connection"
             }
           }
         },
@@ -371,104 +436,91 @@
           },
           {
             "name": "name",
-            "type": "text",
-            "label": "name"
-          },
-          {
-            "name": "program",
-            "type": "array",
-            "label": "program"
-          },
-          {
-            "name": "schedule",
-            "spec": {
-              "label": "Record ID"
-            },
-            "type": "array",
-            "label": "schedule"
-          },
-          {
-            "name": "project-name",
-            "type": "text",
-            "label": "project-name"
-          },
-          {
-            "name": "project-github",
-            "type": "url",
-            "label": "project-github"
-          },
-          {
-            "name": "project-pitch",
-            "type": "text",
-            "label": "project-pitch"
-          },
-          {
-            "name": "video",
-            "type": "url",
-            "label": "video"
-          },
-          {
-            "name": "project-effort",
-            "type": "text",
-            "label": "project-effort"
-          },
-          {
-            "name": "bio",
-            "type": "text",
-            "label": "bio"
-          },
-          {
-            "name": "created",
-            "type": "date",
-            "label": "created"
-          },
-          {
-            "name": "experience",
-            "type": "text",
-            "label": "experience"
-          },
-          {
-            "name": "reviewed",
-            "type": "boolean",
-            "label": "reviewed"
+            "label": "name",
+            "type": "text"
           },
           {
             "name": "verified",
-            "type": "boolean",
-            "label": "verified"
-          },
-          {
-            "name": "rejected",
-            "type": "boolean",
-            "label": "rejected"
+            "label": "verified",
+            "type": "boolean"
           },
           {
             "name": "strength",
-            "type": "text",
-            "label": "strength"
+            "label": "strength",
+            "type": "text"
           },
           {
             "name": "notes",
-            "type": "text",
-            "label": "notes"
+            "label": "notes",
+            "type": "text"
           },
           {
-            "name": "duplicate",
-            "type": "boolean",
-            "label": "duplicate"
+            "name": "project-name",
+            "label": "project-name",
+            "type": "text"
+          },
+          {
+            "name": "project-pitch",
+            "label": "project-pitch",
+            "type": "text"
+          },
+          {
+            "name": "video",
+            "label": "video",
+            "type": "url"
+          },
+          {
+            "name": "project-github",
+            "label": "project-github",
+            "type": "url"
+          },
+          {
+            "name": "project-effort",
+            "label": "project-effort",
+            "type": "text"
+          },
+          {
+            "name": "schedule",
+            "label": "schedule",
+            "type": "array",
+            "spec": {
+              "label": "Record ID"
+            }
+          },
+          {
+            "name": "bio",
+            "label": "bio",
+            "type": "text"
+          },
+          {
+            "name": "created",
+            "label": "created",
+            "type": "date"
+          },
+          {
+            "name": "experience_with_near",
+            "label": "experience_with_near",
+            "type": "text"
           },
           {
             "name": "email",
-            "type": "text",
-            "label": "email"
+            "label": "email",
+            "type": "text"
           },
           {
             "name": "mainnet",
-            "type": "text",
-            "label": "mainnet"
+            "label": "mainnet",
+            "type": "text"
+          },
+          {
+            "name": "program",
+            "label": "program",
+            "type": "array"
           },
           {
             "name": "profile",
+            "label": "profile",
+            "type": "array",
             "spec": [
               {
                 "name": "id",
@@ -492,14 +544,18 @@
               },
               {
                 "name": "type",
-                "type": "text",
-                "label": "MIME type"
+                "label": "MIME type",
+                "type": "text"
               },
               {
                 "name": "thumbnails",
+                "label": "Thumbnails",
+                "type": "collection",
                 "spec": [
                   {
                     "name": "small",
+                    "label": "Small",
+                    "type": "collection",
                     "spec": [
                       {
                         "name": "url",
@@ -516,12 +572,12 @@
                         "type": "uinteger",
                         "label": "Height"
                       }
-                    ],
-                    "type": "collection",
-                    "label": "Small"
+                    ]
                   },
                   {
                     "name": "large",
+                    "label": "Large",
+                    "type": "collection",
                     "spec": [
                       {
                         "name": "url",
@@ -538,12 +594,12 @@
                         "type": "uinteger",
                         "label": "Height"
                       }
-                    ],
-                    "type": "collection",
-                    "label": "Large"
+                    ]
                   },
                   {
                     "name": "full",
+                    "label": "Full",
+                    "type": "collection",
                     "spec": [
                       {
                         "name": "url",
@@ -560,49 +616,60 @@
                         "type": "uinteger",
                         "label": "Height"
                       }
-                    ],
-                    "type": "collection",
-                    "label": "Full"
+                    ]
                   }
-                ],
-                "type": "collection",
-                "label": "Thumbnails"
+                ]
               }
-            ],
-            "type": "array",
-            "label": "profile"
+            ]
           },
           {
             "name": "join-alumni",
-            "type": "text",
-            "label": "join-alumni"
+            "label": "join-alumni",
+            "type": "text"
           },
           {
             "name": "integromat",
-            "type": "text",
             "label": "integromat",
+            "type": "text",
             "multiline": true
           },
           {
+            "name": "reviewed",
+            "label": "reviewed",
+            "type": "boolean"
+          },
+          {
+            "name": "rejected",
+            "label": "rejected",
+            "type": "boolean"
+          },
+          {
+            "name": "duplicate",
+            "label": "duplicate",
+            "type": "boolean"
+          },
+          {
             "name": "count",
-            "type": "number",
-            "label": "count"
+            "label": "count",
+            "type": "number"
           },
           {
             "name": "jobs",
-            "type": "text",
-            "label": "jobs"
+            "label": "jobs",
+            "type": "text"
           },
           {
             "name": "hiring",
+            "label": "hiring",
+            "type": "array",
             "spec": {
               "label": "Record ID"
-            },
-            "type": "array",
-            "label": "hiring"
+            }
           },
           {
             "name": "contact",
+            "label": "contact",
+            "type": "collection",
             "spec": [
               {
                 "name": "label",
@@ -614,27 +681,27 @@
                 "type": "url",
                 "label": "URL"
               }
-            ],
-            "type": "collection",
-            "label": "contact"
+            ]
           },
           {
             "name": "contact_link",
-            "type": "text",
-            "label": "contact_link"
+            "label": "contact_link",
+            "type": "text"
           },
           {
             "name": "Talent ID",
-            "type": "text",
-            "label": "Talent ID"
+            "label": "Talent ID",
+            "type": "text"
           },
           {
             "name": "discord-role-assigned",
-            "type": "boolean",
-            "label": "discord-role-assigned"
+            "label": "discord-role-assigned",
+            "type": "boolean"
           },
           {
             "name": "pitchdeck",
+            "label": "pitchdeck",
+            "type": "array",
             "spec": [
               {
                 "name": "id",
@@ -658,14 +725,18 @@
               },
               {
                 "name": "type",
-                "type": "text",
-                "label": "MIME type"
+                "label": "MIME type",
+                "type": "text"
               },
               {
                 "name": "thumbnails",
+                "label": "Thumbnails",
+                "type": "collection",
                 "spec": [
                   {
                     "name": "small",
+                    "label": "Small",
+                    "type": "collection",
                     "spec": [
                       {
                         "name": "url",
@@ -682,12 +753,12 @@
                         "type": "uinteger",
                         "label": "Height"
                       }
-                    ],
-                    "type": "collection",
-                    "label": "Small"
+                    ]
                   },
                   {
                     "name": "large",
+                    "label": "Large",
+                    "type": "collection",
                     "spec": [
                       {
                         "name": "url",
@@ -704,12 +775,12 @@
                         "type": "uinteger",
                         "label": "Height"
                       }
-                    ],
-                    "type": "collection",
-                    "label": "Large"
+                    ]
                   },
                   {
                     "name": "full",
+                    "label": "Full",
+                    "type": "collection",
                     "spec": [
                       {
                         "name": "url",
@@ -726,56 +797,65 @@
                         "type": "uinteger",
                         "label": "Height"
                       }
-                    ],
-                    "type": "collection",
-                    "label": "Full"
+                    ]
                   }
-                ],
-                "type": "collection",
-                "label": "Thumbnails"
+                ]
               }
-            ],
-            "type": "array",
-            "label": "pitchdeck"
+            ]
           },
           {
             "name": "nce-peer-ratings",
+            "label": "nce-peer-ratings",
+            "type": "array",
             "spec": {
               "label": "Record ID"
-            },
-            "type": "array",
-            "label": "nce-peer-ratings"
+            }
           },
           {
             "name": "trainer",
-            "type": "text",
-            "label": "trainer"
+            "label": "trainer",
+            "type": "text"
           },
           {
             "name": "nc-schedule",
+            "label": "nc-schedule",
+            "type": "array",
             "spec": {
               "label": "Record ID"
-            },
-            "type": "array",
-            "label": "nc-schedule"
+            }
           },
           {
             "name": "certificate-minted",
-            "type": "boolean",
-            "label": "certificate-minted"
+            "label": "certificate-minted",
+            "type": "boolean"
           },
           {
             "name": "mainnet (from nc-instructors) (from schedule)",
-            "type": "array",
-            "label": "mainnet (from nc-instructors) (from schedule)"
+            "label": "mainnet (from nc-instructors) (from schedule)",
+            "type": "array"
           },
           {
             "name": "certificates-batch",
+            "label": "certificates-batch",
+            "type": "array",
             "spec": {
               "label": "Record ID"
-            },
-            "type": "array",
-            "label": "certificates-batch"
+            }
+          },
+          {
+            "name": "start datetime (from schedule)",
+            "label": "start datetime (from schedule)",
+            "type": "array"
+          },
+          {
+            "name": "mainnet vaildation",
+            "label": "mainnet vaildation",
+            "type": "text"
+          },
+          {
+            "name": "contract_code",
+            "label": "contract_code",
+            "type": "text"
           }
         ]
       }
@@ -785,7 +865,7 @@
       "module": "airtable:ActionGetRecord",
       "version": 3,
       "parameters": {
-        "__IMTCONN__": 138028
+        "__IMTCONN__": 138023
       },
       "filter": {
         "name": "Exclude when already minted",
@@ -800,10 +880,10 @@
         ]
       },
       "mapper": {
-        "id": "{{9.schedule[]}}",
         "base": "appncY8IjPHkOVapz",
+        "useColumnId": true,
         "table": "nc-schedule",
-        "useColumnId": true
+        "id": "{{9.schedule[]}}"
       },
       "metadata": {
         "designer": {
@@ -811,26 +891,26 @@
           "y": 0
         },
         "restore": {
+          "parameters": {
+            "__IMTCONN__": {
+              "label": "NEAR Edu Workspace",
+              "data": {
+                "scoped": "true",
+                "connection": "airtable2"
+              }
+            }
+          },
           "expect": {
             "base": {
               "mode": "chose",
               "label": "NEAR University"
             },
+            "useColumnId": {
+              "mode": "chose"
+            },
             "table": {
               "mode": "chose",
               "label": "nc-schedule"
-            },
-            "useColumnId": {
-              "mode": "chose"
-            }
-          },
-          "parameters": {
-            "__IMTCONN__": {
-              "data": {
-                "scoped": "true",
-                "connection": "airtable2"
-              },
-              "label": "NEAR University"
             }
           }
         },
@@ -843,30 +923,6 @@
           }
         ],
         "expect": [
-          {
-            "name": "base",
-            "type": "select",
-            "label": "Base",
-            "required": true
-          },
-          {
-            "name": "useColumnId",
-            "type": "boolean",
-            "label": "Use Column ID",
-            "required": true
-          },
-          {
-            "name": "table",
-            "type": "select",
-            "label": "Table",
-            "required": true
-          },
-          {
-            "name": "id",
-            "type": "text",
-            "label": "Record ID",
-            "required": true
-          },
           {
             "name": "base",
             "type": "select",
@@ -929,105 +985,130 @@
           },
           {
             "name": "fldjNn2LIMUDgmieE",
-            "type": "text",
-            "label": "label"
-          },
-          {
-            "name": "fldCrKDdfR2FEi8PJ",
-            "type": "text",
-            "label": "instructor"
-          },
-          {
-            "name": "fldHnXxq15KGlwDzv",
-            "spec": {
-              "label": "Record ID"
-            },
-            "type": "array",
-            "label": "nc-instructors"
-          },
-          {
-            "name": "fldL6k7c3WauvrMFR",
-            "type": "array",
-            "label": "mainnet (from nc-instructors)"
-          },
-          {
-            "name": "fldZxwYOPRZzwqBKO",
-            "type": "number",
-            "label": "count"
-          },
-          {
-            "name": "fldcpV8upPxgG5qRH",
-            "type": "text",
-            "label": "status"
+            "label": "label",
+            "type": "text"
           },
           {
             "name": "fldGqWws6vU28wjXP",
-            "time": false,
+            "label": "start",
             "type": "date",
-            "label": "start"
+            "time": false
           },
           {
             "name": "fld4GqGR5FctEnDGT",
-            "time": false,
+            "label": "end",
             "type": "date",
-            "label": "end"
+            "time": false
           },
           {
             "name": "fld4iqrevMqYFd9FD",
-            "type": "text",
-            "label": "time"
+            "label": "time",
+            "type": "text"
+          },
+          {
+            "name": "fldCrKDdfR2FEi8PJ",
+            "label": "instructor",
+            "type": "text"
+          },
+          {
+            "name": "fldHnXxq15KGlwDzv",
+            "label": "nc-instructors",
+            "type": "array",
+            "spec": {
+              "label": "Record ID"
+            }
+          },
+          {
+            "name": "fldL6k7c3WauvrMFR",
+            "label": "mainnet (from nc-instructors)",
+            "type": "array"
+          },
+          {
+            "name": "fldZxwYOPRZzwqBKO",
+            "label": "count",
+            "type": "number"
+          },
+          {
+            "name": "fldwbkm5CsO8932gE",
+            "label": "pipeline",
+            "type": "array"
+          },
+          {
+            "name": "fldcpV8upPxgG5qRH",
+            "label": "status",
+            "type": "text"
+          },
+          {
+            "name": "fld6JTGz0Ds3hyk5y",
+            "label": "program",
+            "type": "array",
+            "spec": {
+              "label": "Record ID"
+            }
+          },
+          {
+            "name": "fld50MLmRrHCuO3M9",
+            "label": "start datetime",
+            "type": "text"
+          },
+          {
+            "name": "fldx48rqseJOeY9HH",
+            "label": "start time",
+            "type": "text"
           },
           {
             "name": "fldMaC8otl1KHeVCu",
-            "type": "array",
-            "label": "link"
+            "label": "link",
+            "type": "array"
           },
           {
             "name": "fldFuCfkrJx4MZaDR",
+            "label": "nc-registrations",
+            "type": "array",
             "spec": {
               "label": "Record ID"
-            },
-            "type": "array",
-            "label": "nc-registrations"
+            }
           },
           {
             "name": "flds5fhLQyUawX9rV",
-            "type": "array",
-            "label": "short name"
+            "label": "short name",
+            "type": "array"
           },
           {
             "name": "fldIhsl4Htaaug261",
-            "type": "array",
-            "label": "nickname (from program)"
+            "label": "nickname (from program)",
+            "type": "array"
           },
           {
             "name": "fld4BlYENfpqnTrqj",
-            "type": "array",
-            "label": "url (from program)"
+            "label": "url (from program)",
+            "type": "array"
           },
           {
             "name": "fldrmjRBuVbYXuFg8",
+            "label": "nps-data-collection",
+            "type": "array",
             "spec": {
               "label": "Record ID"
-            },
-            "type": "array",
-            "label": "nps-data-collection"
+            }
           },
           {
             "name": "fldzY4QMcE8TrurUt",
+            "label": "nc-alumni",
+            "type": "array",
             "spec": {
               "label": "Record ID"
-            },
-            "type": "array",
-            "label": "nc-alumni"
+            }
           },
           {
             "name": "fldeIHyqpt18Ypd75",
-            "type": "text",
-            "label": "duration"
+            "label": "duration",
+            "type": "text"
           },
           {
             "name": "fldZQgt9N7iVlzmIb",
+            "label": "register",
+            "type": "collection",
             "spec": [
               {
                 "name": "label",
@@ -1039,55 +1120,65 @@
                 "type": "url",
                 "label": "URL"
               }
-            ],
-            "type": "collection",
-            "label": "register"
+            ]
           },
           {
             "name": "fldmprgpIlvN95qdf",
-            "type": "date",
-            "label": "created"
+            "label": "created",
+            "type": "date"
           },
           {
             "name": "fldoznCStCPRhMEP3",
-            "type": "date",
-            "label": "updated"
+            "label": "updated",
+            "type": "date"
           },
           {
             "name": "fldRB7i1wKpVC83aO",
-            "type": "array",
-            "label": "program name"
+            "label": "program name",
+            "type": "array"
           },
           {
             "name": "fldBsymvmCZYHfznC",
-            "type": "boolean",
-            "label": "hide"
-          },
-          {
-            "name": "fldTzUZTaB8nUBMnh",
-            "type": "array",
-            "label": "certificate description (from program)"
-          },
-          {
-            "name": "fldwbkm5CsO8932gE",
-            "type": "array",
-            "label": "pipeline"
-          },
-          {
-            "name": "fld6JTGz0Ds3hyk5y",
-            "spec": {
-              "label": "Record ID"
-            },
-            "type": "array",
-            "label": "program"
+            "label": "hide",
+            "type": "boolean"
           },
           {
             "name": "fldWZodW6skA5jlQR",
+            "label": "nc-submissions",
+            "type": "array",
             "spec": {
               "label": "Record ID"
-            },
-            "type": "array",
-            "label": "nc-submissions"
+            }
+          },
+          {
+            "name": "fldTzUZTaB8nUBMnh",
+            "label": "certificate description (from program)",
+            "type": "array"
+          },
+          {
+            "name": "fldC7i7oEwaN8qEVD",
+            "label": "time summary",
+            "type": "text"
+          },
+          {
+            "name": "fld1p6sMnWersIHzB",
+            "label": "description (from program)",
+            "type": "array"
+          },
+          {
+            "name": "fld3qJi0c9wtctF3e",
+            "label": "Color code",
+            "type": "array"
+          },
+          {
+            "name": "fldNUM5phrKNDfJm2",
+            "label": "sessionUrl",
+            "type": "text"
+          },
+          {
+            "name": "fldiUps1GUHO9t5u9",
+            "label": "surveyUrl",
+            "type": "text"
           }
         ],
         "advanced": true
@@ -1553,17 +1644,17 @@
       "module": "airtable:ActionUpdateRecords",
       "version": 3,
       "parameters": {
-        "__IMTCONN__": 138028
+        "__IMTCONN__": 138023
       },
       "mapper": {
-        "id": "{{9.id}}",
         "base": "appncY8IjPHkOVapz",
+        "typecast": false,
+        "useColumnId": false,
         "table": "nc-submissions",
+        "id": "{{9.id}}",
         "record": {
           "fldQTjaDaAdhaYTCT": true
-        },
-        "typecast": false,
-        "useColumnId": false
+        }
       },
       "metadata": {
         "designer": {
@@ -1571,37 +1662,37 @@
           "y": 0
         },
         "restore": {
+          "parameters": {
+            "__IMTCONN__": {
+              "label": "NEAR Edu Workspace",
+              "data": {
+                "scoped": "true",
+                "connection": "airtable2"
+              }
+            }
+          },
           "expect": {
             "base": {
               "label": "NEAR University"
+            },
+            "typecast": {
+              "mode": "chose"
+            },
+            "useColumnId": {
+              "mode": "chose"
             },
             "table": {
               "label": "nc-submissions"
             },
             "record": {
               "nested": {
-                "fld5PGOPp9gK065Gi": {
-                  "mode": "chose"
-                },
-                "fld8XgArgcB4JfOhr": {
+                "flddcblIyd5jMqLBh": {
                   "mode": "chose"
                 },
                 "fld8tmtqMy1QLcDFU": {
                   "mode": "chose"
                 },
-                "fldLwlYN6RqIObvNr": {
-                  "mode": "chose"
-                },
-                "fldQTjaDaAdhaYTCT": {
-                  "mode": "chose"
-                },
-                "fldaizYpf2KJNpS8H": {
-                  "mode": "chose"
-                },
-                "fldc9JKJhgnGU1xZT": {
-                  "mode": "chose"
-                },
-                "flddcblIyd5jMqLBh": {
+                "fldxLIGXjRUPn7OfJ": {
                   "mode": "chose"
                 },
                 "fldgNPkCgVwstL7la": {
@@ -1610,31 +1701,31 @@
                 "fldn61tIkGd9AiGAH": {
                   "mode": "chose"
                 },
+                "fldLwlYN6RqIObvNr": {
+                  "mode": "chose"
+                },
                 "fldpLhUzCtjZewzkh": {
                   "mode": "chose"
                 },
-                "fldxLIGXjRUPn7OfJ": {
+                "fldc9JKJhgnGU1xZT": {
+                  "mode": "chose"
+                },
+                "fldaizYpf2KJNpS8H": {
+                  "mode": "chose"
+                },
+                "fld5PGOPp9gK065Gi": {
+                  "mode": "chose"
+                },
+                "fld8XgArgcB4JfOhr": {
+                  "mode": "chose"
+                },
+                "fldQTjaDaAdhaYTCT": {
                   "mode": "chose"
                 },
                 "fldxwnkd4raoZPzhm": {
                   "mode": "chose"
                 }
               }
-            },
-            "typecast": {
-              "mode": "chose"
-            },
-            "useColumnId": {
-              "mode": "chose"
-            }
-          },
-          "parameters": {
-            "__IMTCONN__": {
-              "data": {
-                "scoped": "true",
-                "connection": "airtable2"
-              },
-              "label": "NEAR University"
             }
           }
         },
@@ -1678,212 +1769,6 @@
             "required": true
           },
           {
-            "name": "record",
-            "spec": [
-              {
-                "name": "fldTQ9cRTgI8ZKdjC",
-                "type": "text",
-                "label": "name"
-              },
-              {
-                "name": "fld8tmtqMy1QLcDFU",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
-                "type": "array",
-                "label": "schedule"
-              },
-              {
-                "name": "fldnIDAvWSc7RUEDc",
-                "type": "text",
-                "label": "project-name"
-              },
-              {
-                "name": "fld9BfQnizQARehzj",
-                "type": "url",
-                "label": "project-github"
-              },
-              {
-                "name": "fldeX6obiRpwUZySo",
-                "type": "text",
-                "label": "project-pitch"
-              },
-              {
-                "name": "fldCEuGU8WrZ9bVKc",
-                "type": "url",
-                "label": "video"
-              },
-              {
-                "name": "fldrphOEqAUSE56PD",
-                "type": "text",
-                "label": "project-effort"
-              },
-              {
-                "name": "fldtddH8wbKMd0eMC",
-                "type": "text",
-                "label": "bio"
-              },
-              {
-                "name": "fldfZV0fZ46XqRWES",
-                "type": "text",
-                "label": "experience"
-              },
-              {
-                "name": "fldgNPkCgVwstL7la",
-                "type": "boolean",
-                "label": "reviewed"
-              },
-              {
-                "name": "flddcblIyd5jMqLBh",
-                "type": "boolean",
-                "label": "verified"
-              },
-              {
-                "name": "fldn61tIkGd9AiGAH",
-                "type": "boolean",
-                "label": "rejected"
-              },
-              {
-                "name": "fldHS1tNYv4jR1wKb",
-                "type": "text",
-                "label": "strength"
-              },
-              {
-                "name": "fldtPCAAgniBsX4Y1",
-                "type": "text",
-                "label": "notes"
-              },
-              {
-                "name": "fldLwlYN6RqIObvNr",
-                "type": "boolean",
-                "label": "duplicate"
-              },
-              {
-                "name": "fldX5FvXZbkB0S1a3",
-                "type": "text",
-                "label": "email"
-              },
-              {
-                "name": "fldOZnaEck7dx29xL",
-                "type": "text",
-                "label": "mainnet"
-              },
-              {
-                "name": "fldxLIGXjRUPn7OfJ",
-                "spec": [
-                  {
-                    "name": "url",
-                    "type": "text",
-                    "label": "File URL"
-                  },
-                  {
-                    "name": "filename",
-                    "type": "filename",
-                    "label": "File name"
-                  }
-                ],
-                "type": "array",
-                "label": "profile"
-              },
-              {
-                "name": "fldUUljEkESXNV9dH",
-                "type": "text",
-                "label": "join-alumni"
-              },
-              {
-                "name": "fldkUYMtZjnWI20me",
-                "type": "text",
-                "label": "integromat"
-              },
-              {
-                "name": "fldv6bypVKYVKPGGy",
-                "type": "number",
-                "label": "count"
-              },
-              {
-                "name": "fld4YW6V9K7JMotlD",
-                "type": "text",
-                "label": "jobs"
-              },
-              {
-                "name": "fldpLhUzCtjZewzkh",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
-                "type": "array",
-                "label": "hiring"
-              },
-              {
-                "name": "fldhmqxb10TJBDHy8",
-                "type": "text",
-                "label": "Talent ID"
-              },
-              {
-                "name": "fldc9JKJhgnGU1xZT",
-                "type": "boolean",
-                "label": "discord-role-assigned"
-              },
-              {
-                "name": "fldaizYpf2KJNpS8H",
-                "spec": [
-                  {
-                    "name": "url",
-                    "type": "text",
-                    "label": "File URL"
-                  },
-                  {
-                    "name": "filename",
-                    "type": "filename",
-                    "label": "File name"
-                  }
-                ],
-                "type": "array",
-                "label": "pitchdeck"
-              },
-              {
-                "name": "fld5PGOPp9gK065Gi",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
-                "type": "array",
-                "label": "nce-peer-ratings"
-              },
-              {
-                "name": "fldtVPNHjYeaR6ZKE",
-                "type": "text",
-                "label": "trainer"
-              },
-              {
-                "name": "fld8XgArgcB4JfOhr",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
-                "type": "array",
-                "label": "nc-schedule"
-              },
-              {
-                "name": "fldQTjaDaAdhaYTCT",
-                "type": "boolean",
-                "label": "certificate-minted"
-              },
-              {
-                "name": "fldxwnkd4raoZPzhm",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
-                "type": "array",
-                "label": "certificates-batch"
-              }
-            ],
-            "type": "collection",
-            "label": "Record"
-          },
-          {
             "name": "base",
             "type": "select",
             "label": "Base",
@@ -1915,6 +1800,8 @@
           },
           {
             "name": "record",
+            "type": "collection",
+            "label": "Record",
             "spec": [
               {
                 "name": "fldTQ9cRTgI8ZKdjC",
@@ -1922,63 +1809,9 @@
                 "label": "name"
               },
               {
-                "name": "fld8tmtqMy1QLcDFU",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
-                "type": "array",
-                "label": "schedule"
-              },
-              {
-                "name": "fldnIDAvWSc7RUEDc",
-                "type": "text",
-                "label": "project-name"
-              },
-              {
-                "name": "fld9BfQnizQARehzj",
-                "type": "url",
-                "label": "project-github"
-              },
-              {
-                "name": "fldeX6obiRpwUZySo",
-                "type": "text",
-                "label": "project-pitch"
-              },
-              {
-                "name": "fldCEuGU8WrZ9bVKc",
-                "type": "url",
-                "label": "video"
-              },
-              {
-                "name": "fldrphOEqAUSE56PD",
-                "type": "text",
-                "label": "project-effort"
-              },
-              {
-                "name": "fldtddH8wbKMd0eMC",
-                "type": "text",
-                "label": "bio"
-              },
-              {
-                "name": "fldfZV0fZ46XqRWES",
-                "type": "text",
-                "label": "experience"
-              },
-              {
-                "name": "fldgNPkCgVwstL7la",
-                "type": "boolean",
-                "label": "reviewed"
-              },
-              {
                 "name": "flddcblIyd5jMqLBh",
                 "type": "boolean",
                 "label": "verified"
-              },
-              {
-                "name": "fldn61tIkGd9AiGAH",
-                "type": "boolean",
-                "label": "rejected"
               },
               {
                 "name": "fldHS1tNYv4jR1wKb",
@@ -1991,9 +1824,48 @@
                 "label": "notes"
               },
               {
-                "name": "fldLwlYN6RqIObvNr",
-                "type": "boolean",
-                "label": "duplicate"
+                "name": "fldnIDAvWSc7RUEDc",
+                "type": "text",
+                "label": "project-name"
+              },
+              {
+                "name": "fldeX6obiRpwUZySo",
+                "type": "text",
+                "label": "project-pitch"
+              },
+              {
+                "name": "fldCEuGU8WrZ9bVKc",
+                "type": "url",
+                "label": "video"
+              },
+              {
+                "name": "fld9BfQnizQARehzj",
+                "type": "url",
+                "label": "project-github"
+              },
+              {
+                "name": "fldrphOEqAUSE56PD",
+                "type": "text",
+                "label": "project-effort"
+              },
+              {
+                "name": "fld8tmtqMy1QLcDFU",
+                "type": "array",
+                "label": "schedule",
+                "spec": {
+                  "label": "Record ID",
+                  "name": "value"
+                }
+              },
+              {
+                "name": "fldtddH8wbKMd0eMC",
+                "type": "text",
+                "label": "bio"
+              },
+              {
+                "name": "fldfZV0fZ46XqRWES",
+                "type": "text",
+                "label": "experience_with_near"
               },
               {
                 "name": "fldX5FvXZbkB0S1a3",
@@ -2007,20 +1879,20 @@
               },
               {
                 "name": "fldxLIGXjRUPn7OfJ",
+                "type": "array",
+                "label": "profile",
                 "spec": [
                   {
                     "name": "url",
-                    "type": "text",
-                    "label": "File URL"
+                    "label": "File URL",
+                    "type": "text"
                   },
                   {
                     "name": "filename",
-                    "type": "filename",
-                    "label": "File name"
+                    "label": "File name",
+                    "type": "filename"
                   }
-                ],
-                "type": "array",
-                "label": "profile"
+                ]
               },
               {
                 "name": "fldUUljEkESXNV9dH",
@@ -2031,175 +1903,6 @@
                 "name": "fldkUYMtZjnWI20me",
                 "type": "text",
                 "label": "integromat"
-              },
-              {
-                "name": "fldv6bypVKYVKPGGy",
-                "type": "number",
-                "label": "count"
-              },
-              {
-                "name": "fld4YW6V9K7JMotlD",
-                "type": "text",
-                "label": "jobs"
-              },
-              {
-                "name": "fldpLhUzCtjZewzkh",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
-                "type": "array",
-                "label": "hiring"
-              },
-              {
-                "name": "fldhmqxb10TJBDHy8",
-                "type": "text",
-                "label": "Talent ID"
-              },
-              {
-                "name": "fldc9JKJhgnGU1xZT",
-                "type": "boolean",
-                "label": "discord-role-assigned"
-              },
-              {
-                "name": "fldaizYpf2KJNpS8H",
-                "spec": [
-                  {
-                    "name": "url",
-                    "type": "text",
-                    "label": "File URL"
-                  },
-                  {
-                    "name": "filename",
-                    "type": "filename",
-                    "label": "File name"
-                  }
-                ],
-                "type": "array",
-                "label": "pitchdeck"
-              },
-              {
-                "name": "fld5PGOPp9gK065Gi",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
-                "type": "array",
-                "label": "nce-peer-ratings"
-              },
-              {
-                "name": "fldtVPNHjYeaR6ZKE",
-                "type": "text",
-                "label": "trainer"
-              },
-              {
-                "name": "fld8XgArgcB4JfOhr",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
-                "type": "array",
-                "label": "nc-schedule"
-              },
-              {
-                "name": "fldQTjaDaAdhaYTCT",
-                "type": "boolean",
-                "label": "certificate-minted"
-              },
-              {
-                "name": "fldxwnkd4raoZPzhm",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
-                "type": "array",
-                "label": "certificates-batch"
-              }
-            ],
-            "type": "collection",
-            "label": "Record"
-          },
-          {
-            "name": "base",
-            "type": "select",
-            "label": "Base",
-            "required": true
-          },
-          {
-            "name": "typecast",
-            "type": "boolean",
-            "label": "Smart links",
-            "required": true
-          },
-          {
-            "name": "useColumnId",
-            "type": "boolean",
-            "label": "Use Column ID",
-            "required": true
-          },
-          {
-            "name": "table",
-            "type": "select",
-            "label": "Table",
-            "required": true
-          },
-          {
-            "name": "id",
-            "type": "text",
-            "label": "Record ID",
-            "required": true
-          },
-          {
-            "name": "record",
-            "spec": [
-              {
-                "name": "fldTQ9cRTgI8ZKdjC",
-                "type": "text",
-                "label": "name"
-              },
-              {
-                "name": "fld8tmtqMy1QLcDFU",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
-                "type": "array",
-                "label": "schedule"
-              },
-              {
-                "name": "fldnIDAvWSc7RUEDc",
-                "type": "text",
-                "label": "project-name"
-              },
-              {
-                "name": "fld9BfQnizQARehzj",
-                "type": "url",
-                "label": "project-github"
-              },
-              {
-                "name": "fldeX6obiRpwUZySo",
-                "type": "text",
-                "label": "project-pitch"
-              },
-              {
-                "name": "fldCEuGU8WrZ9bVKc",
-                "type": "url",
-                "label": "video"
-              },
-              {
-                "name": "fldrphOEqAUSE56PD",
-                "type": "text",
-                "label": "project-effort"
-              },
-              {
-                "name": "fldtddH8wbKMd0eMC",
-                "type": "text",
-                "label": "bio"
-              },
-              {
-                "name": "fldfZV0fZ46XqRWES",
-                "type": "text",
-                "label": "experience"
               },
               {
                 "name": "fldgNPkCgVwstL7la",
@@ -2207,66 +1910,14 @@
                 "label": "reviewed"
               },
               {
-                "name": "flddcblIyd5jMqLBh",
-                "type": "boolean",
-                "label": "verified"
-              },
-              {
                 "name": "fldn61tIkGd9AiGAH",
                 "type": "boolean",
                 "label": "rejected"
               },
               {
-                "name": "fldHS1tNYv4jR1wKb",
-                "type": "text",
-                "label": "strength"
-              },
-              {
-                "name": "fldtPCAAgniBsX4Y1",
-                "type": "text",
-                "label": "notes"
-              },
-              {
                 "name": "fldLwlYN6RqIObvNr",
                 "type": "boolean",
                 "label": "duplicate"
-              },
-              {
-                "name": "fldX5FvXZbkB0S1a3",
-                "type": "text",
-                "label": "email"
-              },
-              {
-                "name": "fldOZnaEck7dx29xL",
-                "type": "text",
-                "label": "mainnet"
-              },
-              {
-                "name": "fldxLIGXjRUPn7OfJ",
-                "spec": [
-                  {
-                    "name": "url",
-                    "type": "text",
-                    "label": "File URL"
-                  },
-                  {
-                    "name": "filename",
-                    "type": "filename",
-                    "label": "File name"
-                  }
-                ],
-                "type": "array",
-                "label": "profile"
-              },
-              {
-                "name": "fldUUljEkESXNV9dH",
-                "type": "text",
-                "label": "join-alumni"
-              },
-              {
-                "name": "fldkUYMtZjnWI20me",
-                "type": "text",
-                "label": "integromat"
               },
               {
                 "name": "fldv6bypVKYVKPGGy",
@@ -2280,12 +1931,12 @@
               },
               {
                 "name": "fldpLhUzCtjZewzkh",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
                 "type": "array",
-                "label": "hiring"
+                "label": "hiring",
+                "spec": {
+                  "label": "Record ID",
+                  "name": "value"
+                }
               },
               {
                 "name": "fldhmqxb10TJBDHy8",
@@ -2299,29 +1950,29 @@
               },
               {
                 "name": "fldaizYpf2KJNpS8H",
+                "type": "array",
+                "label": "pitchdeck",
                 "spec": [
                   {
                     "name": "url",
-                    "type": "text",
-                    "label": "File URL"
+                    "label": "File URL",
+                    "type": "text"
                   },
                   {
                     "name": "filename",
-                    "type": "filename",
-                    "label": "File name"
+                    "label": "File name",
+                    "type": "filename"
                   }
-                ],
-                "type": "array",
-                "label": "pitchdeck"
+                ]
               },
               {
                 "name": "fld5PGOPp9gK065Gi",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
                 "type": "array",
-                "label": "nce-peer-ratings"
+                "label": "nce-peer-ratings",
+                "spec": {
+                  "label": "Record ID",
+                  "name": "value"
+                }
               },
               {
                 "name": "fldtVPNHjYeaR6ZKE",
@@ -2330,12 +1981,12 @@
               },
               {
                 "name": "fld8XgArgcB4JfOhr",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
                 "type": "array",
-                "label": "nc-schedule"
+                "label": "nc-schedule",
+                "spec": {
+                  "label": "Record ID",
+                  "name": "value"
+                }
               },
               {
                 "name": "fldQTjaDaAdhaYTCT",
@@ -2344,16 +1995,19 @@
               },
               {
                 "name": "fldxwnkd4raoZPzhm",
-                "spec": {
-                  "name": "value",
-                  "label": "Record ID"
-                },
                 "type": "array",
-                "label": "certificates-batch"
+                "label": "certificates-batch",
+                "spec": {
+                  "label": "Record ID",
+                  "name": "value"
+                }
+              },
+              {
+                "name": "fldP0Ax1AVXvmt9Rd",
+                "type": "text",
+                "label": "contract_code"
               }
-            ],
-            "type": "collection",
-            "label": "Record"
+            ]
           }
         ],
         "interface": [
@@ -2369,104 +2023,91 @@
           },
           {
             "name": "name",
-            "type": "text",
-            "label": "name"
-          },
-          {
-            "name": "program",
-            "type": "array",
-            "label": "program"
-          },
-          {
-            "name": "schedule",
-            "spec": {
-              "label": "Record ID"
-            },
-            "type": "array",
-            "label": "schedule"
-          },
-          {
-            "name": "project-name",
-            "type": "text",
-            "label": "project-name"
-          },
-          {
-            "name": "project-github",
-            "type": "url",
-            "label": "project-github"
-          },
-          {
-            "name": "project-pitch",
-            "type": "text",
-            "label": "project-pitch"
-          },
-          {
-            "name": "video",
-            "type": "url",
-            "label": "video"
-          },
-          {
-            "name": "project-effort",
-            "type": "text",
-            "label": "project-effort"
-          },
-          {
-            "name": "bio",
-            "type": "text",
-            "label": "bio"
-          },
-          {
-            "name": "created",
-            "type": "date",
-            "label": "created"
-          },
-          {
-            "name": "experience",
-            "type": "text",
-            "label": "experience"
-          },
-          {
-            "name": "reviewed",
-            "type": "boolean",
-            "label": "reviewed"
+            "label": "name",
+            "type": "text"
           },
           {
             "name": "verified",
-            "type": "boolean",
-            "label": "verified"
-          },
-          {
-            "name": "rejected",
-            "type": "boolean",
-            "label": "rejected"
+            "label": "verified",
+            "type": "boolean"
           },
           {
             "name": "strength",
-            "type": "text",
-            "label": "strength"
+            "label": "strength",
+            "type": "text"
           },
           {
             "name": "notes",
-            "type": "text",
-            "label": "notes"
+            "label": "notes",
+            "type": "text"
           },
           {
-            "name": "duplicate",
-            "type": "boolean",
-            "label": "duplicate"
+            "name": "project-name",
+            "label": "project-name",
+            "type": "text"
+          },
+          {
+            "name": "project-pitch",
+            "label": "project-pitch",
+            "type": "text"
+          },
+          {
+            "name": "video",
+            "label": "video",
+            "type": "url"
+          },
+          {
+            "name": "project-github",
+            "label": "project-github",
+            "type": "url"
+          },
+          {
+            "name": "project-effort",
+            "label": "project-effort",
+            "type": "text"
+          },
+          {
+            "name": "schedule",
+            "label": "schedule",
+            "type": "array",
+            "spec": {
+              "label": "Record ID"
+            }
+          },
+          {
+            "name": "bio",
+            "label": "bio",
+            "type": "text"
+          },
+          {
+            "name": "created",
+            "label": "created",
+            "type": "date"
+          },
+          {
+            "name": "experience_with_near",
+            "label": "experience_with_near",
+            "type": "text"
           },
           {
             "name": "email",
-            "type": "text",
-            "label": "email"
+            "label": "email",
+            "type": "text"
           },
           {
             "name": "mainnet",
-            "type": "text",
-            "label": "mainnet"
+            "label": "mainnet",
+            "type": "text"
+          },
+          {
+            "name": "program",
+            "label": "program",
+            "type": "array"
           },
           {
             "name": "profile",
+            "label": "profile",
+            "type": "array",
             "spec": [
               {
                 "name": "id",
@@ -2490,14 +2131,18 @@
               },
               {
                 "name": "type",
-                "type": "text",
-                "label": "MIME type"
+                "label": "MIME type",
+                "type": "text"
               },
               {
                 "name": "thumbnails",
+                "label": "Thumbnails",
+                "type": "collection",
                 "spec": [
                   {
                     "name": "small",
+                    "label": "Small",
+                    "type": "collection",
                     "spec": [
                       {
                         "name": "url",
@@ -2514,12 +2159,12 @@
                         "type": "uinteger",
                         "label": "Height"
                       }
-                    ],
-                    "type": "collection",
-                    "label": "Small"
+                    ]
                   },
                   {
                     "name": "large",
+                    "label": "Large",
+                    "type": "collection",
                     "spec": [
                       {
                         "name": "url",
@@ -2536,12 +2181,12 @@
                         "type": "uinteger",
                         "label": "Height"
                       }
-                    ],
-                    "type": "collection",
-                    "label": "Large"
+                    ]
                   },
                   {
                     "name": "full",
+                    "label": "Full",
+                    "type": "collection",
                     "spec": [
                       {
                         "name": "url",
@@ -2558,49 +2203,60 @@
                         "type": "uinteger",
                         "label": "Height"
                       }
-                    ],
-                    "type": "collection",
-                    "label": "Full"
+                    ]
                   }
-                ],
-                "type": "collection",
-                "label": "Thumbnails"
+                ]
               }
-            ],
-            "type": "array",
-            "label": "profile"
+            ]
           },
           {
             "name": "join-alumni",
-            "type": "text",
-            "label": "join-alumni"
+            "label": "join-alumni",
+            "type": "text"
           },
           {
             "name": "integromat",
-            "type": "text",
             "label": "integromat",
+            "type": "text",
             "multiline": true
           },
           {
+            "name": "reviewed",
+            "label": "reviewed",
+            "type": "boolean"
+          },
+          {
+            "name": "rejected",
+            "label": "rejected",
+            "type": "boolean"
+          },
+          {
+            "name": "duplicate",
+            "label": "duplicate",
+            "type": "boolean"
+          },
+          {
             "name": "count",
-            "type": "number",
-            "label": "count"
+            "label": "count",
+            "type": "number"
           },
           {
             "name": "jobs",
-            "type": "text",
-            "label": "jobs"
+            "label": "jobs",
+            "type": "text"
           },
           {
             "name": "hiring",
+            "label": "hiring",
+            "type": "array",
             "spec": {
               "label": "Record ID"
-            },
-            "type": "array",
-            "label": "hiring"
+            }
           },
           {
             "name": "contact",
+            "label": "contact",
+            "type": "collection",
             "spec": [
               {
                 "name": "label",
@@ -2612,27 +2268,27 @@
                 "type": "url",
                 "label": "URL"
               }
-            ],
-            "type": "collection",
-            "label": "contact"
+            ]
           },
           {
             "name": "contact_link",
-            "type": "text",
-            "label": "contact_link"
+            "label": "contact_link",
+            "type": "text"
           },
           {
             "name": "Talent ID",
-            "type": "text",
-            "label": "Talent ID"
+            "label": "Talent ID",
+            "type": "text"
           },
           {
             "name": "discord-role-assigned",
-            "type": "boolean",
-            "label": "discord-role-assigned"
+            "label": "discord-role-assigned",
+            "type": "boolean"
           },
           {
             "name": "pitchdeck",
+            "label": "pitchdeck",
+            "type": "array",
             "spec": [
               {
                 "name": "id",
@@ -2656,14 +2312,18 @@
               },
               {
                 "name": "type",
-                "type": "text",
-                "label": "MIME type"
+                "label": "MIME type",
+                "type": "text"
               },
               {
                 "name": "thumbnails",
+                "label": "Thumbnails",
+                "type": "collection",
                 "spec": [
                   {
                     "name": "small",
+                    "label": "Small",
+                    "type": "collection",
                     "spec": [
                       {
                         "name": "url",
@@ -2680,12 +2340,12 @@
                         "type": "uinteger",
                         "label": "Height"
                       }
-                    ],
-                    "type": "collection",
-                    "label": "Small"
+                    ]
                   },
                   {
                     "name": "large",
+                    "label": "Large",
+                    "type": "collection",
                     "spec": [
                       {
                         "name": "url",
@@ -2702,12 +2362,12 @@
                         "type": "uinteger",
                         "label": "Height"
                       }
-                    ],
-                    "type": "collection",
-                    "label": "Large"
+                    ]
                   },
                   {
                     "name": "full",
+                    "label": "Full",
+                    "type": "collection",
                     "spec": [
                       {
                         "name": "url",
@@ -2724,56 +2384,65 @@
                         "type": "uinteger",
                         "label": "Height"
                       }
-                    ],
-                    "type": "collection",
-                    "label": "Full"
+                    ]
                   }
-                ],
-                "type": "collection",
-                "label": "Thumbnails"
+                ]
               }
-            ],
-            "type": "array",
-            "label": "pitchdeck"
+            ]
           },
           {
             "name": "nce-peer-ratings",
+            "label": "nce-peer-ratings",
+            "type": "array",
             "spec": {
               "label": "Record ID"
-            },
-            "type": "array",
-            "label": "nce-peer-ratings"
+            }
           },
           {
             "name": "trainer",
-            "type": "text",
-            "label": "trainer"
+            "label": "trainer",
+            "type": "text"
           },
           {
             "name": "nc-schedule",
+            "label": "nc-schedule",
+            "type": "array",
             "spec": {
               "label": "Record ID"
-            },
-            "type": "array",
-            "label": "nc-schedule"
+            }
           },
           {
             "name": "certificate-minted",
-            "type": "boolean",
-            "label": "certificate-minted"
+            "label": "certificate-minted",
+            "type": "boolean"
           },
           {
             "name": "mainnet (from nc-instructors) (from schedule)",
-            "type": "array",
-            "label": "mainnet (from nc-instructors) (from schedule)"
+            "label": "mainnet (from nc-instructors) (from schedule)",
+            "type": "array"
           },
           {
             "name": "certificates-batch",
+            "label": "certificates-batch",
+            "type": "array",
             "spec": {
               "label": "Record ID"
-            },
-            "type": "array",
-            "label": "certificates-batch"
+            }
+          },
+          {
+            "name": "start datetime (from schedule)",
+            "label": "start datetime (from schedule)",
+            "type": "array"
+          },
+          {
+            "name": "mainnet vaildation",
+            "label": "mainnet vaildation",
+            "type": "text"
+          },
+          {
+            "name": "contract_code",
+            "label": "contract_code",
+            "type": "text"
           }
         ]
       }
