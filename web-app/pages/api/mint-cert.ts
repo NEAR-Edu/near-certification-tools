@@ -28,7 +28,7 @@ type CertificateRequiredFields = {
 };
 
 function generateUUIDForTokenId(): string {
-  return randomUUID().replace(/-/g, ''); // https://stackoverflow.com/a/67624847/470749 https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID
+  return randomUUID().replace(/-/g, ''); // https://stackoverflow.com/a/67624847/470749 https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID https://stackoverflow.com/questions/72637010/replaceall-is-not-working-in-next-js-node-js-when-deployed-to-render-com-ser
 }
 
 /**
