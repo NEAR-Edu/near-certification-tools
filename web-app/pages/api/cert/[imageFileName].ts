@@ -71,21 +71,16 @@ export async function fetchCertificateDetails(tokenId: string): Promise<ImageIng
       const programName = metadata.title;
       const programDescription = metadata.description;
       const instructor = certificateMetadata.authority_id;
+
+      // Field mappings here must stay in sync with getImageIngredientsFromCertificateRequiredFields.
       return {
         accountName,
-
         date,
-
         expiration,
-
         instructor,
-
         programCode,
-
         programDescription,
-
         programName,
-        // Field mappings here must stay in sync with getImageIngredientsFromCertificateRequiredFields.
         tokenId,
       };
     }
