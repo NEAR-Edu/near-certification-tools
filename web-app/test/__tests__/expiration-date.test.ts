@@ -41,8 +41,9 @@ describe('Test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2021-03-02T12:35:46+00:00', // Start date of long inactivity period
+              // Start date of long inactivity period
               diff_to_next_activity: 296,
+              moment: '2021-03-02T12:35:46+00:00',
             },
           ]),
         );
@@ -115,8 +116,9 @@ describe('Test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2021-03-16T20:08:59+00:00', // Start date of long inactivity period
+              // Start date of long inactivity period
               diff_to_next_activity: 204,
+              moment: '2021-03-16T20:08:59+00:00',
             },
           ]),
         );
@@ -156,8 +158,9 @@ describe('Test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2018-10-01T00:00:00+00:00', // Start date of long inactivity period
+              // Start date of long inactivity period
               diff_to_next_activity: 365,
+              moment: '2018-10-01T00:00:00+00:00',
             },
           ]),
         );
@@ -196,8 +199,9 @@ describe('Test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2019-08-03T00:00:00+00:00', // Start date of long inactivity period
+              // Start date of long inactivity period
               diff_to_next_activity: 214,
+              moment: '2019-08-03T00:00:00+00:00',
             },
           ]),
         );
@@ -235,8 +239,9 @@ describe('Test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2022-04-07T16:25:59+00:00', // Most recent activity
+              // Most recent activity
               diff_to_next_activity: null,
+              moment: '2022-04-07T16:25:59+00:00',
             },
           ]),
         );
@@ -271,8 +276,9 @@ describe('Test expiration date functions', () => {
         expect(queryResult).toEqual(
           expect.arrayContaining([
             {
-              moment: '2022-04-06T10:10:00+00:00', // Most recent activity
+              // Most recent activity
               diff_to_next_activity: null,
+              moment: '2022-04-06T10:10:00+00:00',
             },
           ]),
         );

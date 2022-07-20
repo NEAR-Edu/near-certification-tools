@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { mockDeep, mockReset, DeepMockProxy } from 'jest-mock-extended';
 
-import prisma from './client';
+import client from './client';
 
 jest.mock('./client', () => ({
   __esModule: true,
@@ -15,4 +15,4 @@ beforeEach(() => {
 });
 
 // eslint-disable-next-line import/prefer-default-export
-export const prismaMock = prisma as unknown as DeepMockProxy<PrismaClient>;
+export const prismaMock = client as unknown as DeepMockProxy<PrismaClient>;
