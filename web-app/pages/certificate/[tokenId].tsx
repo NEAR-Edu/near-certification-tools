@@ -1,3 +1,4 @@
+/* eslint-disable canonical/filename-match-regex */
 // This page is visible at /certificate/j3h45kjh345
 /*
 See:

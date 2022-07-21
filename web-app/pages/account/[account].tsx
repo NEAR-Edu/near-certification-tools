@@ -1,3 +1,4 @@
+/* eslint-disable canonical/filename-match-regex */
 // This page is visible at /account/example.near
 
 import type { GetServerSideProps, NextPage } from 'next';
@@ -6,7 +7,7 @@ import ExplorerAccountLink from '../../components/ExplorerAccountLink';
 import Layout from '../../components/Layout';
 import { Certificate, isValid } from '../../helpers/certificate';
 import { AccountId, getNearAccountWithoutAccountIdOrKeyStoreForFrontend, getNftContractOfAccount, NFT } from '../../helpers/near';
-import { getImageUrl, getSimpleStringFromParam } from '../../helpers/strings';
+import { getImageUrl, getSimpleStringFromParameter } from '../../helpers/strings';
 import styles from '../../styles/Account.module.scss';
 
 function Tile({ tokenId }: { tokenId: string }): JSX.Element {
@@ -36,7 +37,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   // https://nextjs.org/docs/api-reference/data-fetching/get-server-side-props
   // TODO: Replace `"near-api-js": "ryancwalsh/near-api-js#gracefully-handle-window-and-buffer"` with the official "near-api-js" in `package.json` once https://github.com/near/near-api-js/issues/747 is fixed.
   const { account } = context.query; // https://nextjs.org/docs/routing/dynamic-routes
-  const accountId = getSimpleStringFromParam(account);
+  const accountId = getSimpleStringFromParameter(account);
   const tokenIds = await getTokenIdsOfCertificates(accountId);
   console.log({ accountId, tokenIds });
   // Pass data to the page via props

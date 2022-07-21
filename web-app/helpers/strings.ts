@@ -1,8 +1,8 @@
 export const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
-export function getSimpleStringFromParam(paramValue: string | string[] | undefined) {
-  if (paramValue) {
-    return typeof paramValue === 'string' ? paramValue : paramValue[0];
+export function getSimpleStringFromParameter(parameterValue: string[] | string | undefined) {
+  if (parameterValue) {
+    return typeof parameterValue === 'string' ? parameterValue : parameterValue[0];
   } else {
     return '';
   }

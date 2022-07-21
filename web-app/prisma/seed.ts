@@ -1,12 +1,57 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 // Disabling TypeScript checking for this file since it's only seeding. https://stackoverflow.com/a/51774725/470749
 import dayjs from 'dayjs';
-import prisma from '../test/test-helpers/client';
+import client from '../test/test-helpers/client';
 import { convertStringDateToNanoseconds } from '../helpers/time';
 import generateActivityData from '../test/test-helpers/generate-account-activities';
 
 // TODO: refactor comments
+
+type SeedData = {
+  account_activities: {
+    included_in_block_timestamp: string;
+    receipt_id: string;
+  };
+  signer_account_id: string;
+};
+
+async function seedForAccount(data: SeedData): Promise<void> {
+  // Seed DB with sally.testnet data
+  // create receipts and action_receipts for sally.testnet
+  const receipts: Promise[] = [];
+  const actionReceipts: Promise[] = [];
+
+  /* eslint-disable camelcase, @typescript-eslint/naming-convention */
+  // eslint-disable-next-line no-restricted-syntax
+  for (const { included_in_block_timestamp, receipt_id } of data.account_activities) {
+    receipts.push(
+      client.receipts.upsert({
+        create: {
+          included_in_block_timestamp,
+          receipt_id,
+        },
+        update: {
+          included_in_block_timestamp,
+        },
+        where: { receipt_id },
+      }),
+    );
+
+    actionReceipts.push(
+      client.action_receipts.upsert({
+        create: {
+          receipt_id,
+          signer_account_id: dataSally.signer_account_id,
+        },
+        update: {},
+        where: { receipt_id },
+      }),
+    );
+  }
+  /* eslint-enable camelcase, @typescript-eslint/naming-convention */
+
+  await Promise.all([Promise.all(receipts), Promise.all(actionReceipts)]);
+}
 
 // eslint-disable-next-line max-lines-per-function
 async function main() {
@@ -24,38 +69,18 @@ async function main() {
 
   // sally.testnet data
   const dataSally = {
-    signer_account_id: 'sally.testnet',
     account_activities: [
       {
         included_in_block_timestamp: convertStringDateToNanoseconds('2021-12-23T09:46:39+00:00'), // 296 days have passed since issue date, which was on 2021-03-02T12:35:46+00:00. moment = issue date. When getExpiration is called, query will return issue date as moment. Issuing a cert to an account is not an action recorded on account's mainnet transaction history and therefore cannot be directly reached from account activity data, also the reason for not being seeded here.
         receipt_id: 'Wt4a5NwKgihcWiKlU6NHDWhfoeE9b7HsYUIjTQAfCUoic',
       },
     ],
+    signer_account_id: 'sally.testnet',
   };
 
   // Seed DB with sally.testnet data
   // create receipts and action_receipts for sally.testnet
-  dataSally.account_activities.forEach(async (action) => {
-    await prisma.receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-      create: {
-        receipt_id: action.receipt_id,
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-    });
-
-    await prisma.action_receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {},
-      create: {
-        receipt_id: action.receipt_id,
-        signer_account_id: dataSally.signer_account_id,
-      },
-    });
-  });
+  await seedForAccount(dataSally);
   // ########### END OF SEEDING DATA FOR sally.testnet ###########
 
   // ###########
@@ -77,7 +102,6 @@ async function main() {
 
   // steve.testnet data
   const dataSteve = {
-    signer_account_id: 'steve.testnet',
     account_activities: [
       {
         included_in_block_timestamp: convertStringDateToNanoseconds('2022-03-05T09:46:39+00:00'), // Most recent mainnet activity
@@ -92,6 +116,7 @@ async function main() {
         receipt_id: 'st02R6f58evLaZ3h306k9vs9PpAifXytsRABt4ngpHa6V',
       },
     ],
+    signer_account_id: 'steve.testnet',
   };
 
   // Create activities between dates where the account was frequently active according to the scenario.
@@ -102,27 +127,7 @@ async function main() {
 
   // Seed DB with steve.testnet data
   // create receipts and action_receipts for steve.testnet
-  dataSteve.account_activities.forEach(async (action) => {
-    await prisma.receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-      create: {
-        receipt_id: action.receipt_id,
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-    });
-
-    await prisma.action_receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {},
-      create: {
-        receipt_id: action.receipt_id,
-        signer_account_id: dataSteve.signer_account_id,
-      },
-    });
-  });
+  await seedForAccount(dataSteve);
   // ########### END OF SEEDING DATA FOR steve.testnet ###########
 
   // ######### START OF SEEDING DATA FOR bob.testnet #########
@@ -139,7 +144,6 @@ async function main() {
 
   // bob.testnet data
   const dataBob = {
-    signer_account_id: 'bob.testnet',
     account_activities: [
       {
         included_in_block_timestamp: convertStringDateToNanoseconds('2022-03-04T13:20:37+00:00'), // Most recent mainnet activity
@@ -158,6 +162,7 @@ async function main() {
         receipt_id: 'FkcSMfikcRDP1xGRiRMSVPMciC2Mq1tndRC2Mq1tndRC2',
       },
     ],
+    signer_account_id: 'bob.testnet',
   };
 
   // Create activities between dates where the account was frequently active according to the scenario.
@@ -168,27 +173,7 @@ async function main() {
 
   // Seed DB with bob.testnet data
   // Create receipts and action_receipts for bob.testnet
-  dataBob.account_activities.forEach(async (action) => {
-    await prisma.receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-      create: {
-        receipt_id: action.receipt_id,
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-    });
-
-    await prisma.action_receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {},
-      create: {
-        receipt_id: action.receipt_id,
-        signer_account_id: dataBob.signer_account_id,
-      },
-    });
-  });
+  await seedForAccount(dataBob);
   // ######### END OF SEEDING DATA FOR bob.testnet #########
 
   // ########### START OF SEEDING DATA FOR alice.testnet ###########
@@ -204,7 +189,6 @@ async function main() {
 
   // alice.testnet data
   const dataAlice = {
-    signer_account_id: 'alice.testnet',
     account_activities: [
       {
         included_in_block_timestamp: convertStringDateToNanoseconds('2021-03-11T19:05:12+00:00'), // Most recent mainnet activity. 182 days have passed since previous activity which was on 2020-09-10T18:30:06+00:00
@@ -219,31 +203,12 @@ async function main() {
         receipt_id: 'al98R6f58evkjlvmewopOFOKDjfdkKdjfksdfcmkskldew',
       },
     ],
+    signer_account_id: 'alice.testnet',
   };
 
   // Seed DB with alice.testnet activity data
   // Create receipts and action_receipts for alice.testnet
-  dataAlice.account_activities.forEach(async (action) => {
-    await prisma.receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-      create: {
-        receipt_id: action.receipt_id,
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-    });
-
-    await prisma.action_receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {},
-      create: {
-        receipt_id: action.receipt_id,
-        signer_account_id: dataAlice.signer_account_id,
-      },
-    });
-  });
+  await seedForAccount(dataAlice);
   // ########### END OF SEEDING DATA FOR alice.testnet ###########
 
   // ########### START OF SEEDING DATA FOR rebecca.testnet ###########
@@ -256,8 +221,8 @@ async function main() {
 
   // rebecca.testnet data
   const dataRebecca = {
-    signer_account_id: 'rebecca.testnet',
     account_activities: [],
+    signer_account_id: 'rebecca.testnet',
   };
 
   // Seed DB with rebecca.testnet activity data
@@ -273,27 +238,7 @@ async function main() {
 
   // Seed DB with rebecca.testnet activity data
   // Create receipts and action_receipts for rebecca.testnet
-  dataRebecca.account_activities.forEach(async (action) => {
-    await prisma.receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-      create: {
-        receipt_id: action.receipt_id,
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-    });
-
-    await prisma.action_receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {},
-      create: {
-        receipt_id: action.receipt_id,
-        signer_account_id: dataRebecca.signer_account_id,
-      },
-    });
-  });
+  await seedForAccount(dataRebecca);
   // ########### END OF SEEDING DATA FOR rebecca.testnet ###########
 
   // ########### START OF SEEDING DATA FOR jennifer.testnet ###########
@@ -306,8 +251,8 @@ async function main() {
 
   // jennifer.testnet data
   const dataJennifer = {
-    signer_account_id: 'jennifer.testnet',
     account_activities: [],
+    signer_account_id: 'jennifer.testnet',
   };
 
   // Create activities between dates where the account was frequently active according to the scenario.
@@ -317,27 +262,7 @@ async function main() {
 
   // Seed DB with jennifer.testnet activity data
   // Create receipts and action_receipts for jennifer.testnet
-  dataJennifer.account_activities.forEach(async (action) => {
-    await prisma.receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-      create: {
-        receipt_id: action.receipt_id,
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-    });
-
-    await prisma.action_receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {},
-      create: {
-        receipt_id: action.receipt_id,
-        signer_account_id: dataJennifer.signer_account_id,
-      },
-    });
-  });
+  await seedForAccount(dataJennifer);
   // ########### END OF SEEDING DATA FOR jennifer.testnet ###########
 
   // ########### START OF SEEDING DATA FOR william.testnet ###########
@@ -351,8 +276,8 @@ async function main() {
 
   // william.testnet data
   const dataWilliam = {
-    signer_account_id: 'william.testnet',
     account_activities: [],
+    signer_account_id: 'william.testnet',
   };
 
   const startDateWilliam = dayjs.utc().subtract(180, 'days').subtract(2, 'hours');
@@ -365,27 +290,7 @@ async function main() {
 
   // Seed DB with william.testnet activity data
   // Create receipts and action_receipts for william.testnet
-  dataWilliam.account_activities.forEach(async (action) => {
-    await prisma.receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-      create: {
-        receipt_id: action.receipt_id,
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-    });
-
-    await prisma.action_receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {},
-      create: {
-        receipt_id: action.receipt_id,
-        signer_account_id: dataWilliam.signer_account_id,
-      },
-    });
-  });
+  await seedForAccount(dataWilliam);
   // ########### END OF SEEDING DATA FOR william.testnet ###########
 
   // ########### START OF SEEDING DATA FOR john.testnet ###########
@@ -399,8 +304,8 @@ async function main() {
 
   // john.testnet data
   const dataJohn = {
-    signer_account_id: 'john.testnet',
     account_activities: [],
+    signer_account_id: 'john.testnet',
   };
 
   const startDateJohn = dayjs.utc().subtract(180, 'days');
@@ -413,37 +318,17 @@ async function main() {
 
   // Seed DB with john.testnet activity data
   // Create receipts and action_receipts for john.testnet
-  dataJohn.account_activities.forEach(async (action) => {
-    await prisma.receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-      create: {
-        receipt_id: action.receipt_id,
-        included_in_block_timestamp: action.included_in_block_timestamp,
-      },
-    });
-
-    await prisma.action_receipts.upsert({
-      where: { receipt_id: action.receipt_id },
-      update: {},
-      create: {
-        receipt_id: action.receipt_id,
-        signer_account_id: dataJohn.signer_account_id,
-      },
-    });
-  });
+  await seedForAccount(dataJohn);
   // ########### END OF SEEDING DATA FOR john.testnet ###########
 
   console.log('✨ Seeding finished!');
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
+  .catch((error) => {
+    console.error(error);
     process.exit(1);
   })
-  .finally(async () => {
-    await prisma.$disconnect();
+  .finally(() => {
+    await client.$disconnect();
   });

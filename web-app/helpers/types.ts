@@ -1,19 +1,20 @@
 export type ImageIngredients = {
-  tokenId: string;
+  accountName: string;
   date: string;
   expiration: string;
-  programCode: string; // This will determine which background image gets used.
-  programName: string;
-  accountName: string;
-  programDescription: string;
   instructor: string;
+  programCode: string;
+  programDescription: string;
+  // This will determine which background image gets used.
+  programName: string;
+  tokenId: string;
 };
 
 export type JsonResponse =
   | {
-      status: string;
       message: string;
+      status: string;
     }
-  | { success: boolean; error?: undefined | unknown };
+  | { error?: unknown | undefined; success: boolean };
 
 export type NftMintResult = any;

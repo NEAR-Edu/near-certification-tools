@@ -1,27 +1,27 @@
 export type Certificate = {
-  token_id: string;
-  owner_id: string;
   metadata: {
-    title?: string;
+    copies?: number;
     description?: string;
+    expires_at?: string;
+    extra?: string;
+    issued_at?: string;
     media?: string;
     media_hash?: string;
-    copies?: number;
-    issued_at?: string;
-    expires_at?: string;
-    starts_at?: string;
-    updated_at?: string;
-    extra?: string;
     reference?: string;
     reference_hash?: string;
+    starts_at?: string;
+    title?: string;
+    updated_at?: string;
   };
+  owner_id: string;
+  token_id: string;
 };
 
 export function isValid(cert: Certificate): boolean {
   try {
-    const extra = cert?.metadata.extra;
+    const { extra } = cert.metadata;
     return !!(extra && JSON.parse(extra).valid);
-  } catch (_) {
+  } catch {
     return false;
   }
 }

@@ -1,5 +1,6 @@
-import { Decimal } from '@prisma/client/runtime';
-import dayjs, { Dayjs } from 'dayjs'; // https://day.js.org/en
+/* eslint-disable canonical/id-match */
+import { type Decimal } from '@prisma/client/runtime';
+import dayjs, { type Dayjs } from 'dayjs'; // https://day.js.org/en
 import utc from 'dayjs/plugin/utc'; // https://day.js.org/docs/en/plugin/utc
 import BN from 'bn.js'; // https://github.com/indutny/bn.js
 
@@ -9,8 +10,8 @@ dayjs.extend(utc); // use dayjs utc plugin to avoid parsing different dates depe
 export function convertTimestampToDayjsMoment(timestamp: Decimal | number | string, denominator: number): Dayjs {
   // https://stackoverflow.com/questions/71024496/why-do-i-need-to-divide-the-timestamp-by-1-billion
   // https://discord.com/channels/828768337978195969/830348856561500167/940337682121359391
-  const timestampNum = new BN(Number(timestamp)).div(new BN(denominator));
-  const moment = dayjs.unix(timestampNum.toNumber()); // https://day.js.org/docs/en/parse/unix-timestamp
+  const timestampNumber = new BN(Number(timestamp)).div(new BN(denominator));
+  const moment = dayjs.unix(timestampNumber.toNumber()); // https://day.js.org/docs/en/parse/unix-timestamp
   return moment;
 }
 
@@ -46,5 +47,5 @@ export function convertStringDateToNanoseconds(iso8601DateTime: string): string 
 }
 
 export function convertStringDateToMilliseconds(iso8601DateTime: string): string {
-  return convertStringDateToOtherPrecision(iso8601DateTime, new BN(1000));
+  return convertStringDateToOtherPrecision(iso8601DateTime, new BN(1_000));
 }
