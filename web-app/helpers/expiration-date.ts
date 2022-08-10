@@ -9,8 +9,10 @@ dayjs.extend(utc); // use dayjs utc plugin to avoid parsing different dates depe
 const expirationDays = 180; // Certificates expire after the first period of this many consecutive days of inactivity after issueDate.
 type RawQueryResult = [
   {
-    moment: string; // If account has had any inactivity period over 180 days, moment is the start date of such period. If account did not have any long (>=180 days) inactivity period, moment is the most recent activity date
-    diff_to_next_activity: number; // Number of days of inactivity if long (>=180 days) inactivity period is present for given account
+    // If account has had any inactivity period over 180 days, moment is the start date of such period
+    // If account did not have any long (>=180 days) inactivity period, moment is the most recent activity date
+    diff_to_next_activity: number;
+    moment: string; // Number of days of inactivity if long (>=180 days) inactivity period is present for given account
   },
 ];
 
@@ -32,37 +34,37 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
   /**
    * ---- QUERY 1 ----
    * First query checks if the account has a period where it hasn't been active for 180 days straight after the issue date
-   * IMPORTANT: When a certificate is issued to an account, it does not appear as a transaction on the account's transaction history. 
+   * IMPORTANT: When a certificate is issued to an account, it does not appear as a transaction on the account's transaction history.
    * Therefore, the period between the first mainnet activity and issue date needs to be checked as well whether it exceeds 180 days, or not.
-   * 
-   * This is done by: 
-   * 1. Calculating the difference between account's first activity after issue date and the issue date. 
+   *
+   * This is done by:
+   * 1. Calculating the difference between account's first activity after issue date and the issue date.
    * 2. Retrieving account activities after the issue date and checking differences between these dates in days.
-   *    
+   *
    * Since it is important to detect the FIRST occurance of a >180-day period,
    * only in case such period is present:
    * -- 1. if difference between (first activity - issue date) > 180, moment is the issue date
    * -- 2. if difference between (first activity - issue date) < 180, moment is the first occurence of >180-day period after the first activity
-   * 
-   * -- Example result: 
+   *
+   * -- Example result:
    * [
-      { 
-        moment: '2019-08-03T00:00:00+00:00', // The beginning of the *first* such period (moment) + 180 days
-        diff_to_next_activity: 214 // Either (first activity - issue date) or any other period where >180-day inacitivity is present, in days
-      }
-    ]
-
+   * {
+   * moment: '2019-08-03T00:00:00+00:00', // The beginning of the *first* such period (moment) + 180 days
+   * diff_to_next_activity: 214 // Either (first activity - issue date) or any other period where >180-day inacitivity is present, in days
+   * }
+   * ]
+   *
    * ---- QUERY 2 ----
    * Second query is run if no 180-day-inactivity period is found and returns most recent activity date
-   * 
-   * -- Example result: 
+   *
+   * -- Example result:
    * [
-      {
-        moment: '2022-04-07T16:25:59+00:00', // Most recent activity
-        diff_to_next_activity: null // null, since no >180-day period was found
-      }
-    ]
-   * 
+   * {
+   * moment: '2022-04-07T16:25:59+00:00', // Most recent activity
+   * diff_to_next_activity: null // null, since no >180-day period was found
+   * }
+   * ]
+   *
    * BOTH queries are set up to return the desired date in a column called 'moment'.
    */
 
@@ -142,7 +144,7 @@ export async function getRawQueryResult(accountName: string, issuedAt: string): 
    */
   const issuedAtUnixNano = new BN(issuedAt).mul(new BN(1_000_000)).toString(); // Converts issued_at which is in milliseconds to nanoseconds, finally from BN instance to string type. Result can't be saved as numeric type because it is exceeding 53 bits.
 
-  console.log({ issuedAt, issuedAtUnixNano, accountName });
+  console.log({ accountName, issuedAt, issuedAtUnixNano });
   const rawQuery = getRawQuery(accountName, issuedAtUnixNano);
   // https://www.prisma.io/docs/concepts/components/prisma-client/raw-database-access#queryraw
   const result: RawQueryResult = await prisma.$queryRaw<RawQueryResult>`${rawQuery}`;
@@ -168,7 +170,8 @@ export async function getExpiration(accountName: string, issuedAt: string): Prom
    * -- return expiration date as issue date + 180 days
    */
 
-  const moment = expiration.length ? dayjs.utc(expiration[0].moment) : dayjs.utc(parseInt(issuedAt, 10)); // https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const moment = expiration.length ? dayjs.utc(expiration[0].moment) : dayjs.utc(Number.parseInt(issuedAt, 10)); // https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
 
   return moment.add(expirationDays, 'days').format('YYYY-MM-DDTHH:mm:ss+00:00');
 }
