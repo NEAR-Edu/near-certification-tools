@@ -5,8 +5,8 @@ import type { GetServerSideProps, NextPage } from 'next';
 import Link from 'next/link'; // https://nextjs.org/docs/api-reference/next/link
 import ExplorerAccountLink from '../../components/ExplorerAccountLink';
 import Layout from '../../components/Layout';
-import { Certificate, isValid } from '../../helpers/certificate';
-import { AccountId, getNearAccountWithoutAccountIdOrKeyStoreForFrontend, getNftContractOfAccount, NFT } from '../../helpers/near';
+import { Token, isValid } from '../../helpers/certificate';
+import { AccountId, getNearAccountWithoutAccountIdOrKeyStoreForFrontend, getNftContractOfAccount } from '../../helpers/near';
 import { getImageUrl, getSimpleStringFromParameter } from '../../helpers/strings';
 import styles from '../../styles/Account.module.scss';
 
@@ -28,9 +28,9 @@ type AccountPageProps = { accountId: AccountId; tokenIds: string[] };
 async function getTokenIdsOfCertificates(accountId: string): Promise<string[]> {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForFrontend();
   const contract = getNftContractOfAccount(account);
-  const response = await (contract as NFT).nft_tokens_for_owner({ account_id: accountId });
+  const response = await contract.nft_tokens_for_owner({ account_id: accountId });
   console.log({ account, accountId, response });
-  return response.filter((cert: Certificate) => isValid(cert)).map((cert: Certificate) => cert.token_id);
+  return response.filter((cert) => isValid(cert as Required<Token>)).map((cert) => cert.token_id);
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

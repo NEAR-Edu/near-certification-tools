@@ -2,30 +2,17 @@
 import { randomUUID } from 'crypto'; // Added in: node v14.17.0
 import { utils } from 'near-api-js'; // https://github.com/near/near-api-js/blob/master/examples/quick-reference.md
 import { type NextApiRequest, type NextApiResponse } from 'next';
-import { type Certificate } from '../../helpers/certificate';
-import { type AccountId, type NFT, apiKey, gas, getNftContract, HTTP_ERROR, HTTP_SUCCESS, rejectAsUnauthorized } from '../../helpers/near';
+import { ZodError } from 'zod';
+import { fromZodError } from 'zod-validation-error';
+import { type CertificateRequiredFields, type TokenMetadata, validate } from '../../helpers/certificate';
+import { apiKey, gas, getNftContract, HTTP_ERROR, HTTP_SUCCESS, rejectAsUnauthorized } from '../../helpers/near';
 import { getImageUrl } from '../../helpers/strings';
 import { convertStringDateToNanoseconds } from '../../helpers/time';
 import { type JsonResponse, type NftMintResult } from '../../helpers/types';
 
 // Could also use https://github.com/near/units-js#parsing-strings for this:
-export const depositAmountYoctoNear = utils.format.parseNearAmount('0.2'); // 0.2Ⓝ is max. There will be a certain deposit required to pay for the storage of the data on chain. Contract will automatically refund any excess.
+export const depositAmountYoctoNear = utils.format.parseNearAmount('0.2') as string; // 0.2Ⓝ is max. There will be a certain deposit required to pay for the storage of the data on chain. Contract will automatically refund any excess.
 const apiKeyHeaderName = 'x-api-key'; // Although the user interface of Integromat shows the capitalization as "X-API-Key", inspecting the actual header reveals that lowercase is used.
-
-type CertificateRequiredFields = {
-  authority_id: AccountId;
-  authority_name: string;
-  description: string;
-  memo: string;
-  original_recipient_id: AccountId;
-  original_recipient_name: string;
-  program: string;
-  program_end_date: string;
-  program_link: string;
-  program_name: string;
-  program_start_date: string;
-  title: string;
-};
 
 function generateUUIDForTokenId(): string {
   return randomUUID().replaceAll('-', ''); // https://stackoverflow.com/a/67624847/470749 https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID
@@ -35,7 +22,7 @@ function generateUUIDForTokenId(): string {
  *
  * @see https://nomicon.io/Standards/Tokens/NonFungibleToken/Metadata#interface
  */
-function buildTokenMetadata(tokenId: string, certificateRequiredFields: CertificateRequiredFields): Certificate['metadata'] {
+function buildTokenMetadata(tokenId: string, certificateRequiredFields: CertificateRequiredFields): TokenMetadata {
   const issuedAt = Date.now().toString(); // issued_at expects milliseconds since epoch as string
   const media = getImageUrl(tokenId);
   const { title, description } = certificateRequiredFields;
@@ -73,13 +60,12 @@ async function mintCertificate(tokenId: string, certificateRequiredFields: Certi
   const certificationMetadata = buildCertificationMetadata(certificateRequiredFields);
   const payload = {
     certification_metadata: certificationMetadata,
-    memo: null,
     receiver_account_id: certificateRequiredFields.original_recipient_id,
     token_id: tokenId,
     token_metadata: tokenMetadata,
   };
   console.log({ payload });
-  const result = (contract as NFT).nft_mint(
+  const result = contract.nft_mint(
     // https://github.com/near/near-api-js/issues/719
     payload,
     gas, // attached GAS (optional)
@@ -89,26 +75,43 @@ async function mintCertificate(tokenId: string, certificateRequiredFields: Certi
   return await result;
 }
 
-export default async function handler(request: NextApiRequest, response: NextApiResponse<JsonResponse | { result: NftMintResult; tokenId: string; url: string }>) {
+export type MintPayload = {
+  details: CertificateRequiredFields;
+};
+
+export default async function handler({ headers, body }: NextApiRequest, response: NextApiResponse<JsonResponse | { result: NftMintResult; tokenId: string; url: string }>) {
   // Require that this request is authenticated!
   const tokenId = generateUUIDForTokenId();
   console.log({ tokenId });
-  const { headers } = request; // https://stackoverflow.com/a/63529345/470749
-  if (headers[apiKeyHeaderName] === apiKey) {
-    const { body } = request;
-    console.log({ body, headers });
-    const certificateRequiredFields = body?.details; // Eventually we will want to add error-handling / validation.
-    // const tokenId = generateUUIDForTokenId();
-    console.log('minting', { certificateRequiredFields, tokenId });
-    try {
-      const result = await mintCertificate(tokenId, certificateRequiredFields);
-      const url = getImageUrl(tokenId);
-      response.status(HTTP_SUCCESS).json({ result, tokenId, url });
-    } catch (error) {
-      console.error(error);
-      response.status(HTTP_ERROR).json({ message: 'Issuing the certificate failed.', status: 'error' });
-    }
-  } else {
+
+  if (headers[apiKeyHeaderName] !== apiKey) {
     rejectAsUnauthorized(response, headers);
+    return;
+  }
+
+  console.log({ body, headers });
+  const certificateRequiredFields = body?.details;
+
+  try {
+    validate(certificateRequiredFields);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      const formatted = fromZodError(error);
+      console.error(formatted);
+      response.status(400).json({ message: JSON.stringify(formatted), status: 'error' });
+    }
+
+    return;
+  }
+
+  console.log('minting', { certificateRequiredFields, tokenId });
+
+  try {
+    const result = await mintCertificate(tokenId, certificateRequiredFields);
+    const url = getImageUrl(tokenId);
+    response.status(HTTP_SUCCESS).json({ result, tokenId, url });
+  } catch (error) {
+    console.error(error);
+    response.status(HTTP_ERROR).json({ message: 'Issuing the certificate failed.', status: 'error' });
   }
 }
