@@ -4,12 +4,13 @@
 import { type NextApiRequest, type NextApiResponse } from 'next';
 import { createCanvas } from 'canvas';
 import { getSimpleStringFromParameter } from '../../../helpers/strings';
-import { type NFT, getNearAccountWithoutAccountIdOrKeyStoreForBackend, getNftContractOfAccount } from '../../../helpers/near';
+import { getNearAccountWithoutAccountIdOrKeyStoreForBackend, getNftContractOfAccount } from '../../../helpers/near';
 import { height, populateCert, width } from '../../../helpers/certificate-designs';
 import { addCacheHeader } from '../../../helpers/caching';
 import { convertMillisecondsTimestampToFormattedDate } from '../../../helpers/time';
 import { getExpiration } from '../../../helpers/expiration-date';
 import { type ImageIngredients } from '../../../helpers/types';
+import { type Token } from '../../../helpers/certificate';
 
 export const HTTP_ERROR_CODE_MISSING = 404;
 const svg = 'svg';
@@ -49,44 +50,47 @@ async function generateImage(imageIngredients: ImageIngredients, canvasType: Can
 export async function fetchCertificateDetails(tokenId: string): Promise<ImageIngredients | null> {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForBackend();
   const contract = getNftContractOfAccount(account);
-  const response = await (contract as NFT).nft_token({ token_id: tokenId });
-  if (response) {
-    const { metadata } = response;
-    const { extra } = metadata;
-    const certificateMetadata = JSON.parse(extra);
-    console.log({ certificateMetadata, contract, response });
-    // similar to isValid function but without re-running some of those lines
-    if (certificateMetadata.valid) {
-      const accountName = certificateMetadata.original_recipient_id;
-      const programCode = certificateMetadata.program;
-      let expiration = ''; // The UI (see `populateCert`) will need to gracefully handle this case when indexer service is unavailable.
-      try {
-        expiration = await getExpiration(accountName, metadata.issued_at);
-      } catch (error) {
-        console.error('Perhaps a certificate for the original_recipient_id could not be found or the public indexer query timed out.', error);
-      }
+  const response = (await contract.nft_token({ token_id: tokenId })) as Required<Token> | null;
 
-      const date = convertMillisecondsTimestampToFormattedDate(metadata.issued_at);
-
-      const programName = metadata.title;
-      const programDescription = metadata.description;
-      const instructor = certificateMetadata.authority_id;
-
-      // Field mappings here must stay in sync with getImageIngredientsFromCertificateRequiredFields.
-      return {
-        accountName,
-        date,
-        expiration,
-        instructor,
-        programCode,
-        programDescription,
-        programName,
-        tokenId,
-      };
-    }
+  if (!response) {
+    return null;
   }
 
-  return null;
+  const metadata = response.metadata as Required<typeof response['metadata']>;
+  const { extra } = metadata;
+  const certificateMetadata = JSON.parse(extra);
+  console.log({ certificateMetadata, contract, response });
+  // similar to isValid function but without re-running some of those lines
+  if (!certificateMetadata.valid) {
+    return null;
+  }
+
+  const accountName = certificateMetadata.original_recipient_id;
+  const programCode = certificateMetadata.program;
+  let expiration = ''; // The UI (see `populateCert`) will need to gracefully handle this case when indexer service is unavailable.
+  try {
+    expiration = await getExpiration(accountName, metadata.issued_at);
+  } catch (error) {
+    console.error('Perhaps a certificate for the original_recipient_id could not be found or the public indexer query timed out.', error);
+  }
+
+  const date = convertMillisecondsTimestampToFormattedDate(metadata.issued_at);
+
+  const programName = metadata.title;
+  const programDescription = metadata.description;
+  const instructor = certificateMetadata.authority_id;
+
+  // Field mappings here must stay in sync with getImageIngredientsFromCertificateRequiredFields.
+  return {
+    accountName,
+    date,
+    expiration,
+    instructor,
+    programCode,
+    programDescription,
+    programName,
+    tokenId,
+  };
 }
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse<Buffer | { error: string }>) {
