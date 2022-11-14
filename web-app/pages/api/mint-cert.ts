@@ -101,6 +101,8 @@ export default async function handler({ headers, body }: NextApiRequest, respons
       response.status(400).json({ message: JSON.stringify(formatted), status: 'error' });
     }
 
+    response.status(400).json({ message: `Invalid data. ${JSON.stringify(error)}`, status: 'error' });
+
     return;
   }
 
