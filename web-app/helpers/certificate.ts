@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { getNearConnection } from './near';
+import { getImageUrl } from './strings';
+import { convertStringDateToNanoseconds } from './time';
 
 export interface Token {
   token_id: string;
@@ -52,30 +54,74 @@ export async function checkAccountId(accountId: string): Promise<boolean> {
     const connection = await getNearConnection();
     const account = await connection.account(accountId);
     const state = await account.state();
+
     return !!state;
   } catch {
     return false;
   }
 }
 
-export function validate(details: unknown): details is CertificateRequiredFields {
-  const nonEmptyString = () => z.string().min(1);
+/**
+ *
+ * @see https://nomicon.io/Standards/Tokens/NonFungibleToken/Metadata#interface
+ */
+export function buildTokenMetadata(tokenId: string, { title, description }: CertificateRequiredFields): TokenMetadata {
+  return { copies: 1, description, issued_at: `${Date.now()}`, media: getImageUrl(tokenId), title }; // Jacob L, Ryan W, and Petar V just decided to omit media_hash (even though the NFT standard requires it) since `media` points to a URL that dynamically generates the image (and since these NFTs aren't transferrable anyway).
+}
 
-  z.object({
+export function buildCertificationMetadata({
+  authority_id,
+  authority_name,
+  program,
+  program_name,
+  program_link,
+  program_start_date,
+  program_end_date,
+  original_recipient_id,
+  original_recipient_name,
+  memo,
+}: CertificateRequiredFields): CertificationExtraMetadata {
+  return {
+    authority_id,
+    authority_name,
+    memo,
+    original_recipient_id,
+    original_recipient_name,
+    program,
+    program_name,
+    program_link,
+    program_start_date,
+    program_end_date,
+    valid: true,
+  };
+}
+
+export function validate(details: unknown): CertificateRequiredFields {
+  const nonEmptyString = () => z.string().min(1);
+  const validAccountId = () => nonEmptyString().refine(async (id) => await checkAccountId(id), { message: 'Not a valid account ID' });
+  const validDate = () =>
+    nonEmptyString()
+      .refine((date) => new Date(date), { message: 'Not a valid date string' })
+      .transform(convertStringDateToNanoseconds);
+
+  const validationSchema = z.object({
     title: nonEmptyString(),
     description: nonEmptyString(),
-    authority_id: nonEmptyString().refine(async (id) => await checkAccountId(id), { message: 'Not a valid account ID' }),
+    authority_id: validAccountId(),
     authority_name: nonEmptyString(),
     program: nonEmptyString(),
     program_name: nonEmptyString(),
     program_link: nonEmptyString(),
-    program_start_date: nonEmptyString(),
-    program_end_date: nonEmptyString(),
-    original_recipient_id: nonEmptyString().refine(async (id) => await checkAccountId(id), { message: 'Not a valid account ID' }),
+    program_start_date: validDate(),
+    program_end_date: validDate(),
+    original_recipient_id: validAccountId(),
     original_recipient_name: nonEmptyString(),
-  }).parse(details);
+    memo: z.string(),
+  });
 
-  return true;
+  const result = validationSchema.parse(details);
+
+  return result;
 }
 
 export function isValid(cert: Required<Token>): boolean {
