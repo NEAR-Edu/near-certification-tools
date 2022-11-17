@@ -156,6 +156,7 @@ export async function getRawQueryResult(accountName: string, issuedAt: string): 
 
   console.log({ accountName, issuedAt, issuedAtUnixNano });
   const rawQuery = getRawQuery(accountName, issuedAtUnixNano);
+  console.log(rawQuery);
   // https://www.prisma.io/docs/concepts/components/prisma-client/raw-database-access#queryraw
   const result: RawQueryResult = await prisma.$queryRaw<RawQueryResult>`${rawQuery}`;
 
