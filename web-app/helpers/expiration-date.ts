@@ -70,26 +70,27 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
 
   // *issue_date* <-----------Query - 1-----------> *last_activtiy*  <-----------Query - 2 -----------> *now (render date)*
 
-  return Prisma.sql`
+  return prisma.$queryRawUnsafe<RawQueryResult>(
+    `
   /* <--- START OF FIRST QUERY ---> */
   WITH long_period_of_inactivity AS (
     (
       SELECT 
         case
           /* return issue date as moment if days_between_issue_date_and_first_activity > 180 */
-          when days_between_issue_date_and_first_activity >= ${expirationDays} then TO_TIMESTAMP((${issuedAtUnixNano}::text)::numeric/1000000000)
+          when days_between_issue_date_and_first_activity >= $1 then TO_TIMESTAMP(($2::text)::numeric/1000000000)
           /* else, return the start date of first occurance of >=180 day inactivity period if present */
           else moment
         end as moment,
         case
           /* if first activity - issue date exceeds 180 days, return the difference in days */
-          when days_between_issue_date_and_first_activity >= ${expirationDays} then days_between_issue_date_and_first_activity
+          when days_between_issue_date_and_first_activity >= $1 then days_between_issue_date_and_first_activity
           /* else, return the days between start of inactivity period and the next activity date */
           else diff_to_next_activity
         end as diff_to_next_activity
       FROM (
         SELECT *,
-          ((EXTRACT(epoch FROM first_activity) - (${issuedAtUnixNano}::text)::numeric / 1000000000) / 86400)::int AS days_between_issue_date_and_first_activity
+          ((EXTRACT(epoch FROM first_activity) - ($2::text)::numeric / 1000000000) / 86400)::int AS days_between_issue_date_and_first_activity
         FROM (
           SELECT *,
             /* 1 day = 60sec * 60min * 24h = 86400 sec*/
@@ -102,13 +103,13 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
             FROM
               PUBLIC.RECEIPTS R LEFT JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
             WHERE
-              SIGNER_ACCOUNT_ID = ${accountName}
+              SIGNER_ACCOUNT_ID = $2
               /* double casting because of prisma template literal throwing 22P03 Error in DB */
-              AND R."included_in_block_timestamp" >= (${issuedAtUnixNano}::text)::numeric
+              AND R."included_in_block_timestamp" >= ($2::text)::numeric
           ) as account_activity_dates
         ) as account_activity_periods
       ) as account_activity_periods_with_first_activity
-      WHERE (diff_to_next_activity > ${expirationDays}) OR (days_between_issue_date_and_first_activity > ${expirationDays})
+      WHERE (diff_to_next_activity > $1) OR (days_between_issue_date_and_first_activity > $1)
       ORDER BY moment ASC
       LIMIT 1
     )
@@ -126,9 +127,9 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
       FROM
         PUBLIC.receipts R LEFT JOIN PUBLIC.ACTION_RECEIPTS AR ON R.RECEIPT_ID = AR.RECEIPT_ID
       WHERE
-        SIGNER_ACCOUNT_ID = ${accountName}
+        SIGNER_ACCOUNT_ID = $3
         /* double casting because of prisma template literal throwing 22P03 Error in DB */
-        AND R."included_in_block_timestamp" >= (${issuedAtUnixNano}::text)::numeric
+        AND R."included_in_block_timestamp" >= ($2::text)::numeric
     ) as receipt
     WHERE NOT EXISTS (TABLE long_period_of_inactivity)
     ORDER BY moment DESC
@@ -139,7 +140,11 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
   /* <--- BINDING CTEs WITH UNION ALL. IF FIRST QUERY (long_period_of_inactivity) DOESN'T RETURN ANY RESULT, RUN SECOND QUERY (most_recent_activity) ---> */
   TABLE long_period_of_inactivity
   UNION ALL
-  TABLE most_recent_activity`;
+  TABLE most_recent_activity`,
+    expirationDays,
+    issuedAtUnixNano,
+    accountName,
+  );
 }
 
 export async function getRawQueryResult(accountName: string, issuedAt: string): Promise<RawQueryResult> {
@@ -155,9 +160,7 @@ export async function getRawQueryResult(accountName: string, issuedAt: string): 
   const issuedAtUnixNano = new BN(issuedAt).mul(new BN(1_000_000)).toString(); // Converts issued_at which is in milliseconds to nanoseconds, finally from BN instance to string type. Result can't be saved as numeric type because it is exceeding 53 bits.
 
   console.log({ accountName, issuedAt, issuedAtUnixNano });
-  const rawQuery = getRawQuery(accountName, issuedAtUnixNano);
-  // https://www.prisma.io/docs/concepts/components/prisma-client/raw-database-access#queryraw
-  const result = await prisma.$queryRaw<RawQueryResult>(rawQuery);
+  const result = await getRawQuery(accountName, issuedAtUnixNano);
 
   console.log('getExpiration query result', { result });
   return result;
