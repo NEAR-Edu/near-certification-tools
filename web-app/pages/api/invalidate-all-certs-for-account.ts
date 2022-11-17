@@ -14,9 +14,11 @@ async function invalidateAllCertsForAccount(accountId: AccountId) {
 
   try {
     await Promise.all(
+      /* eslint-disable-next-line camelcase */
       tokens.map(({ token_id }) =>
         contract.cert_invalidate(
           // https://github.com/near/near-api-js/issues/719
+          /* eslint-disable-next-line camelcase */
           { token_id }, // `memo` here?
           gas,
           '1', // deposit exactly 1 yoctoNEAR

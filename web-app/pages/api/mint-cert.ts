@@ -16,9 +16,9 @@ async function mintCertificate(tokenId: string, certificateRequiredFields: Certi
   const contract = await getNftContract();
 
   const payload = {
+    certification_metadata: buildCertificationMetadata(certificateRequiredFields),
     receiver_account_id: certificateRequiredFields.original_recipient_id,
     token_id: tokenId,
-    certification_metadata: buildCertificationMetadata(certificateRequiredFields),
     token_metadata: buildTokenMetadata(tokenId, certificateRequiredFields),
   };
 

@@ -3,7 +3,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { type NextApiRequest, type NextApiResponse } from 'next';
 import { createCanvas } from 'canvas';
-import { BufferType, CanvasType, getSimpleStringFromParameter, parseFileName } from '../../../helpers/strings';
+import { type BufferType, type CanvasType, getSimpleStringFromParameter, parseFileName } from '../../../helpers/strings';
 import { getNearAccountWithoutAccountIdOrKeyStoreForBackend, getNftContractOfAccount } from '../../../helpers/near';
 import { height, populateCert, width } from '../../../helpers/certificate-designs';
 import { addCacheHeader } from '../../../helpers/caching';
@@ -24,7 +24,6 @@ async function generateImage(imageIngredients: ImageIngredients, canvasType: Can
   return bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();
 }
 
-// eslint-disable-next-line max-lines-per-function
 export async function fetchCertificateDetails(tokenId: string): Promise<ImageIngredients | null> {
   const account = await getNearAccountWithoutAccountIdOrKeyStoreForBackend();
   const contract = getNftContractOfAccount(account);
@@ -34,6 +33,7 @@ export async function fetchCertificateDetails(tokenId: string): Promise<ImageIng
     return null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention, camelcase
   const { extra, issued_at, title, description } = response.metadata as Required<typeof response['metadata']>;
   const certificateMetadata = JSON.parse(extra);
   console.log({ certificateMetadata, contract, response });

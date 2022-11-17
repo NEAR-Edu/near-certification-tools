@@ -80,7 +80,6 @@ type CertificatePageProps = {
   };
 };
 
-// eslint-disable-next-line max-lines-per-function
 const CertificatePage: NextPage<CertificatePageProps> = ({ details }: CertificatePageProps) => {
   // https://nextjs.org/docs/routing/dynamic-routes
   const { tokenId, accountName } = details;

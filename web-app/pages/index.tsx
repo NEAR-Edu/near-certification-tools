@@ -5,7 +5,6 @@ import { networkId } from '../helpers/near';
 
 const suffix = networkId === 'mainnet' ? '.near' : `.${networkId}`;
 
-// eslint-disable-next-line max-lines-per-function
 const Home: NextPage = () => {
   const [account, setAccount] = useState('');
 
