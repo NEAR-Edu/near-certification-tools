@@ -1,20 +1,18 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'; // https://day.js.org/docs/en/plugin/utc
 import BN from 'bn.js';
-import { Prisma } from '@prisma/client';
-import prisma from './prisma';
+import { Pool } from "pg";
 
 dayjs.extend(utc); // use dayjs utc plugin to avoid parsing different dates depending on local timezone. https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
 
 const expirationDays = 180; // Certificates expire after the first period of this many consecutive days of inactivity after issueDate.
-type RawQueryResult = [
-  {
-    // If account has had any inactivity period over 180 days, moment is the start date of such period
-    // If account did not have any long (>=180 days) inactivity period, moment is the most recent activity date
-    diff_to_next_activity: number;
-    moment: string; // Number of days of inactivity if long (>=180 days) inactivity period is present for given account
-  },
-];
+type RawQueryResult = {
+  // If account has had any inactivity period over 180 days, moment is the start date of such period
+  // If account did not have any long (>=180 days) inactivity period, moment is the most recent activity date
+  diff_to_next_activity: number;
+  moment: string; // Number of days of inactivity if long (>=180 days) inactivity period is present for given account
+};
+
 
 /**
  * issuedAtUnixNano is double casted in query because of Prisma template literal throwing 22P03 Error in DB
@@ -23,7 +21,7 @@ type RawQueryResult = [
  * Double casting : https://github.com/prisma/prisma/issues/4647#issuecomment-939555602
  */
 // eslint-disable-next-line max-lines-per-function
-export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
+export async function getRawQuery(accountName: string, issuedAtUnixNano: string) {
   // Pulls from the public indexer. https://github.com/near/near-indexer-for-explorer#shared-public-access
   /**
    * This query uses Common Table Expressions(CTE) to execute two separate queries conditionally;
@@ -69,8 +67,11 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
    */
 
   // *issue_date* <-----------Query - 1-----------> *last_activtiy*  <-----------Query - 2 -----------> *now (render date)*
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+  });
 
-  return prisma.$queryRawUnsafe<RawQueryResult>(
+  return pool.query<RawQueryResult>(
     `
   /* <--- START OF FIRST QUERY ---> */
   WITH long_period_of_inactivity AS (
@@ -141,13 +142,15 @@ export function getRawQuery(accountName: string, issuedAtUnixNano: string) {
   TABLE long_period_of_inactivity
   UNION ALL
   TABLE most_recent_activity`,
-    expirationDays,
-    issuedAtUnixNano,
-    accountName,
+    [
+      expirationDays,
+      issuedAtUnixNano,
+      accountName,
+    ]
   );
 }
 
-export async function getRawQueryResult(accountName: string, issuedAt: string): Promise<RawQueryResult> {
+export async function getRawQueryResult(accountName: string, issuedAt: string): Promise<RawQueryResult[]> {
   /**
    * Calculates Unix Timestamp in nanoseconds.
    * Calculation is exceeding JS's MAX_SAFE_INTEGER value, making it unsafe to use Number type(floating point `number` type).
@@ -160,7 +163,7 @@ export async function getRawQueryResult(accountName: string, issuedAt: string): 
   const issuedAtUnixNano = new BN(issuedAt).mul(new BN(1_000_000)).toString(); // Converts issued_at which is in milliseconds to nanoseconds, finally from BN instance to string type. Result can't be saved as numeric type because it is exceeding 53 bits.
 
   console.log({ accountName, issuedAt, issuedAtUnixNano });
-  const result = await getRawQuery(accountName, issuedAtUnixNano);
+  const { rows: result } = await getRawQuery(accountName, issuedAtUnixNano);
 
   console.log('getExpiration query result', { result });
   return result;
