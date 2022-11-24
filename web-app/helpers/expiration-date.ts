@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'; // https://day.js.org/docs/en/plugin/utc
 import BN from 'bn.js';
-import { Pool } from "pg";
+import { Pool } from 'pg';
 
 dayjs.extend(utc); // use dayjs utc plugin to avoid parsing different dates depending on local timezone. https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
 
@@ -12,7 +12,6 @@ type RawQueryResult = {
   diff_to_next_activity: number;
   moment: string; // Number of days of inactivity if long (>=180 days) inactivity period is present for given account
 };
-
 
 /**
  * issuedAtUnixNano is double casted in query because of Prisma template literal throwing 22P03 Error in DB
@@ -71,6 +70,7 @@ export async function getRawQuery(accountName: string, issuedAtUnixNano: string)
     connectionString: process.env.DATABASE_URL,
   });
 
+  // eslint-disable-next-line @typescript-eslint/return-await
   return pool.query<RawQueryResult>(
     `
   /* <--- START OF FIRST QUERY ---> */
@@ -142,11 +142,7 @@ export async function getRawQuery(accountName: string, issuedAtUnixNano: string)
   TABLE long_period_of_inactivity
   UNION ALL
   TABLE most_recent_activity`,
-    [
-      expirationDays,
-      issuedAtUnixNano,
-      accountName,
-    ]
+    [expirationDays, issuedAtUnixNano, accountName],
   );
 }
 
@@ -163,10 +159,15 @@ export async function getRawQueryResult(accountName: string, issuedAt: string): 
   const issuedAtUnixNano = new BN(issuedAt).mul(new BN(1_000_000)).toString(); // Converts issued_at which is in milliseconds to nanoseconds, finally from BN instance to string type. Result can't be saved as numeric type because it is exceeding 53 bits.
 
   console.log({ accountName, issuedAt, issuedAtUnixNano });
-  const { rows: result } = await getRawQuery(accountName, issuedAtUnixNano);
+  try {
+    const { rows: result } = await getRawQuery(accountName, issuedAtUnixNano);
 
-  console.log('getExpiration query result', { result });
-  return result;
+    console.log('getExpiration query result', { result });
+    return result;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
 }
 
 /**
@@ -186,7 +187,6 @@ export async function getExpiration(accountName: string, issuedAt: string): Prom
    * -- return expiration date as issue date + 180 days
    */
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const moment = expiration.length ? dayjs.utc(expiration[0].moment) : dayjs.utc(Number.parseInt(issuedAt, 10)); // https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
 
   return moment.add(expirationDays, 'days').format('YYYY-MM-DDTHH:mm:ss+00:00');
