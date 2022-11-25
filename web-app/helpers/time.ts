@@ -35,6 +35,13 @@ export function isBeforeNow(dateTimeString: string): boolean {
   return dayjs(dateTimeString).isBefore(dayjs()); // https://day.js.org/docs/en/query/is-before
 }
 
+/**
+ * Get the start of the current date in nanoseconds.
+ */
+export function getStartOfDayInNanoseconds(): string {
+  return new BN(dayjs().startOf('d').unix()).mul(new BN(1_000_000_000)).toString();
+}
+
 export function convertStringDateToOtherPrecision(iso8601DateTime: string, multiplier: BN): string {
   const moment = dayjs(iso8601DateTime); // https://day.js.org/docs/en/parse/string
   const unixSeconds = moment.unix();

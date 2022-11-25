@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'; // https://day.js.org/docs/en/plugin/utc
 import BN from 'bn.js';
 import { Pool } from 'pg';
+import { getStartOfDayInNanoseconds } from './time';
 
 dayjs.extend(utc); // use dayjs utc plugin to avoid parsing different dates depending on local timezone. https://github.com/iamkun/dayjs/issues/1723#issuecomment-985246689
 
@@ -70,6 +71,10 @@ export async function getRawQuery(accountName: string, issuedAtUnixNano: string)
     connectionString: process.env.DATABASE_URL,
   });
 
+  // We need to filter up to today's date as those receipts might still be updated as per
+  // https://github.com/near/near-indexer-for-explorer/issues/134#issuecomment-883131423
+  const startOfDay = getStartOfDayInNanoseconds();
+
   // eslint-disable-next-line @typescript-eslint/return-await
   return pool.query<RawQueryResult>(
     `
@@ -107,6 +112,7 @@ export async function getRawQuery(accountName: string, issuedAtUnixNano: string)
               SIGNER_ACCOUNT_ID = $2
               /* double casting because of prisma template literal throwing 22P03 Error in DB */
               AND R."included_in_block_timestamp" >= ($2::text)::numeric
+              AND R."included_in_block_timestamp" <= ($4::text)::numeric
           ) as account_activity_dates
         ) as account_activity_periods
       ) as account_activity_periods_with_first_activity
@@ -131,6 +137,7 @@ export async function getRawQuery(accountName: string, issuedAtUnixNano: string)
         SIGNER_ACCOUNT_ID = $3
         /* double casting because of prisma template literal throwing 22P03 Error in DB */
         AND R."included_in_block_timestamp" >= ($2::text)::numeric
+        AND R."included_in_block_timestamp" <= ($4::text)::numeric
     ) as receipt
     WHERE NOT EXISTS (TABLE long_period_of_inactivity)
     ORDER BY moment DESC
@@ -142,7 +149,7 @@ export async function getRawQuery(accountName: string, issuedAtUnixNano: string)
   TABLE long_period_of_inactivity
   UNION ALL
   TABLE most_recent_activity`,
-    [expirationDays, issuedAtUnixNano, accountName],
+    [expirationDays, issuedAtUnixNano, accountName, startOfDay],
   );
 }
 
