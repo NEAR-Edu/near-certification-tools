@@ -12,7 +12,7 @@ use near_primitives::{
 
 async fn call_mint(payload: MintNFT, signer_data: SignerData) -> APIResult<Token> {
     let method_name = "nft_mint".to_string();
-    let gas = 3 * TGAS;
+    let gas = 100 * TGAS;
     let deposit = NEAR / 5;
     let args = serde_json::json!(payload).to_string().into_bytes();
 

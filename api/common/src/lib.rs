@@ -10,7 +10,7 @@ use near_primitives::{
     views::{AccessKeyView, CallResult, FinalExecutionOutcomeView},
 };
 
-pub const TGAS: u64 = 100_000_000_000_000;
+pub const TGAS: u64 = 1_000_000_000_000;
 pub const NEAR: u128 = 1_000_000_000_000_000_000_000_000;
 pub const YOCTO_NEAR: u128 = 1;
 
@@ -64,23 +64,31 @@ pub async fn view_access_key(
         public_key,
         ..
     } = near_crypto::InMemorySigner::from_secret_key(account_id, private_key);
+    println!("{account_id:?}");
 
-    let Ok(near_jsonrpc_primitives::types::query::RpcQueryResponse {
-        kind, block_hash, ..
-    }) = connect_rpc().call(
-        methods::query::RpcQueryRequest {
+    let (kind, block_hash) = match connect_rpc()
+        .call(methods::query::RpcQueryRequest {
             block_reference: BlockReference::latest(),
             request: near_primitives::views::QueryRequest::ViewAccessKey {
                 account_id,
                 public_key,
             },
+        })
+        .await
+    {
+        Ok(response) => (response.kind, response.block_hash),
+        Err(error) => {
+            eprintln!("{error:?}");
+            return Err(errors::APIError::ServerError);
         }
-    ).await else {
-        return Err(errors::APIError::ServerError);
     };
 
-    let QueryResponseKind::AccessKey(access_key_view) = kind else {
-        return Err(errors::APIError::ServerError);
+    let access_key_view = match kind {
+        QueryResponseKind::AccessKey(access_key_view) => access_key_view,
+        _ => {
+            eprintln!("Received wrong query response kind.");
+            return Err(errors::APIError::ServerError);
+        }
     };
 
     Ok((block_hash, access_key_view))
