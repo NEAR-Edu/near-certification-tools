@@ -1,0 +1,21 @@
+[workspace]
+members = [
+  "near-certification-tools",
+  "router",
+  "mint-cert",
+  "errors",
+  "common",
+  "invalidate-all-certs-for-account",
+  "invalidate-cert",
+  "cert",
+]
+
+[profile.release]
+panic = "abort"
+lto = true
+
+[profile.release.package.near-certification-tools]
+codegen-units = 1
+opt-level = "z"
+debug = false
+overflow-checks = true

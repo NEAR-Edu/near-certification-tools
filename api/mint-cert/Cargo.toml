@@ -1,0 +1,17 @@
+[package]
+name = "mint-cert"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = { version = "0.6", features = ["macros"] }
+chrono = "0.4.23"
+common = { version = "0.1.0", path = "../common" }
+errors = { version = "0.1.0", path = "../errors" }
+near-certification-tools = { version = "0.1.0", path = "../near-certification-tools" }
+near-primitives = "0.15.0"
+serde = { version = "1.0.147", features = ["derive"] }
+serde_json = "1.0.89"
+uuid = "1.2.2"

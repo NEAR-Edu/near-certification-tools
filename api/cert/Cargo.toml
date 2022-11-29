@@ -1,0 +1,16 @@
+[package]
+name = "cert"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = { version = "0.6.0", features = ["macros"] }
+chrono = "0.4.23"
+common = { version = "0.1.0", path = "../common" }
+errors = { version = "0.1.0", path = "../errors" }
+serde = { version = "1.0.148", features = ["derive"] }
+serde_json = "1.0.89"
+tokio = { version = "1.22.0", features = ["full"] }
+tokio-postgres = "0.7.7"
