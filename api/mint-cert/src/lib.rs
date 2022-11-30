@@ -7,43 +7,8 @@ use errors::APIResult;
 use near_certification_tools::{CertificationExtraMetadata, MintNFT, Token, TokenMetadata};
 use near_primitives::{
     transaction::{Action, FunctionCallAction},
-    views::ExecutionStatusView,
+    views::FinalExecutionStatus,
 };
-
-async fn call_mint(payload: MintNFT, signer_data: SignerData) -> APIResult<Token> {
-    let method_name = "nft_mint".to_string();
-    let gas = 100 * TGAS;
-    let deposit = NEAR / 5;
-    let args = serde_json::json!(payload).to_string().into_bytes();
-
-    let function_call = Action::FunctionCall(FunctionCallAction {
-        method_name,
-        args,
-        gas,
-        deposit,
-    });
-
-    let outcome = common::send_transaction_to_certs(vec![function_call], signer_data).await?;
-    match outcome
-        .receipts_outcome
-        .get(0)
-        .unwrap()
-        .clone()
-        .outcome
-        .status
-    {
-        ExecutionStatusView::SuccessValue(value) => common::deserialize_bytes(&value),
-        ExecutionStatusView::SuccessReceiptId(receipt_id) => Err(errors::APIError::MintFailure {
-            message: format!("Unexpected receipt ID: {receipt_id}."),
-        }),
-        ExecutionStatusView::Failure(error) => Err(errors::APIError::MintFailure {
-            message: error.to_string(),
-        }),
-        ExecutionStatusView::Unknown => Err(errors::APIError::MintFailure {
-            message: "Unknown failure.".to_string(),
-        }),
-    }
-}
 
 #[derive(serde::Deserialize)]
 pub struct MintPayloadDetails {
@@ -104,6 +69,33 @@ impl From<MintPayload> for MintNFT {
             token_id,
             memo: None,
         }
+    }
+}
+
+async fn call_mint(payload: MintNFT, signer_data: SignerData) -> APIResult<Token> {
+    let method_name = "nft_mint".to_string();
+    let gas = 100 * TGAS;
+    let deposit = NEAR / 5;
+    let args = serde_json::json!(payload).to_string().into_bytes();
+
+    let function_call = Action::FunctionCall(FunctionCallAction {
+        method_name,
+        args,
+        gas,
+        deposit,
+    });
+
+    match common::send_transaction_to_certs(vec![function_call], signer_data)
+        .await?
+        .status
+    {
+        FinalExecutionStatus::SuccessValue(value) => common::deserialize_bytes(&value),
+        FinalExecutionStatus::Failure(error) => Err(errors::APIError::MintFailure {
+            message: error.to_string(),
+        }),
+        _ => Err(errors::APIError::MintFailure {
+            message: "Transaction is not yet completed.".to_string(),
+        }),
     }
 }
 

@@ -11,8 +11,10 @@ pub enum APIError {
     AccountInvalid { account_id: String },
     #[error("Invalid private key provided. {private_key} did not pass validation.")]
     PrivateKeyInvalid { private_key: String },
-    #[error("Minting the certificate for failed with error: {message}.")]
+    #[error("Minting the certificate failed with error: {message}.")]
     MintFailure { message: String },
+    #[error("Invalidating the certificate failed with error: {message}.")]
+    InvalidateFailure { message: String },
     #[error("Error parsing bytes: {bytes:?}.")]
     ParseError { bytes: Vec<u8> },
     #[error("Error deserializing string: {string}.")]

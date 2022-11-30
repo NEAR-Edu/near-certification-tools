@@ -7,8 +7,13 @@ use common::{SignerData, TGAS, YOCTO_NEAR};
 use errors::APIResult;
 use near_primitives::{
     transaction::{Action, FunctionCallAction},
-    views::ExecutionStatusView,
+    views::FinalExecutionStatus,
 };
+
+#[derive(serde::Deserialize)]
+pub struct Payload {
+    account_id: String,
+}
 
 async fn call_cert_invalidate(account_id: &str, signer_data: SignerData) -> APIResult<bool> {
     let tokens = common::get_tokens_for_owner(account_id).await?;
@@ -32,21 +37,18 @@ async fn call_cert_invalidate(account_id: &str, signer_data: SignerData) -> APIR
         })
         .collect();
 
-    let outcome = common::send_transaction_to_certs(actions, signer_data).await?;
-    match outcome.transaction_outcome.outcome.status {
-        ExecutionStatusView::Failure(error) => Err(errors::APIError::MintFailure {
+    match common::send_transaction_to_certs(actions, signer_data)
+        .await?
+        .status
+    {
+        FinalExecutionStatus::SuccessValue(_) => Ok(true),
+        FinalExecutionStatus::Failure(error) => Err(errors::APIError::InvalidateFailure {
             message: error.to_string(),
         }),
-        ExecutionStatusView::Unknown => Err(errors::APIError::MintFailure {
-            message: "Unknown failure.".to_string(),
+        _ => Err(errors::APIError::MintFailure {
+            message: "Transaction is not yet completed.".to_string(),
         }),
-        _ => Ok(true),
     }
-}
-
-#[derive(serde::Deserialize)]
-pub struct Payload {
-    account_id: String,
 }
 
 #[debug_handler]
