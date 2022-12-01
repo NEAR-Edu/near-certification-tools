@@ -11,18 +11,10 @@ import { convertMillisecondsTimestampToFormattedDate } from '../../../helpers/ti
 
 export const HTTP_ERROR_CODE_MISSING = 404;
 const CACHE_SECONDS = Number(process.env.DYNAMIC_CERT_IMAGE_GENERATION_CACHE_SECONDS) || 60 * 60 * 6;
-
-async function generateImage(imageIngredients: ImageIngredients, canvasType: CanvasType, bufferType: BufferType = undefined) {
-  const canvas = createCanvas(width, height, canvasType);
-
-  await populateCert(canvas, imageIngredients);
-
-  // Convert the Canvas to a buffer
-  return bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();
-}
+const API_URL = process.env.API_URL || '//127.0.0.1:4000/';
 
 export async function fetchCertificateDetails(tokenId: string): Promise<ImageIngredients | null> {
-  const response = await fetch(`http://127.0.0.1:4000/cert/${tokenId}`);
+  const response = await fetch(`${API_URL}cert/${tokenId}`);
   const ingredients = await response.json();
 
   return {
@@ -35,6 +27,15 @@ export async function fetchCertificateDetails(tokenId: string): Promise<ImageIng
     programName: ingredients.program_name,
     tokenId: ingredients.token_id,
   };
+}
+
+async function generateImage(imageIngredients: ImageIngredients, canvasType: CanvasType, bufferType: BufferType = undefined) {
+  const canvas = createCanvas(width, height, canvasType);
+
+  await populateCert(canvas, imageIngredients);
+
+  // Convert the Canvas to a buffer
+  return bufferType ? canvas.toBuffer(bufferType) : canvas.toBuffer();
 }
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse<Buffer | { error: string }>) {
