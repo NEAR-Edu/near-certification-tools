@@ -11,7 +11,7 @@ import { convertMillisecondsTimestampToFormattedDate } from '../../../helpers/ti
 
 export const HTTP_ERROR_CODE_MISSING = 404;
 const CACHE_SECONDS = Number(process.env.DYNAMIC_CERT_IMAGE_GENERATION_CACHE_SECONDS) || 60 * 60 * 6;
-const API_URL = process.env.API_URL || '//127.0.0.1:4000/';
+const API_URL = process.env.API_URL ?? '//127.0.0.1:4000/';
 
 export async function fetchCertificateDetails(tokenId: string): Promise<ImageIngredients | null> {
   const response = await fetch(`${API_URL}cert/${tokenId}`);
