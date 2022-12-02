@@ -8,7 +8,6 @@ const DB_URL: &'static str =
     "postgres://public_readonly:nearprotocol@mainnet.db.explorer.indexer.near.dev/mainnet_explorer";
 const EXPIRATION_DAYS: u8 = 180;
 
-#[allow(dead_code)]
 fn get_start_of_day_in_nanoseconds() -> String {
     let now = Utc::now();
     let start_of_day = Utc
@@ -18,6 +17,7 @@ fn get_start_of_day_in_nanoseconds() -> String {
     start_of_day.timestamp_nanos().to_string()
 }
 
+#[allow(dead_code)]
 fn get_hour_earlier_in_nanoseconds() -> String {
     (Utc::now() - Duration::hours(1))
         .timestamp_nanos()
@@ -46,13 +46,13 @@ pub async fn get_expiration(account_id: &str, issued_at: &str) -> APIResult<Stri
         }
     });
 
-    let hour_earlier = get_hour_earlier_in_nanoseconds();
+    let start_of_day = get_start_of_day_in_nanoseconds();
 
     let Ok(rows) = client.simple_query(&expiration_query(
             &EXPIRATION_DAYS.to_string(),
             &format!("{issued_at}000000"),
             account_id,
-            &hour_earlier,
+            &start_of_day,
         )
     ).await else {
         return Err(errors::APIError::DBQueryExecutionError);

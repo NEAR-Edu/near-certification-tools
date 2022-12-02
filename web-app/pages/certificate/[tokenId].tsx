@@ -34,24 +34,6 @@ function buildLinkedInUrl(certificateUrl: string) {
   return url;
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { tokenId } = context.query; // https://nextjs.org/docs/routing/dynamic-routes
-  const castingTokenId: string = tokenId as string;
-  const details = await fetchCertificateDetails(castingTokenId);
-
-  if (!details) {
-    return {
-      notFound: true, // https://nextjs.org/docs/api-reference/data-fetching/get-server-side-props#notfound
-    };
-  }
-
-  return {
-    props: {
-      details,
-    },
-  };
-};
-
 function OpenGraphMetaData({ pngUrl, certificateUrl }: { pngUrl: string; certificateUrl: string }) {
   return (
     <Head>
@@ -77,6 +59,24 @@ type CertificatePageProps = {
   details: {
     tokenId: string;
     accountName: string;
+  };
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { tokenId } = context.query; // https://nextjs.org/docs/routing/dynamic-routes
+  const castingTokenId: string = tokenId as string;
+  const details = await fetchCertificateDetails(castingTokenId);
+
+  if (!details) {
+    return {
+      notFound: true, // https://nextjs.org/docs/api-reference/data-fetching/get-server-side-props#notfound
+    };
+  }
+
+  return {
+    props: {
+      details,
+    },
   };
 };
 

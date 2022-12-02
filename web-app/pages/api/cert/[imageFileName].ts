@@ -15,6 +15,11 @@ const API_URL = process.env.API_URL ?? '//127.0.0.1:4000/';
 
 export async function fetchCertificateDetails(tokenId: string): Promise<ImageIngredients | null> {
   const response = await fetch(`${API_URL}cert/${tokenId}`);
+  if (response.status !== 200) {
+    console.error(response.statusText);
+    return null;
+  }
+
   const ingredients = await response.json();
 
   return {
