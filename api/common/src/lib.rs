@@ -27,9 +27,9 @@ pub struct AppData {
 
 impl AppData {
     pub fn new() -> Self {
-        let account_id = std::env::var("ISSUING_AUTHORITY_ACCOUNT_ID")
+        let account_id = dotenvy::var("ISSUING_AUTHORITY_ACCOUNT_ID")
             .expect("No authority account ID in environment!");
-        let private_key = std::env::var("ISSUING_AUTHORITY_PRIVATE_KEY")
+        let private_key = dotenvy::var("ISSUING_AUTHORITY_PRIVATE_KEY")
             .expect("No authority private key in environment!");
 
         AppData {
@@ -42,7 +42,7 @@ impl AppData {
 }
 
 fn connect_rpc() -> JsonRpcClient {
-    let rpc_url = std::env::var("RPC_URL").expect("Missing RPC URL!");
+    let rpc_url = dotenvy::var("RPC_URL").expect("Missing RPC URL!");
 
     JsonRpcClient::connect(&rpc_url)
 }
@@ -116,7 +116,10 @@ pub async fn check_account_id(account_id: &str) -> APIResult<bool> {
 }
 
 pub async fn get_tokens_for_owner(account_id: &str) -> APIResult<Vec<Token>> {
-    let contract_id = "certificates.unv.near".parse().unwrap();
+    let contract_id = dotenvy::var("CERTIFICATE_CONTRACT_ACCOUNT_ID")
+        .expect("Certificate contract account ID missing!")
+        .parse()
+        .unwrap();
     let method_name = "nft_tokens_for_owner".to_string();
     let args = FunctionArgs::from(
         serde_json::json!({ "account_id": account_id })
@@ -145,7 +148,10 @@ pub async fn get_tokens_for_owner(account_id: &str) -> APIResult<Vec<Token>> {
 }
 
 pub async fn get_token(token_id: &str) -> APIResult<Token> {
-    let account_id = "certificates.unv.near".parse().unwrap();
+    let account_id = dotenvy::var("CERTIFICATE_CONTRACT_ACCOUNT_ID")
+        .expect("Certificate contract account ID missing!")
+        .parse()
+        .unwrap();
     let method_name = "nft_token".to_string();
     let args = FunctionArgs::from(
         serde_json::json!({ "token_id": token_id })
@@ -184,7 +190,10 @@ pub async fn send_transaction_to_certs(
 
     let nonce = access_key_view.nonce + 1;
 
-    let receiver_id = "certificates.unv.near".parse().unwrap();
+    let receiver_id = dotenvy::var("CERTIFICATE_CONTRACT_ACCOUNT_ID")
+        .expect("Certificate contract account ID missing!")
+        .parse()
+        .unwrap();
     let signer = near_crypto::InMemorySigner::from_secret_key(
         account_id.parse().unwrap(),
         private_key.parse().unwrap(),

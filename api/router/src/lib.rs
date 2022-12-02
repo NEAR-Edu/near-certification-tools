@@ -20,7 +20,7 @@ async fn authorize<B>(request: Request<B>, next: Next<B>) -> APIResult<Response>
         return Err(errors::APIError::Unauthorized);
     };
 
-    let api_key = std::env::var("API_KEY").expect("Missing API key!");
+    let api_key = dotenvy::var("API_KEY").expect("Missing API key!");
 
     if api_key == x_api_key {
         Ok(next.run(request).await)
