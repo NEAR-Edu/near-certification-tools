@@ -14,4 +14,7 @@ invalidate-all-certs-for-account = { version = "0.1.0", path = "../invalidate-al
 invalidate-cert = { version = "0.1.0", path = "../invalidate-cert" }
 mint-cert = { version = "0.1.0", path = "../mint-cert" }
 tokio = { version = "1.22.0", features = ["full"] }
+tower = { version = "0.4.13", features = ["full"] }
+tower-http = { version = "0.3.4", features = ["trace", "full"] }
+tracing-subscriber = "0.3.16"
 

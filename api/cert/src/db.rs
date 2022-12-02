@@ -1,4 +1,4 @@
-use chrono::{Datelike, Days, TimeZone, Utc};
+use chrono::{Datelike, Days, Duration, TimeZone, Utc};
 use errors::APIResult;
 use tokio_postgres::{NoTls, SimpleQueryMessage};
 
@@ -8,14 +8,20 @@ const DB_URL: &'static str =
     "postgres://public_readonly:nearprotocol@mainnet.db.explorer.indexer.near.dev/mainnet_explorer";
 const EXPIRATION_DAYS: u8 = 180;
 
+#[allow(dead_code)]
 fn get_start_of_day_in_nanoseconds() -> String {
     let now = Utc::now();
-    let year = now.year();
-    let month = now.month();
-    let day = now.day();
-    let start_of_day = Utc.with_ymd_and_hms(year, month, day, 0, 0, 0).unwrap();
+    let start_of_day = Utc
+        .with_ymd_and_hms(now.year(), now.month(), now.day(), 0, 0, 0)
+        .unwrap();
 
     start_of_day.timestamp_nanos().to_string()
+}
+
+fn get_hour_earlier_in_nanoseconds() -> String {
+    (Utc::now() - Duration::hours(1))
+        .timestamp_nanos()
+        .to_string()
 }
 
 fn add_expiration_days(start_date: &str) -> String {
@@ -40,13 +46,13 @@ pub async fn get_expiration(account_id: &str, issued_at: &str) -> APIResult<Stri
         }
     });
 
-    let start_of_day = get_start_of_day_in_nanoseconds();
+    let hour_earlier = get_hour_earlier_in_nanoseconds();
 
     let Ok(rows) = client.simple_query(&expiration_query(
             &EXPIRATION_DAYS.to_string(),
             &format!("{issued_at}000000"),
             account_id,
-            &start_of_day,
+            &hour_earlier,
         )
     ).await else {
         return Err(errors::APIError::DBQueryExecutionError);
