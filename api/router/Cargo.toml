@@ -1,0 +1,21 @@
+[package]
+name = "router"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = { version = "0.6.0", features = ["macros", "headers"] }
+cert = { version = "0.1.0", path = "../cert" }
+common = { version = "0.1.0", path = "../common" }
+dotenvy = "0.15.6"
+errors = { version = "0.1.0", path = "../errors" }
+invalidate-all-certs-for-account = { version = "0.1.0", path = "../invalidate-all-certs-for-account" }
+invalidate-cert = { version = "0.1.0", path = "../invalidate-cert" }
+mint-cert = { version = "0.1.0", path = "../mint-cert" }
+tokio = { version = "1.22.0", features = ["full"] }
+tower = { version = "0.4.13", features = ["full"] }
+tower-http = { version = "0.3.4", features = ["trace", "full"] }
+tracing-subscriber = "0.3.16"
+

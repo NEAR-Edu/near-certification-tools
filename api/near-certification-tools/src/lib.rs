@@ -1,3 +1,6 @@
+use near_contract_standards::non_fungible_token::TokenId;
+pub use near_sdk::AccountId;
+
 pub use crate::contract::CertificationContract;
 
 mod contract;
@@ -5,6 +8,21 @@ mod event;
 mod metadata;
 mod storage_key;
 mod utils;
+
+#[derive(near_sdk::serde::Deserialize, near_sdk::serde::Serialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct MintNFT {
+    pub token_id: TokenId,
+    pub receiver_account_id: Option<AccountId>,
+    pub token_metadata: TokenMetadata,
+    pub certification_metadata: CertificationExtraMetadata,
+    pub memo: Option<String>,
+}
+
+pub use metadata::CertificationExtraMetadata;
+pub use near_contract_standards::non_fungible_token::metadata::TokenMetadata;
+
+pub use near_contract_standards::non_fungible_token::Token;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
